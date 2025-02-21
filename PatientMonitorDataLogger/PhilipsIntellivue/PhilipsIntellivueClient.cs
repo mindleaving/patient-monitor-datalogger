@@ -5,7 +5,7 @@ using PatientMonitorDataLogger.PhilipsIntellivue.Models;
 
 namespace PatientMonitorDataLogger.PhilipsIntellivue;
 
-public class PhilipsIntellivueClient : IDisposable
+public class PhilipsIntellivueClient : IDisposable, IAsyncDisposable
 {
     private readonly PhilipsIntellivueClientSettings settings;
     private ISerialPort? serialPort;
@@ -227,6 +227,11 @@ public class PhilipsIntellivueClient : IDisposable
     public void Dispose()
     {
         Disconnect();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        Dispose();
     }
 
     public void Log(string message) => Console.WriteLine($"{nameof(PhilipsIntellivueClient)} - {DateTime.UtcNow:yyyy-MM-dd HH:mm:ss.fff} - {message}");

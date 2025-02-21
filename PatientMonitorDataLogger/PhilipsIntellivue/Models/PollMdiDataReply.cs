@@ -27,7 +27,7 @@ public class PollMdiDataReply : IActionResultData
     public OIDType AttributeGroup { get; }
     public List<SingleContextPoll> PollContexts { get; }
 
-    public byte[] Serialize()
+    public virtual byte[] Serialize()
     {
         return
         [

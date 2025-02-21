@@ -21,7 +21,7 @@ public class RemoteOperationResult : IRemoteOperation
     public ushort Length { get; }
     public IRemoteOperationResultData Data { get; }
 
-    public byte[] Serialize()
+    public virtual byte[] Serialize()
     {
         return
         [

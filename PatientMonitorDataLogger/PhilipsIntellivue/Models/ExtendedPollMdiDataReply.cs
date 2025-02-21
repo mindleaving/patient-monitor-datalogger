@@ -2,7 +2,7 @@
 
 namespace PatientMonitorDataLogger.PhilipsIntellivue.Models;
 
-public class ExtendedPollMdiDataReply : IActionResultData
+public class ExtendedPollMdiDataReply : PollMdiDataReply
 {
     public ExtendedPollMdiDataReply(
         ushort pollNumber,
@@ -12,25 +12,14 @@ public class ExtendedPollMdiDataReply : IActionResultData
         NomenclatureReference objectType,
         OIDType attributeGroup,
         List<SingleContextPoll> pollContexts)
+        : base(pollNumber, relativeTimeStamp, absoluteTimeStamp, objectType, attributeGroup, pollContexts)
     {
-        PollNumber = pollNumber;
         SequenceNumber = sequenceNumber;
-        RelativeTimeStamp = relativeTimeStamp;
-        AbsoluteTimeStamp = absoluteTimeStamp;
-        ObjectType = objectType;
-        AttributeGroup = attributeGroup;
-        PollContexts = pollContexts;
     }
 
-    public ushort PollNumber { get; }
     public ushort SequenceNumber { get; }
-    public RelativeTime RelativeTimeStamp { get; }
-    public AbsoluteTime AbsoluteTimeStamp { get; }
-    public NomenclatureReference ObjectType { get; }
-    public OIDType AttributeGroup { get; }
-    public List<SingleContextPoll> PollContexts { get; }
 
-    public byte[] Serialize()
+    public override byte[] Serialize()
     {
         return
         [
@@ -44,7 +33,7 @@ public class ExtendedPollMdiDataReply : IActionResultData
         ];
     }
 
-    public static ExtendedPollMdiDataReply Read(
+    public new static ExtendedPollMdiDataReply Read(
         BigEndianBinaryReader binaryReader)
     {
         var pollNumber = binaryReader.ReadUInt16();
