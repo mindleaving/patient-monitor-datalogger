@@ -2,9 +2,9 @@
 
 namespace PatientMonitorDataLogger.API.Models;
 
-public class PhilipsIntellivuePatientMonitorSettings : IPatientMonitorSettings
+public class PhilipsIntellivuePatientMonitorSettings : PatientMonitorSettings
 {
-    public PatientMonitorType Type => PatientMonitorType.PhilipsIntellivue;
+    public override PatientMonitorType Type => PatientMonitorType.PhilipsIntellivue;
 
     [Required]
     [RegularExpression("^(COM[0-9]+|/dev/tty[a-zA-Z0-9]+)$")]

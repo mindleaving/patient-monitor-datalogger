@@ -1,0 +1,17 @@
+[Unit]
+Description=Patient Monitor Data Logger API
+
+[Service]
+WorkingDirectory=/var/www/PatientMonitorDataLogger.API
+ExecStart=/usr/bin/dotnet /var/www/PatientMonitorDataLogger.API/PatientMonitorDataLogger.API.dll
+Restart=always
+# Restart service after 10 seconds if the dotnet service crashes:
+RestartSec=10
+KillSignal=SIGINT
+SyslogIdentifier=dotnet-datalogger
+User=www-data
+Environment=ASPNETCORE_ENVIRONMENT=Production
+Environment=DOTNET_NOLOGO=true
+
+[Install]
+WantedBy=multi-user.target

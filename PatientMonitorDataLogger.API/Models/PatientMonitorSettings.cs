@@ -1,10 +1,10 @@
-﻿using System.Text.Json.Serialization;
+﻿using Newtonsoft.Json;
 using PatientMonitorDataLogger.API.Models.Converters;
 
 namespace PatientMonitorDataLogger.API.Models;
 
 [JsonConverter(typeof(PatientMonitorSettingsJsonConverter))]
-public interface IPatientMonitorSettings
+public abstract class PatientMonitorSettings
 {
-    PatientMonitorType Type { get; }
+    public abstract PatientMonitorType Type { get; }
 }

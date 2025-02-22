@@ -1,5 +1,5 @@
-﻿using System.Text.Json;
-using System.Text.Json.Serialization;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace PatientMonitorDataLogger.API.Setups;
 
@@ -10,11 +10,11 @@ public class ControllerSetup : ISetup
         IConfiguration configuration)
     {
         services.AddControllers()
-            .AddJsonOptions(
+            .AddNewtonsoftJson(
                 options =>
                 {
-                    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-                    options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+                    options.SerializerSettings.Converters.Add(new StringEnumConverter());
+                    options.SerializerSettings.Formatting = Formatting.None;
                 });
     }
 }

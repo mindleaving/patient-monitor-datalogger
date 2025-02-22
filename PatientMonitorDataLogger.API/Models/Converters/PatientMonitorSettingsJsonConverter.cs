@@ -1,42 +1,39 @@
-﻿using System.Text.Json;
-using System.Text.Json.Serialization;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace PatientMonitorDataLogger.API.Models.Converters;
 
-public class PatientMonitorSettingsJsonConverter : JsonConverter<IPatientMonitorSettings>
+public class PatientMonitorSettingsJsonConverter : JsonConverter<PatientMonitorSettings>
 {
-    public override IPatientMonitorSettings? Read(
-        ref Utf8JsonReader reader,
-        Type typeToConvert,
-        JsonSerializerOptions options)
+    public override bool CanWrite => false;
+
+    public override void WriteJson(
+        JsonWriter writer,
+        PatientMonitorSettings? value,
+        JsonSerializer serializer)
     {
-        var jObject = JsonDocument.ParseValue(ref reader).RootElement;
-        if (!jObject.TryGetProperty(nameof(IPatientMonitorSettings.Type), out var typeProperty) 
-            && !jObject.TryGetProperty(nameof(IPatientMonitorSettings.Type).ToLower(), out typeProperty))
-        {
-            throw new FormatException($"Could not find {nameof(IPatientMonitorSettings.Type)} property");
-        }
-        var typeString = typeProperty.GetString();
-        if (!Enum.TryParse<PatientMonitorType>(typeString, ignoreCase: true, out var monitorType))
-            throw new FormatException($"Unknown patient monitor settings type {typeString}");
-        switch (monitorType)
-        {
-            case PatientMonitorType.Unknown:
-                throw new NotSupportedException();
-            case PatientMonitorType.PhilipsIntellivue:
-                return JsonSerializer.Deserialize<PhilipsIntellivuePatientMonitorSettings>(jObject.GetRawText(), options);
-            case PatientMonitorType.GEDash:
-                return JsonSerializer.Deserialize<GEDashPatientMonitorSettings>(jObject.GetRawText(), options);
-            default:
-                throw new ArgumentOutOfRangeException();
-        }
+        throw new NotSupportedException();
     }
 
-    public override void Write(
-        Utf8JsonWriter writer,
-        IPatientMonitorSettings value,
-        JsonSerializerOptions options)
+    public override PatientMonitorSettings? ReadJson(
+        JsonReader reader,
+        Type objectType,
+        PatientMonitorSettings? existingValue,
+        bool hasExistingValue,
+        JsonSerializer serializer)
     {
-        JsonSerializer.Serialize(writer, value, options);
+        var jObject = JObject.Load(reader);
+        if (!jObject.TryGetValue(nameof(PatientMonitorSettings.Type), StringComparison.InvariantCultureIgnoreCase, out var typeString))
+            throw new FormatException($"Missing or unexpected {nameof(PatientMonitorSettings.Type)} field");
+        if (!Enum.TryParse<PatientMonitorType>(typeString.Value<string>(), ignoreCase: true, out var monitorType))
+            throw new FormatException($"Unknown monitor type {typeString}");
+        var monitorSettings = monitorType switch
+        {
+            PatientMonitorType.PhilipsIntellivue => new PhilipsIntellivuePatientMonitorSettings(),
+            PatientMonitorType.GEDash => new PhilipsIntellivuePatientMonitorSettings(),
+            _ => throw new ArgumentOutOfRangeException(nameof(monitorType))
+        };
+        serializer.Populate(jObject.CreateReader(), monitorSettings);
+        return monitorSettings;
     }
 }

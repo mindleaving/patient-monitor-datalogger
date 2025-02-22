@@ -2,9 +2,9 @@
 
 namespace PatientMonitorDataLogger.API.Models;
 
-public class GEDashPatientMonitorSettings : IPatientMonitorSettings
+public class GEDashPatientMonitorSettings : PatientMonitorSettings
 {
-    public PatientMonitorType Type => PatientMonitorType.GEDash;
+    public override PatientMonitorType Type => PatientMonitorType.GEDash;
 
     [Required]
     [RegularExpression("^(COM[0-9]+|/dev/tty[a-zA-Z0-9]+)$")]

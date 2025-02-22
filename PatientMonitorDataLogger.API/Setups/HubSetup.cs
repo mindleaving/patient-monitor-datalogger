@@ -1,5 +1,5 @@
-﻿using System.Text.Json;
-using System.Text.Json.Serialization;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using PatientMonitorDataLogger.API.Workflow;
 
 namespace PatientMonitorDataLogger.API.Setups;
@@ -11,12 +11,11 @@ public class HubSetup : ISetup
         IConfiguration configuration)
     {
         services.AddSignalR()
-            .AddJsonProtocol(
-                options =>
-                {
-                    options.PayloadSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-                    options.PayloadSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
-                });
+            .AddNewtonsoftJsonProtocol(options =>
+            {
+                options.PayloadSerializerSettings.Converters.Add(new StringEnumConverter());
+                options.PayloadSerializerSettings.Formatting = Formatting.None;
+            });
         services.AddScoped<MeasurementDataDistributor>();
     }
 }

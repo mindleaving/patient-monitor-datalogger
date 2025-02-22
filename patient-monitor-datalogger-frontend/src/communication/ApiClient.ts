@@ -61,14 +61,15 @@ export class ApiClient
     _buildUrl(path: string, queryParams?: QueryParameters)
     {
         let host = this.hostname;
-        if(this.port !== 443) {
+        if(this.port !== 443 && this.port !== 80) {
             host += `:${this.port}`;
         }
+        const protocol = this.port === 80 ? 'http' : 'https';
         let query = '';
         if(queryParams && Object.entries(queryParams).length > 0) {
             query = '?' + Object.keys(queryParams).map(key => `${key}=${queryParams[key]}`).join('&');
         }
-        return `https://${host}${this.basePath}${path}${query}`;
+        return `${protocol}://${host}${this.basePath}${path}${query}`;
     }
 }
 export const apiClient: { instance?: ApiClient } = {};
