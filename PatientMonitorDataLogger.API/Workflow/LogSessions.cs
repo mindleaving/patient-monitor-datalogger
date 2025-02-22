@@ -7,6 +7,8 @@ public class LogSessions
 {
     private readonly ConcurrentDictionary<Guid, LogSession> sessions = new();
 
+    public List<LogSession> All => sessions.Values.ToList();
+
     public async Task<LogSession> CreateNew(
         LogSessionSettings settings,
         MonitorDataWriterSettings writerSettings)

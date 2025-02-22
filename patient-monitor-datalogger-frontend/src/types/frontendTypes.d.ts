@@ -1,0 +1,1 @@
+type Update<T> = (item: T) => T;

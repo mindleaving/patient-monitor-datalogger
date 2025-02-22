@@ -1,13 +1,13 @@
 export interface QueryParameters {
     [key: string]: string;
 }
-class ApiClient
+export class ApiClient
 {
-    hostname!: string;
-    port!: number;
-    basePath!: string;
+    hostname: string;
+    port: number;
+    basePath: string;
 
-    ApiClient(
+    constructor(
         hostname: string,
         port: number,
         basePath: string)
@@ -71,4 +71,4 @@ class ApiClient
         return `https://${host}${this.basePath}${path}${query}`;
     }
 }
-export const apiClient = new ApiClient();
+export const apiClient: { instance?: ApiClient } = {};

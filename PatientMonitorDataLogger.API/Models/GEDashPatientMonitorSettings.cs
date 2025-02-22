@@ -2,9 +2,9 @@
 
 namespace PatientMonitorDataLogger.API.Models;
 
-public class PhilipsIntellivuePatientMonitorSettings : IPatientMonitorSettings
+public class GEDashPatientMonitorSettings : IPatientMonitorSettings
 {
-    public PatientMonitorType Type => PatientMonitorType.PhilipsIntellivue;
+    public PatientMonitorType Type => PatientMonitorType.GEDash;
 
     [Required]
     [RegularExpression("^(COM[0-9]+|/dev/tty[a-zA-Z0-9]+)$")]

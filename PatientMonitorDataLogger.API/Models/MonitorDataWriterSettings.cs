@@ -2,6 +2,7 @@
 
 public class MonitorDataWriterSettings
 {
+    public const string AppSettingsSectionName = "Output";
+
     public string OutputDirectory { get; set; }
-    public char CsvSeparator { get; set; } = ';';
 }

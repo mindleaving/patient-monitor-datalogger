@@ -19,6 +19,12 @@ public class LogController : ApiController
         this.writerSettings = writerSettings;
     }
 
+    [HttpGet("sessions")]
+    public async Task<IActionResult> GetLogSessions()
+    {
+        return Ok(logSessions.All);
+    }
+
     [HttpGet("{id}/status")]
     public async Task<IActionResult> GetLoggingStatus(
         [FromRoute] Guid id)

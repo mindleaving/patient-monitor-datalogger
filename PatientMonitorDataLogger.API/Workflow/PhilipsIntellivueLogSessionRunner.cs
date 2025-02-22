@@ -8,6 +8,7 @@ namespace PatientMonitorDataLogger.API.Workflow;
 
 public class PhilipsIntellivueLogSessionRunner : ILogSessionRunner
 {
+    private readonly LogSessionSettings logSessionSettings;
     private readonly MonitorDataWriterSettings writerSettings;
     private readonly PhilipsIntellivueClient monitorClient;
     private readonly IPatientMonitorInfo monitorInfo;
@@ -20,8 +21,10 @@ public class PhilipsIntellivueLogSessionRunner : ILogSessionRunner
 
     public PhilipsIntellivueLogSessionRunner(
         PhilipsIntellivuePatientMonitorSettings settings,
+        LogSessionSettings logSessionSettings,
         MonitorDataWriterSettings writerSettings)
     {
+        this.logSessionSettings = logSessionSettings;
         this.writerSettings = writerSettings;
         monitorInfo = new PhilipsIntellivuePatientMonitorInfo();
         var clientSettings = PhilipsIntellivueClientSettings.CreateForPhysicalSerialPort(
@@ -30,7 +33,7 @@ public class PhilipsIntellivueLogSessionRunner : ILogSessionRunner
             TimeSpan.FromSeconds(30));
         monitorClient = new PhilipsIntellivueClient(clientSettings);
         var numericsOutputFilePath = Path.Combine(writerSettings.OutputDirectory, $"numerics_{DateTime.UtcNow:yyyy-MM-dd_HHmmss}.csv");
-        numericsWriter = new CsvNumericsWriter(numericsOutputFilePath, writerSettings.CsvSeparator);
+        numericsWriter = new CsvNumericsWriter(numericsOutputFilePath, logSessionSettings.CsvSeparator);
     }
 
     public LogStatus Status
@@ -80,7 +83,7 @@ public class PhilipsIntellivueLogSessionRunner : ILogSessionRunner
         MeasurementType measurementType)
     {
         var waveOutputFilePath = Path.Combine(writerSettings.OutputDirectory, $"{measurementType}_{DateTime.UtcNow:yyyy-MM-dd_HHmmss}.csv");
-        IWaveWriter waveWriter = new CsvWaveWriter(measurementType, waveOutputFilePath, writerSettings.CsvSeparator);
+        IWaveWriter waveWriter = new CsvWaveWriter(measurementType, waveOutputFilePath, logSessionSettings.CsvSeparator);
         if (!waveWriters.TryAdd(measurementType, waveWriter))
         {
             waveWriter.Dispose(); // Dispose the wave writer we just created, and use the existing.

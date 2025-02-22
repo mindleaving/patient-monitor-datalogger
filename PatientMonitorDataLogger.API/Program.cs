@@ -1,34 +1,49 @@
+using Microsoft.AspNetCore.HttpOverrides;
+using PatientMonitorDataLogger.API.Hubs;
 using PatientMonitorDataLogger.API.Setups;
 
 var builder = WebApplication.CreateBuilder(args);
-
-// Add services to the container.
 
 var setups = new ISetup[]
 {
     new ControllerSetup(),
     new OpenApiSetup(),
     new HubSetup(),
-    new CorsSetup()
+    new CorsSetup(),
+    new WorkflowSetup()
 };
 foreach (var setup in setups)
 {
     setup.Run(builder.Services, builder.Configuration);
 }
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+});
+
+// -------------------------
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    TypescriptGeneratorRunner.Run();
+    app.UseDeveloperExceptionPage();
 }
 
-app.UseHttpsRedirection();
+app.UseForwardedHeaders();
+//app.UseHttpsRedirection(); // API is hosted by reverse proxy, which handles HTTPS
 
-app.UseAuthorization();
+app.UseSwagger();
+app.UseSwaggerUI();
+
+app.UseRouting();
+if (app.Environment.IsDevelopment())
+{
+    app.UseCors();
+}
 
 app.MapControllers();
+app.MapHub<DataHub>("/hubs/data");
 
 app.Run();

@@ -15,7 +15,7 @@ public class LogSession : IDisposable, IAsyncDisposable
         Settings = settings;
         sessionRunner = settings.MonitorSettings switch
         {
-            PhilipsIntellivuePatientMonitorSettings philipsIntellivueSettings => new PhilipsIntellivueLogSessionRunner(philipsIntellivueSettings, writerSettings),
+            PhilipsIntellivuePatientMonitorSettings philipsIntellivueSettings => new PhilipsIntellivueLogSessionRunner(philipsIntellivueSettings, settings, writerSettings),
             _ => throw new NotSupportedException()
         };
     }
