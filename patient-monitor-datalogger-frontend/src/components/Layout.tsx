@@ -9,7 +9,7 @@ export const Layout = (props: LayoutProps) => {
     return (<>
     <ToastContainer theme="colored" />
     <Container>
-        <Row>
+        <Row className="mt-2">
             <Col>
                 <Outlet />
             </Col>

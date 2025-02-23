@@ -1,8 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Net;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using PatientMonitorDataLogger.API.Models;
 using PatientMonitorDataLogger.API.Workflow;
-using PatientMonitorDataLogger.DataExport.Models;
 
 namespace PatientMonitorDataLogger.API.Controllers;
 
@@ -34,40 +34,79 @@ public class LogController : ApiController
         return Ok(logSession!.Status);
     }
 
+    [HttpGet("{id}/patient")]
+    public async Task<IActionResult> GetPatientInfo(
+        [FromRoute] Guid id)
+    {
+        if (!logSessions.TryGet(id, out var logSession))
+            return NotFound();
+        if (logSession!.PatientInfo == null)
+            return NoContent();
+        return Ok(logSession.PatientInfo);
+    }
+
+
     [HttpGet("{id}/latest")]
     public async Task<IActionResult> GetLatestMeasurements(
         [FromRoute] Guid id)
     {
         if (!logSessions.TryGet(id, out var logSession))
             return NotFound();
-
-        var demoData = new NumericsData(
-            DateTime.UtcNow,
-            new()
-            {
-                { MeasurementType.HeartRateEcg, new(76, "1/min") },
-                { MeasurementType.SpO2, new(99, "%") }
-            });
-        return Ok(demoData);
+        return Ok(logSession!.LatestMeasurements);
     }
 
-    [HttpPost("start")]
-    public async Task<IActionResult> StartRecording(
+    [HttpPost]
+    public async Task<IActionResult> CreateNewLogSession(
         [FromBody] LogSessionSettings body)
     {
         var logSession = await logSessions.CreateNew(body, writerSettings.Value);
-        await logSession.Start();
         return Ok(logSession);
+    }
+
+    [HttpPost("{id}/start")]
+    public async Task<IActionResult> StartRecording(
+        [FromRoute] Guid id)
+    {
+        if (!logSessions.TryGet(id, out var logSession))
+            return NotFound();
+        try
+        {
+            await logSession!.Start();
+            return Ok(logSession.Status);
+        }
+        catch (Exception e)
+        {
+            return StatusCode((int)HttpStatusCode.InternalServerError, e.Message);
+        }
     }
 
     [HttpPost("{id}/stop")]
     public async Task<IActionResult> StopRecording(
         [FromRoute] Guid id)
     {
-        if (!logSessions.TryRemove(id, out var logSession))
+        if (!logSessions.TryGet(id, out var logSession))
             return NotFound();
-        await logSession!.Stop();
-        return Ok(logSession.Status);
+        try
+        {
+            await logSession!.Stop();
+            return Ok(logSession.Status);
+        }
+        catch (Exception e)
+        {
+            return StatusCode((int)HttpStatusCode.InternalServerError, e.Message);
+        }
+    }
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteLogSession(
+        [FromRoute] Guid id)
+    {
+        if (logSessions.TryRemove(id, out var logSession))
+        {
+            await logSession!.Stop();
+            await logSession.DisposeAsync();
+        }
+        return Ok();
     }
 
 

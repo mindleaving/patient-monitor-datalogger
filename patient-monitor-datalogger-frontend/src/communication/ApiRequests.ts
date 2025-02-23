@@ -1,4 +1,4 @@
-import { showErrorAlert } from "../helpers/AlertHelpers";
+import { showErrorAlert, showSuccessAlert } from "../helpers/AlertHelpers";
 import { handleResponse } from "./ApiResponseHandler";
 import { apiClient, QueryParameters } from "./ApiClient";
 
@@ -55,6 +55,33 @@ export const sendPostRequest = async (
             onFailure(undefined);
         }
         showErrorAlert(errorText, error.message);
+    } finally {
+        if(onFinally) {
+            onFinally();
+        }
+    }
+}
+
+export const deleteObject = async (
+    apiPath: string,
+    params: { [key: string]: string },
+    successText: string,
+    errorText: string,
+    onSuccess?: () => void,
+    onFailure?: () => void,
+    onFinally?: () => void
+) => {
+    try {
+        await apiClient.instance!.delete(apiPath, params);
+        showSuccessAlert(successText);
+        if(onSuccess) {
+            onSuccess();
+        }
+    } catch(error: any) {
+        showErrorAlert(errorText, error.message);
+        if(onFailure) {
+            onFailure();
+        }
     } finally {
         if(onFinally) {
             onFinally();

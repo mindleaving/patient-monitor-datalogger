@@ -33,7 +33,7 @@ export const CreateNewLogSessionPage = (props: CreateNewLogSessionPageProps) => 
         if(!serialPortName) {
             return;
         }
-        let monitorSettings: Models.IPatientMonitorSettings;
+        let monitorSettings: Models.PatientMonitorSettings;
         switch(selectedMonitorType) {
             case PatientMonitorType.PhilipsIntellivue:
                 monitorSettings = {
@@ -60,7 +60,7 @@ export const CreateNewLogSessionPage = (props: CreateNewLogSessionPageProps) => 
         };
         setIsSubmitting(true);
         await sendPostRequest(
-            'api/log/start', {},
+            'api/log', {},
             "Could not start log session",
             logSessionSettings,
             async response => {
@@ -143,7 +143,7 @@ export const CreateNewLogSessionPage = (props: CreateNewLogSessionPageProps) => 
                 <option value=";">Semi-colon (;)</option>
             </FormControl>
         </FormGroup>
-        <Center className="mt-3">
+        <Center className="my-3">
             <AsyncButton
                 type="submit"
                 isExecuting={isSubmitting}

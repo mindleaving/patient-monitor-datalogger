@@ -16,6 +16,6 @@ public class HubSetup : ISetup
                 options.PayloadSerializerSettings.Converters.Add(new StringEnumConverter());
                 options.PayloadSerializerSettings.Formatting = Formatting.None;
             });
-        services.AddScoped<MeasurementDataDistributor>();
+        services.AddSingleton<MeasurementDataDistributor>();
     }
 }

@@ -2,11 +2,10 @@
   "profiles": {
     "PatientMonitorDataLogger.API": {
       "commandName": "Project",
-      "launchBrowser": true,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
-      "applicationUrl": "https://localhost:62213;http://localhost:62214"
+      "applicationUrl": "http://localhost:5001"
     }
   }
 }

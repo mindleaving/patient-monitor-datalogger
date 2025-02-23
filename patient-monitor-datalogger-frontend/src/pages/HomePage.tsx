@@ -6,6 +6,7 @@ import { LoadingAlert } from "../components/LoadingAlert";
 import { LogSessionListItem } from "../components/LogSessionListItem";
 import { NoEntriesAlert } from "../components/NoEntriesAlert";
 import { useNavigate } from "react-router";
+import { NumericsSignalRConnectionIndicator } from "../components/NumericsSignalRConnectionIndicator";
 
 interface HomePageProps {
     logSessions: Models.LogSession[];
@@ -17,6 +18,7 @@ export const HomePage = (props: HomePageProps) => {
     const { logSessions, setLogSessions } = props;
 
     const [ isLoadingLogSessions, setIsLoadingLogSessions ] = useState<boolean>(true);
+    const [ numericsData, setNumericsData ] = useState<{ [logSessionId: string]: { [measurementType: string]: Models.DataExport.NumericsValue } }>({});
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -29,17 +31,29 @@ export const HomePage = (props: HomePageProps) => {
             () => setIsLoadingLogSessions(false)
         );
         loadLogSessions();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const updateLogSession = (logSessionId: string, update: Update<Models.LogSession>) => {
         setLogSessions(state => state.map(logSession => logSession.id === logSessionId ? update(logSession) : logSession));
     }
-    
+
+    const updateNumericsData = (newData: Models.DataExport.NumericsData) => {
+        setNumericsData(state => ({
+            ...state,
+            [newData.logSessionId]: Object.assign(state[newData.logSessionId], newData.values)
+        }));
+    }
 
     return (<>
         <Row className="align-items-center">
             <Col>
                 <h1>Patient Monitor Data Logger</h1>
+            </Col>
+            <Col xs="auto">
+                <NumericsSignalRConnectionIndicator 
+                    onNewNumericsDataAvailable={updateNumericsData}
+                />
             </Col>
             <Col xs="auto">
                 <Button
@@ -59,7 +73,9 @@ export const HomePage = (props: HomePageProps) => {
                         <LogSessionListItem
                             key={logSession.id}
                             logSession={logSession}
+                            numericsData={numericsData[logSession.id]}
                             onChange={update => updateLogSession(logSession.id, update)}
+                            onDeleted={() => setLogSessions(state => state.filter(x => x.id !== logSession.id))}
                         />
                     ))}
                 </Accordion>}

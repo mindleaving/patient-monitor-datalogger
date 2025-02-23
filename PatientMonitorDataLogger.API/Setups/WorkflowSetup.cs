@@ -11,5 +11,8 @@ public class WorkflowSetup : ISetup
     {
         services.Configure<MonitorDataWriterSettings>(configuration.GetSection(MonitorDataWriterSettings.AppSettingsSectionName));
         services.AddSingleton<LogSessions>();
+        var logSessionSupervisor = new LogSessionSupervisor();
+        logSessionSupervisor.Start();
+        services.AddSingleton(logSessionSupervisor);
     }
 }

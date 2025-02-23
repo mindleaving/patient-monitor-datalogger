@@ -4,13 +4,14 @@ using PatientMonitorDataLogger.PhilipsIntellivue;
 using PatientMonitorDataLogger.PhilipsIntellivue.Models;
 using PatientMonitorDataLogger.PhilipsIntellivue.Helpers;
 
-const bool UseSimulatedEnvironment = true;
+var useSimulatedEnvironment = args.Length > 0 && args[0].ToLower() == "simulate";
 var jsonSerializerSettings = new JsonSerializerSettings { Converters = { new StringEnumConverter() } };
 
 PhilipsIntellivueClientSettings settings;
-SimulatedSerialPortPair simulatedSerialPortPair;
-SimulatedPhilipsIntellivueMonitor? simulatedMonitor;
-if(!UseSimulatedEnvironment) {
+SimulatedSerialPortPair? simulatedSerialPortPair = null;
+SimulatedPhilipsIntellivueMonitor? simulatedMonitor = null;
+if(!useSimulatedEnvironment) 
+{
     var serialPortName = ArgsHelpers.GetOrDefault(args, 0, "/dev/ttyUSB0");
     var serialPortBaudRate = ArgsHelpers.GetOrDefault(args, 1, 115200);
     settings = PhilipsIntellivueClientSettings.CreateForPhysicalSerialPort(serialPortName, serialPortBaudRate, TimeSpan.FromSeconds(10));
@@ -29,14 +30,16 @@ settings.PollMode = PollMode.Extended;
 // Communicate
 var philipsIntellivueCommunicator = new PhilipsIntellivueClient(settings);
 philipsIntellivueCommunicator.NewMessage += StoreMessageAsJson;
-philipsIntellivueCommunicator.Connect();
+philipsIntellivueCommunicator.Connect(
+    TimeSpan.FromSeconds(1), 
+    ExtendedPollProfileOptions.POLL_EXT_PERIOD_NU_1SEC | ExtendedPollProfileOptions.POLL_EXT_PERIOD_RTSA | ExtendedPollProfileOptions.POLL_EXT_ENUM);
 philipsIntellivueCommunicator.StartPolling(); // TODO: Add polling settings (which values and waves to poll)
 while (Console.ReadKey(true).Key != ConsoleKey.Escape);
 philipsIntellivueCommunicator.Disconnect();
-if(UseSimulatedEnvironment)
+if(useSimulatedEnvironment)
 {
-    simulatedMonitor.Stop();
-    simulatedSerialPortPair.Dispose();
+    simulatedMonitor!.Stop();
+    simulatedSerialPortPair!.Dispose();
 }
 
 // Helper methods

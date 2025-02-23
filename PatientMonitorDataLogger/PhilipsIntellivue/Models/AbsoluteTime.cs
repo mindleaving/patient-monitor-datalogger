@@ -43,6 +43,12 @@ public class AbsoluteTime : ISerializable
         return DateTime.ParseExact(dateString, "yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
     }
 
+    public DateOnly ToDateOnly()
+    {
+        var dateString = $"{Century:x2}{Year:x2}-{Month:x2}-{Day:x2}";
+        return DateOnly.ParseExact(dateString, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+    }
+
     public static AbsoluteTime Read(
         BigEndianBinaryReader binaryReader)
     {

@@ -64,7 +64,7 @@ export class ApiClient
         if(this.port !== 443 && this.port !== 80) {
             host += `:${this.port}`;
         }
-        const protocol = this.port === 80 ? 'http' : 'https';
+        const protocol = this.port === 443 ? 'https' : 'http';
         let query = '';
         if(queryParams && Object.entries(queryParams).length > 0) {
             query = '?' + Object.keys(queryParams).map(key => `${key}=${queryParams[key]}`).join('&');

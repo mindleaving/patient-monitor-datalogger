@@ -34,8 +34,11 @@ public class PhilipsIntellivueClient : IDisposable, IAsyncDisposable
     public bool IsConnected { get; private set; }
     public bool IsListening => serialPortCommunicator?.IsListening ?? false;
     public event EventHandler<ICommandMessage>? NewMessage;
+    public event EventHandler<MonitorConnectionChangeEventType>? ConnectionStatusChanged; 
 
-    public void Connect()
+    public void Connect(
+        TimeSpan minimumPollPeriod,
+        ExtendedPollProfileOptions pollOptions)
     {
         if(IsConnected)
             return;
@@ -47,7 +50,7 @@ public class PhilipsIntellivueClient : IDisposable, IAsyncDisposable
             ConfigureSerialPort();
             serialPortCommunicator!.Start();
 
-            SendAssociationRequest();
+            SendAssociationRequest(minimumPollPeriod, pollOptions);
             var associationResult = WaitForAssociationCommandMessage(AssociationCommandType.AssociationAccepted, AssociationCommandType.Refuse);
             if (associationResult.SessionHeader.Type == AssociationCommandType.Refuse)
             {
@@ -58,6 +61,7 @@ public class PhilipsIntellivueClient : IDisposable, IAsyncDisposable
             SendMdsCreateEventResult(mdsCreateEventReport);
             IsConnected = true;
             Log("Connected");
+            ConnectionStatusChanged?.Invoke(this, MonitorConnectionChangeEventType.Connected);
         }
     }
 
@@ -82,17 +86,27 @@ public class PhilipsIntellivueClient : IDisposable, IAsyncDisposable
         serialPort.Open();
         serialPortCommunicator = new SerialPortCommunicator(serialPort, settings.MessageRetentionPeriod, nameof(PhilipsIntellivueClient));
         serialPortCommunicator.NewMessage += ReportNewMessage;
+        serialPortCommunicator.ConnectionStatusChanged += OnConnectionStatusChanged;
+    }
+
+    private void OnConnectionStatusChanged(
+        object? sender,
+        MonitorConnectionChangeEventType connectionChangeEventType)
+    {
+        ConnectionStatusChanged?.Invoke(sender, connectionChangeEventType);
     }
 
     /// <summary>
     /// Send Association Request to monitor
     /// </summary>
     /// <returns>An association response or association refuse message</returns>
-    private void SendAssociationRequest()
+    private void SendAssociationRequest(
+        TimeSpan minimumPollPeriod,
+        ExtendedPollProfileOptions pollOptions)
     {
         var associationRequestMessage = messageCreator.CreateAssociationRequest(
-            TimeSpan.FromSeconds(1),
-            ExtendedPollProfileOptions.POLL_EXT_PERIOD_NU_1SEC | ExtendedPollProfileOptions.POLL_EXT_PERIOD_RTSA | ExtendedPollProfileOptions.POLL_EXT_ENUM);
+            minimumPollPeriod,
+            pollOptions);
         serialPortCommunicator!.Enqueue(associationRequestMessage);
     }
 
@@ -124,10 +138,13 @@ public class PhilipsIntellivueClient : IDisposable, IAsyncDisposable
 
     private DataExportCommandMessage WaitForDataExportCommandMessage(
         RemoteOperationType operationType,
-        DataExportCommandType? commandType)
+        DataExportCommandType? commandType = null,
+        OIDType? actionType = null)
     {
         if (operationType != RemoteOperationType.Error && !commandType.HasValue)
             throw new ArgumentException("Command type must be specified, except when waiting for an error message");
+        if(operationType != RemoteOperationType.Error && commandType == DataExportCommandType.ConfirmedAction && !actionType.HasValue)
+            throw new ArgumentException("Action type must be specified, except when waiting for an error message");
 
         var waitRequest = new WaitForRequest<ICommandMessage>(
             Guid.NewGuid(),
@@ -140,7 +157,21 @@ public class PhilipsIntellivueClient : IDisposable, IAsyncDisposable
                 if (operationType == RemoteOperationType.Error)
                     return true;
                 var remoteOperation = (IRemoteOperation)dataExportCommandMessage.RemoteOperationData;
-                return remoteOperation.CommandType == commandType;
+                if (remoteOperation.CommandType != commandType)
+                    return false;
+                if (commandType != DataExportCommandType.ConfirmedAction)
+                    return true;
+                switch (operationType)
+                {
+                    case RemoteOperationType.Invoke:
+                        var actionCommand = (ActionCommand)((RemoteOperationInvoke)remoteOperation).Data;
+                        return actionCommand.ActionType == actionType;
+                    case RemoteOperationType.Result:
+                    case RemoteOperationType.LinkedResult:
+                        var actionResult = (ActionResultCommand)((RemoteOperationResult)remoteOperation).Data;
+                        return actionResult.ActionType == actionType;
+                }
+                return false;
             });
         serialPortCommunicator!.WaitForMessage(waitRequest);
         if(!waitRequest.WaitHandle.WaitOne(TimeSpan.FromSeconds(10)))
@@ -191,6 +222,15 @@ public class PhilipsIntellivueClient : IDisposable, IAsyncDisposable
         serialPortCommunicator!.Enqueue(pollMessage);
     }
 
+    public void SendPatientDemographicsRequest()
+    {
+        var patientDemographicsRequestMessage = messageCreator.CreateSinglePollRequest(
+            Constants.DefaultPresentationContextId,
+            PollObjectTypes.PatientDemographics,
+            PollAttributeGroups.PatientDemographics.All);
+        serialPortCommunicator!.Enqueue(patientDemographicsRequestMessage);
+    }
+
     public void Disconnect()
     {
         if(!IsConnected)
@@ -201,6 +241,7 @@ public class PhilipsIntellivueClient : IDisposable, IAsyncDisposable
                 return;
 
             IsConnected = false;
+            ConnectionStatusChanged?.Invoke(this, MonitorConnectionChangeEventType.Disconnected);
             StopPolling();
 
             SendAssociationReleaseRequest();

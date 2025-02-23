@@ -17,6 +17,7 @@ public class PhilipsIntellivueSerialDataFrameReader : IDisposable
     }
 
     public event EventHandler<Rs232Frame>? FrameAvailable;
+    public event EventHandler? SerialPortFaulted; 
     public bool IsListening { get; private set; }
 
     public void Start()
@@ -45,65 +46,79 @@ public class PhilipsIntellivueSerialDataFrameReader : IDisposable
         var frameData = new System.Collections.Generic.List<byte>();
         var isFrameInProgress = false;
         var unescapeNextByte = false;
-        while (!cancellationToken.IsCancellationRequested)
+        try
         {
-            var bytesRead = serialPort.Read(buffer);
-            if (bytesRead == 0)
+            while (!cancellationToken.IsCancellationRequested)
             {
-                await Task.Delay(100, cancellationToken);
-                continue;
-            }
-            foreach (var b in buffer.Take(bytesRead))
-            {
-                if (!isFrameInProgress && b != TransparencyByteUnescapedStream.FrameStartCharacter)
-                    continue;
-
-                var unescapedByte = unescapeNextByte ? Unescape(b) : b;
-                unescapeNextByte = false;
-                if (b == TransparencyByteUnescapedStream.FrameStartCharacter)
+                var bytesRead = serialPort.Read(buffer);
+                if (bytesRead == 0)
                 {
-                    if (isFrameInProgress)
-                    {
-                        frameData.Clear();
-                        Console.WriteLine("Frame aborted");
-                    }
-
-                    isFrameInProgress = true;
-                    frameData.Add(b);
+                    await Task.Delay(100, cancellationToken);
                     continue;
                 }
-                if (b == TransparencyByteUnescapedStream.FrameEndCharacter)
+
+                foreach (var b in buffer.Take(bytesRead))
                 {
-                    if (unescapeNextByte)
+                    if (!isFrameInProgress && b != TransparencyByteUnescapedStream.FrameStartCharacter)
+                        continue;
+
+                    var unescapedByte = unescapeNextByte ? Unescape(b) : b;
+                    unescapeNextByte = false;
+                    if (b == TransparencyByteUnescapedStream.FrameStartCharacter)
                     {
-                        Console.WriteLine("Frame aborted");
-                    }
-                    else
-                    {
+                        if (isFrameInProgress)
+                        {
+                            frameData.Clear();
+                            Console.WriteLine("Frame aborted");
+                        }
+
+                        isFrameInProgress = true;
                         frameData.Add(b);
-                        try
-                        {
-                            var frame = Rs232Frame.Parse(frameData.ToArray());
-                            FrameAvailable?.Invoke(this, frame);
-                        }
-                        catch (Exception e)
-                        {
-                            Console.WriteLine("Could not parse frame: " + e.Message);
-                        }
+                        continue;
                     }
 
-                    frameData.Clear();
-                    isFrameInProgress = false;
-                    continue;
-                }
-                if (b == TransparencyByteUnescapedStream.EscapeCharacter)
-                {
-                    unescapeNextByte = true;
-                    continue;
-                }
+                    if (b == TransparencyByteUnescapedStream.FrameEndCharacter)
+                    {
+                        if (unescapeNextByte)
+                        {
+                            Console.WriteLine("Frame aborted");
+                        }
+                        else
+                        {
+                            frameData.Add(b);
+                            try
+                            {
+                                var frame = Rs232Frame.Parse(frameData.ToArray());
+                                FrameAvailable?.Invoke(this, frame);
+                            }
+                            catch (Exception e)
+                            {
+                                Console.WriteLine("Could not parse frame: " + e.Message);
+                            }
+                        }
 
-                frameData.Add(unescapedByte);
+                        frameData.Clear();
+                        isFrameInProgress = false;
+                        continue;
+                    }
+
+                    if (b == TransparencyByteUnescapedStream.EscapeCharacter)
+                    {
+                        unescapeNextByte = true;
+                        continue;
+                    }
+
+                    frameData.Add(unescapedByte);
+                }
             }
+        }
+        catch
+        {
+            SerialPortFaulted?.Invoke(this, EventArgs.Empty);
+        }
+        finally
+        {
+            IsListening = false;
         }
     }
 
@@ -118,10 +133,9 @@ public class PhilipsIntellivueSerialDataFrameReader : IDisposable
             if(!IsListening)
                 return;
 
+            IsListening = false;
             cancellationTokenSource?.Cancel();
             listeningTask?.Wait();
-
-            IsListening = false;
         }
     }
 

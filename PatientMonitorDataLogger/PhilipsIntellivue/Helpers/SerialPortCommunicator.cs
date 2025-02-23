@@ -24,19 +24,34 @@ public class SerialPortCommunicator : IDisposable
         frameReader = new PhilipsIntellivueSerialDataFrameReader(serialPort);
         messageCollection = new(messageRetentionPeriod);
         frameReader.FrameAvailable += QueueMessage;
+        frameReader.SerialPortFaulted += OnSerialPortFaulted;
     }
 
     public bool IsListening => frameReader.IsListening;
     public bool IsSending { get; private set; }
     public event EventHandler<ICommandMessage>? NewMessage;
+    public event EventHandler<MonitorConnectionChangeEventType>? ConnectionStatusChanged;
 
     private void QueueMessage(
         object? sender,
         Rs232Frame frame)
     {
+        if (IsAssociationAbort(frame.UserData))
+        {
+            ConnectionStatusChanged?.Invoke(this, MonitorConnectionChangeEventType.Aborted);
+            Stop();
+        }
         Log($"Received {frame.UserData}");
         messageCollection.Add(frame.UserData);
         NewMessage?.Invoke(this, frame.UserData);
+    }
+
+    private void OnSerialPortFaulted(
+        object? sender,
+        EventArgs e)
+    {
+        ConnectionStatusChanged?.Invoke(this, MonitorConnectionChangeEventType.Faulted);
+        Stop();
     }
 
     public void Start()
@@ -47,7 +62,7 @@ public class SerialPortCommunicator : IDisposable
         {
             if(IsListening && IsSending)
                 return;
-            if(!IsListening)
+            if(!IsListening) 
                 frameReader.Start();
 
             if (!IsSending)
@@ -60,6 +75,7 @@ public class SerialPortCommunicator : IDisposable
                     TaskScheduler.Default);
                 IsSending = true;
             }
+            ConnectionStatusChanged?.Invoke(this, MonitorConnectionChangeEventType.Connected);
         }
     }
 
@@ -68,10 +84,29 @@ public class SerialPortCommunicator : IDisposable
     {
         foreach (var message in outgoingMessages!.GetConsumingEnumerable(token))
         {
-            var frame = BuildFrame(message);
-            var frameBytes = frame.Serialize();
-            serialPort.Write(frameBytes);
-            Log($"Sent {message}");
+            byte[] frameBytes;
+            try
+            {
+                var frame = BuildFrame(message);
+                frameBytes = frame.Serialize();
+            }
+            catch
+            {
+                Console.WriteLine($"Failed to create frame for message {message}. Message was discarded.");
+                continue;
+            }
+
+            try
+            {
+                serialPort.Write(frameBytes);
+                Log($"Sent {message}");
+            }
+            catch
+            {
+                OnSerialPortFaulted(this, EventArgs.Empty);
+                IsSending = false;
+                throw;
+            }
         }
     }
 
@@ -94,16 +129,16 @@ public class SerialPortCommunicator : IDisposable
                 {
                     sendTask?.Wait();
                 }
-                catch (AggregateException aggregateException)
+                catch
                 {
-                    if (aggregateException.InnerException != null && aggregateException.InnerException is not (TaskCanceledException or OperationCanceledException))
-                        throw aggregateException.InnerException;
+                    // Ignore
                 }
                 finally
                 {
                     outgoingMessages = new();
                 }
             }
+            ConnectionStatusChanged?.Invoke(this, MonitorConnectionChangeEventType.Disconnected);
         }
     }
 
@@ -140,4 +175,12 @@ public class SerialPortCommunicator : IDisposable
     }
 
     private void Log(string message) => Console.WriteLine($"{logName} - {DateTime.UtcNow:yyyy-MM-dd HH:mm:ss.fff}: {message}");
+
+    private bool IsAssociationAbort(
+        ICommandMessage commandMessage)
+    {
+        if (commandMessage is not AssociationCommandMessage associationCommandMessage)
+            return false;
+        return associationCommandMessage.SessionHeader.Type == AssociationCommandType.Abort;
+    }
 }

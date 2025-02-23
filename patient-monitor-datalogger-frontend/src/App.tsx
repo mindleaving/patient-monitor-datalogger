@@ -18,7 +18,8 @@ const App = () => {
         });
     }, []);
 
-    return (<Routes>
+    return (
+    <Routes>
         <Route path='/' element={<Layout />}>
             <Route index element={<HomePage logSessions={logSessions} setLogSessions={setLogSessions} />} />
             <Route path="/create/session" element={<CreateNewLogSessionPage onLogSessionCreated={onLogSessionCreated} />} />

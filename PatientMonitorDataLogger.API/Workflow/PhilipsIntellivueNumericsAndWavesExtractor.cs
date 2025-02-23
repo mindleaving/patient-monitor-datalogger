@@ -9,6 +9,7 @@ public class PhilipsIntellivueNumericsAndWavesExtractor
     private RelativeTimeTranslation? relativeTimeTranslation;
 
     public IEnumerable<IMonitorData> Extract(
+        Guid logSessionId,
         ICommandMessage message)
     {
         if(message is not DataExportCommandMessage dataExportMessage)
@@ -22,7 +23,7 @@ public class PhilipsIntellivueNumericsAndWavesExtractor
         if(actionResult.Data is not PollMdiDataReply pollResult)
             yield break;
         var timestamp = GetAbsoluteTime(pollResult.RelativeTimeStamp);
-        var numericsData = new NumericsData(timestamp, new Dictionary<MeasurementType, NumericsValue>());
+        var numericsData = new NumericsData(logSessionId, timestamp, new Dictionary<MeasurementType, NumericsValue>());
         foreach (var singleContextPoll in pollResult.PollContexts.Values)
         {
             var contextId = singleContextPoll.ContextId;
@@ -42,6 +43,7 @@ public class PhilipsIntellivueNumericsAndWavesExtractor
                             var sampleRate = GetSampleRate(measurementType);
                             var translatedWaveSampleValues = TranslateWaveValues(sampleArray.Values.Values);
                             var waveData = new WaveData(
+                                logSessionId,
                                 measurementType,
                                 timestamp,
                                 sampleRate,
@@ -55,7 +57,10 @@ public class PhilipsIntellivueNumericsAndWavesExtractor
                                 continue;
                             if(numericsObservation.State != MeasurementState.VALID)
                                 continue;
-                            numericsData.Values[measurementType] = new(numericsObservation.Value.Value, UnitCodesMap.GetValueOrDefault(numericsObservation.UnitCode, null));
+                            numericsData.Values[measurementType] = new(
+                                timestamp,
+                                numericsObservation.Value.Value,
+                                UnitCodesMap.GetValueOrDefault(numericsObservation.UnitCode, null));
                             break;
                         }
                     }

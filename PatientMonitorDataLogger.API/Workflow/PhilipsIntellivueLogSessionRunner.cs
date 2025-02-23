@@ -13,6 +13,7 @@ public class PhilipsIntellivueLogSessionRunner : ILogSessionRunner
     private readonly PhilipsIntellivueClient monitorClient;
     private readonly IPatientMonitorInfo monitorInfo;
     private readonly PhilipsIntellivueNumericsAndWavesExtractor numericsAndWavesExtractor = new();
+    private readonly PhilipsIntellivuePatientInfoExtractor patientInfoExtractor = new();
     private DateTime? connectTime;
     private readonly System.Collections.Generic.List<MeasurementType> numericsTypes = new();
     private readonly System.Collections.Generic.List<MeasurementType> waveTypes = new();
@@ -20,10 +21,12 @@ public class PhilipsIntellivueLogSessionRunner : ILogSessionRunner
     private readonly Dictionary<MeasurementType, IWaveWriter> waveWriters = new();
 
     public PhilipsIntellivueLogSessionRunner(
+        Guid logSessionId,
         PhilipsIntellivuePatientMonitorSettings settings,
         LogSessionSettings logSessionSettings,
         MonitorDataWriterSettings writerSettings)
     {
+        LogSessionId = logSessionId;
         this.logSessionSettings = logSessionSettings;
         this.writerSettings = writerSettings;
         monitorInfo = new PhilipsIntellivuePatientMonitorInfo();
@@ -36,6 +39,7 @@ public class PhilipsIntellivueLogSessionRunner : ILogSessionRunner
         numericsWriter = new CsvNumericsWriter(numericsOutputFilePath, logSessionSettings.CsvSeparator);
     }
 
+    public Guid LogSessionId { get; }
     public LogStatus Status
         => new(
             monitorClient.IsConnected && monitorClient.IsListening,
@@ -43,20 +47,36 @@ public class PhilipsIntellivueLogSessionRunner : ILogSessionRunner
             connectTime,
             numericsTypes,
             waveTypes);
+    public event EventHandler<LogStatus>? StatusChanged;
+    public event EventHandler<NumericsData>? NewNumericsData;
+    public event EventHandler<PatientInfo>? PatientInfoAvailable;
 
     public async Task Start()
     {
         monitorClient.NewMessage += HandleMonitorMessage;
-        monitorClient.Connect();
+        monitorClient.ConnectionStatusChanged += HandleConnectionStatusChanged;
+        monitorClient.Connect(
+            TimeSpan.FromSeconds(1),
+            ExtendedPollProfileOptions.POLL_EXT_PERIOD_NU_1SEC | ExtendedPollProfileOptions.POLL_EXT_PERIOD_RTSA | ExtendedPollProfileOptions.POLL_EXT_ENUM);
+        monitorClient.SendPatientDemographicsRequest();
         monitorClient.StartPolling();
         connectTime = DateTime.UtcNow;
+    }
+
+    private void HandleConnectionStatusChanged(
+        object? sender,
+        MonitorConnectionChangeEventType connectionChangeEventType)
+    {
+        StatusChanged?.Invoke(this, Status);
     }
 
     private void HandleMonitorMessage(
         object? sender,
         ICommandMessage message)
     {
-        foreach (var monitorData in numericsAndWavesExtractor.Extract(message))
+        if(patientInfoExtractor.TryExtract(message, out var patientInfo))
+            PatientInfoAvailable?.Invoke(this, patientInfo!);
+        foreach (var monitorData in numericsAndWavesExtractor.Extract(LogSessionId, message))
         {
             switch (monitorData)
             {
@@ -65,6 +85,7 @@ public class PhilipsIntellivueLogSessionRunner : ILogSessionRunner
                     if(newNumericsMeasurementTypes.Count > 0)
                         numericsTypes.AddRange(newNumericsMeasurementTypes);
                     numericsWriter.Write(numericsData);
+                    NewNumericsData?.Invoke(this, numericsData);
                     break;
                 case WaveData waveData:
                     if (!waveTypes.Contains(waveData.MeasurementType))
