@@ -52,6 +52,13 @@ export const HomePage = (props: HomePageProps) => {
         }));
     }
 
+    const updateLogStatus = (logStatus: Models.LogStatus) => {
+        updateLogSession(logStatus.logSessionId, logSession => ({
+            ...logSession,
+            status: logStatus
+        }));
+    }
+
     return (<>
         <Row className="align-items-center">
             <Col>
@@ -61,6 +68,7 @@ export const HomePage = (props: HomePageProps) => {
                 <NumericsSignalRConnectionIndicator 
                     onNewNumericsDataAvailable={updateNumericsData}
                     onPatientInfoAvailable={updatePatientInfo}
+                    onLogStatusChanged={updateLogStatus}
                 />
             </Col>
             <Col xs="auto">

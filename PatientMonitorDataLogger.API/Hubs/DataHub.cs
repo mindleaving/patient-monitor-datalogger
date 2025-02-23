@@ -13,6 +13,10 @@ public interface IDataHubClient
     Task ReceivePatientInfo(
         Guid logSessionId,
         PatientInfo patientInfo);
+
+    Task ReceiveStatusChange(
+        Guid logSessionId,
+        LogStatus logStatus);
 }
 
 public class DataHub : Hub<IDataHubClient>

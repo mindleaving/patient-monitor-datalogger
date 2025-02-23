@@ -5,12 +5,14 @@ namespace PatientMonitorDataLogger.API.Models;
 public class LogStatus
 {
     public LogStatus(
+        Guid logSessionId,
         bool isRunning,
         IPatientMonitorInfo monitor,
         DateTime? startTime,
         List<MeasurementType> recordedNumerics,
         List<MeasurementType> recordedWaves)
     {
+        LogSessionId = logSessionId;
         IsRunning = isRunning;
         Monitor = monitor;
         StartTime = startTime;
@@ -18,6 +20,7 @@ public class LogStatus
         RecordedWaves = recordedWaves;
     }
 
+    public Guid LogSessionId { get; }
     public bool IsRunning { get; }
     public IPatientMonitorInfo Monitor { get; }
     public DateTime? StartTime { get; }

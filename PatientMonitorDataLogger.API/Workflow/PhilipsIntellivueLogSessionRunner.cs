@@ -46,6 +46,7 @@ public class PhilipsIntellivueLogSessionRunner : ILogSessionRunner
     public Guid LogSessionId { get; }
     public LogStatus Status
         => new(
+            LogSessionId,
             monitorClient.IsConnected && monitorClient.IsListening,
             monitorInfo,
             connectTime,

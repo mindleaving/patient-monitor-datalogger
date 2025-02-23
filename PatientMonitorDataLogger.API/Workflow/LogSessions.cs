@@ -80,6 +80,7 @@ public class LogSessions
         sessions.TryAdd(logSession.Id, logSession);
         logSession.NewNumericsData += DistributeNumericsData;
         logSession.PatientInfoAvailable += DistributePatientInfo;
+        logSession.StatusChanged += DistributeStatusChange;
         logSessionSupervisor.Register(logSession);
     }
 
@@ -117,5 +118,12 @@ public class LogSessions
         PatientInfo patientInfo)
     {
         measurementDataDistributor.Distribute(patientInfo.LogSessionId, patientInfo);
+    }
+
+    private void DistributeStatusChange(
+        object? sender,
+        LogStatus logStatus)
+    {
+
     }
 }

@@ -1,6 +1,9 @@
 import * as Enums from './enums';
 
 export namespace Models {
+    interface GEDashPatientMonitorInfo extends Models.IPatientMonitorInfo {
+        name: string;
+    }
     interface GEDashPatientMonitorSettings extends Models.PatientMonitorSettings {
         serialPortName: string;
         serialPortBaudRate: number;
@@ -23,6 +26,7 @@ export namespace Models {
         csvSeparator: string;
     }
     interface LogStatus {
+        logSessionId: string;
         isRunning: boolean;
         monitor: Models.IPatientMonitorInfo;
         startTime?: Date | null;
