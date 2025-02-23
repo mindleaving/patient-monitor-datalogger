@@ -41,7 +41,7 @@ export const HomePage = (props: HomePageProps) => {
     const updateNumericsData = (newData: Models.DataExport.NumericsData) => {
         setNumericsData(state => ({
             ...state,
-            [newData.logSessionId]: Object.assign(state[newData.logSessionId], newData.values)
+            [newData.logSessionId]: Object.assign(state[newData.logSessionId] ?? {}, newData.values)
         }));
     }
 

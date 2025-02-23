@@ -16,6 +16,7 @@ public abstract class AsyncFileWriter<T> : IDisposable, IAsyncDisposable
     {
         this.outputFilePath = outputFilePath;
         streamWriter = new StreamWriter(File.OpenWrite(outputFilePath));
+        streamWriter.AutoFlush = true;
     }
 
     public bool IsRunning { get; private set; }
@@ -61,6 +62,7 @@ public abstract class AsyncFileWriter<T> : IDisposable, IAsyncDisposable
             cancellationTokenSource?.Cancel();
             try
             {
+                streamWriter.Flush();
                 writeTask?.Wait();
             }
             catch (AggregateException aggregateException)

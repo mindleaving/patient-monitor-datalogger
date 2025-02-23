@@ -10,6 +10,7 @@ namespace PatientMonitorDataLogger.API.Workflow;
 public class PhilipsIntellivueLogSessionRunner : ILogSessionRunner
 {
     private readonly LogSessionSettings logSessionSettings;
+    private readonly MonitorDataWriterSettings writerSettings;
     private readonly PhilipsIntellivueClient monitorClient;
     private readonly IPatientMonitorInfo monitorInfo;
     private readonly PhilipsIntellivueNumericsAndWavesExtractor numericsAndWavesExtractor = new();
@@ -29,11 +30,13 @@ public class PhilipsIntellivueLogSessionRunner : ILogSessionRunner
     {
         LogSessionId = logSessionId;
         this.logSessionSettings = logSessionSettings;
+        this.writerSettings = writerSettings;
         monitorInfo = new PhilipsIntellivuePatientMonitorInfo();
         var clientSettings = PhilipsIntellivueClientSettings.CreateForPhysicalSerialPort(
             settings.SerialPortName,
             settings.SerialPortBaudRate,
             TimeSpan.FromSeconds(30));
+        clientSettings.PollMode = PollMode.Extended;
         monitorClient = new PhilipsIntellivueClient(clientSettings);
         logSessionOutputDirectory = Path.Combine(writerSettings.OutputDirectory, logSessionId.ToString());
         if (!Directory.Exists(logSessionOutputDirectory))
@@ -58,13 +61,14 @@ public class PhilipsIntellivueLogSessionRunner : ILogSessionRunner
 
     public async Task Start()
     {
+        numericsWriter.Start();
         monitorClient.NewMessage += HandleMonitorMessage;
         monitorClient.ConnectionStatusChanged += HandleConnectionStatusChanged;
         monitorClient.Connect(
             TimeSpan.FromSeconds(1),
             ExtendedPollProfileOptions.POLL_EXT_PERIOD_NU_1SEC | ExtendedPollProfileOptions.POLL_EXT_PERIOD_RTSA | ExtendedPollProfileOptions.POLL_EXT_ENUM);
-        monitorClient.SendPatientDemographicsRequest();
         monitorClient.StartPolling();
+        monitorClient.SendPatientDemographicsRequest();
         connectTime = DateTime.UtcNow;
     }
 
@@ -79,7 +83,8 @@ public class PhilipsIntellivueLogSessionRunner : ILogSessionRunner
         object? sender,
         ICommandMessage message)
     {
-        if(patientInfoExtractor.TryExtract(LogSessionId, message, out var patientInfo))
+        WriteRawMessage(message);
+        if (patientInfoExtractor.TryExtract(LogSessionId, message, out var patientInfo))
             PatientInfoAvailable?.Invoke(this, patientInfo!);
         foreach (var monitorData in numericsAndWavesExtractor.Extract(LogSessionId, message))
         {
@@ -87,7 +92,7 @@ public class PhilipsIntellivueLogSessionRunner : ILogSessionRunner
             {
                 case NumericsData numericsData:
                     var newNumericsMeasurementTypes = numericsData.Values.Keys.Except(numericsTypes).ToList();
-                    if(newNumericsMeasurementTypes.Count > 0)
+                    if (newNumericsMeasurementTypes.Count > 0)
                         numericsTypes.AddRange(newNumericsMeasurementTypes);
                     numericsWriter.Write(numericsData);
                     NewNumericsData?.Invoke(this, numericsData);
@@ -95,7 +100,7 @@ public class PhilipsIntellivueLogSessionRunner : ILogSessionRunner
                 case WaveData waveData:
                     if (!waveTypes.Contains(waveData.MeasurementType))
                         waveTypes.Add(waveData.MeasurementType);
-                    if (!waveWriters.TryGetValue(waveData.MeasurementType, out var waveWriter)) 
+                    if (!waveWriters.TryGetValue(waveData.MeasurementType, out var waveWriter))
                         waveWriter = CreateWaveWriter(waveData.MeasurementType);
                     waveWriter.Write(waveData);
                     break;
@@ -103,6 +108,13 @@ public class PhilipsIntellivueLogSessionRunner : ILogSessionRunner
                     throw new ArgumentOutOfRangeException(nameof(monitorData));
             }
         }
+    }
+
+    private void WriteRawMessage(ICommandMessage message)
+    {
+        File.AppendAllText(
+            Path.Combine(writerSettings.OutputDirectory, LogSessionId.ToString(), "messages.json"),
+            JsonConvert.SerializeObject(message) + Environment.NewLine);
     }
 
     private IWaveWriter CreateWaveWriter(
@@ -114,6 +126,10 @@ public class PhilipsIntellivueLogSessionRunner : ILogSessionRunner
         {
             waveWriter.Dispose(); // Dispose the wave writer we just created, and use the existing.
             waveWriter = waveWriters[measurementType];
+        }
+        else
+        {
+            waveWriter.Start();
         }
         return waveWriter;
     }
@@ -136,8 +152,27 @@ public class PhilipsIntellivueLogSessionRunner : ILogSessionRunner
 
     public async Task Stop()
     {
-        monitorClient.StopPolling();
-        monitorClient.Disconnect();
+        try
+        {
+            monitorClient.StopPolling();
+            monitorClient.Disconnect();
+        }
+        catch
+        {
+            // Ignore
+        }
+        try
+        {
+            numericsWriter.Stop();
+            foreach(var waveWriter in waveWriters.Values)
+            {
+                waveWriter.Stop();
+            }
+        }
+        catch
+        {
+            // Ignore
+        }
         connectTime = null;
     }
 

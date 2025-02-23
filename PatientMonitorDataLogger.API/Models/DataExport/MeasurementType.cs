@@ -8,6 +8,7 @@ public enum MeasurementType
 
     SpO2 = 11,
     SpO2preDuctal = 12,
+    Pleth = 13,
 
     RespirationRate = 21,
 

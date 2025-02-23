@@ -14,6 +14,7 @@ public class PhilipsIntellivueClient : IDisposable, IAsyncDisposable
     private readonly object connectLock = new();
     private readonly Timer alertPollTimer;
     private readonly Timer numericsPollTimer;
+    private readonly Timer wavesPollTimer;
 
     public PhilipsIntellivueClient(
         PhilipsIntellivueClientSettings settings)
@@ -26,6 +27,11 @@ public class PhilipsIntellivueClient : IDisposable, IAsyncDisposable
             Timeout.Infinite);
         numericsPollTimer = new Timer(
             SendNumericsPollRequest,
+            null,
+            Timeout.Infinite,
+            Timeout.Infinite);
+        wavesPollTimer = new Timer(
+            SendWavesPollRequest,
             null,
             Timeout.Infinite,
             Timeout.Infinite);
@@ -203,6 +209,7 @@ public class PhilipsIntellivueClient : IDisposable, IAsyncDisposable
     {
         alertPollTimer.Change(TimeSpan.Zero, TimeSpan.FromSeconds(settings.PollMode == PollMode.Extended ? 30 : 10));
         numericsPollTimer.Change(TimeSpan.Zero, TimeSpan.FromSeconds(settings.PollMode == PollMode.Extended ? 10 : 1));
+        wavesPollTimer.Change(TimeSpan.Zero, TimeSpan.FromSeconds(settings.PollMode == PollMode.Extended ? 10 : 1));
         Log("Started polling for alerts and numerics");
     }
 
@@ -237,6 +244,24 @@ public class PhilipsIntellivueClient : IDisposable, IAsyncDisposable
                 PollObjectTypes.Numerics,
                 PollAttributeGroups.Numerics.MetricObservedValue,
                 TimeSpan.FromSeconds(60)),
+            _ => throw new ArgumentOutOfRangeException(nameof(settings.PollMode))
+        };
+        serialPortCommunicator!.Enqueue(pollMessage);
+    }
+
+    private void SendWavesPollRequest(
+        object? state)
+    {
+        ICommandMessage pollMessage = settings.PollMode switch {
+            PollMode.Single => messageCreator.CreateSinglePollRequest(
+                Constants.DefaultPresentationContextId,
+                PollObjectTypes.Waves,
+                PollAttributeGroups.Waves.MetricObservedValue),
+            PollMode.Extended => messageCreator.CreateExtendedPollRequest(
+                Constants.DefaultPresentationContextId,
+                PollObjectTypes.Waves,
+                PollAttributeGroups.Waves.MetricObservedValue,
+                TimeSpan.FromSeconds(30)),
             _ => throw new ArgumentOutOfRangeException(nameof(settings.PollMode))
         };
         serialPortCommunicator!.Enqueue(pollMessage);

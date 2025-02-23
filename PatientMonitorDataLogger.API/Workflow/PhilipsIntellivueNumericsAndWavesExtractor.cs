@@ -75,6 +75,7 @@ public class PhilipsIntellivueNumericsAndWavesExtractor
     private double GetSampleRate(
         MeasurementType measurementType)
     {
+        return 128;
         switch (measurementType)
         {
             
@@ -103,6 +104,9 @@ public class PhilipsIntellivueNumericsAndWavesExtractor
                 measurementType = physioId switch
                 {
                     SCADAType.NOM_AWAY_RESP_RATE => MeasurementType.RespirationRate,
+                    SCADAType.NOM_PLETH_PULS_RATE => MeasurementType.HeartRateSpO2,
+                    SCADAType.NOM_PULS_OXIM_SAT_O2 => MeasurementType.SpO2,
+                    SCADAType.NOM_ECG_CARD_BEAT_RATE => MeasurementType.HeartRateEcg,
                     // TODO: Add all relevant
                     _ => MeasurementType.Undefined
                 };
@@ -111,6 +115,7 @@ public class PhilipsIntellivueNumericsAndWavesExtractor
                 measurementType = physioId switch
                 {
                     SCADAType.NOM_ECG_ELEC_POTL_I => MeasurementType.EcgLeadI,
+                    SCADAType.NOM_PLETH => MeasurementType.Pleth,
                     // TODO: Add all relevant
                     _ => MeasurementType.Undefined
                 };

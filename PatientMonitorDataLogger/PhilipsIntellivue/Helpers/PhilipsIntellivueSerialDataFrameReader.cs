@@ -94,6 +94,7 @@ public class PhilipsIntellivueSerialDataFrameReader : IDisposable
                             catch (Exception e)
                             {
                                 Console.WriteLine("Could not parse frame: " + e.Message);
+                                Console.WriteLine($"Faulty data: {Convert.ToBase64String(frameData.ToArray())}");
                             }
                         }
 

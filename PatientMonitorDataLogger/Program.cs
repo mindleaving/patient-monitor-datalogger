@@ -34,6 +34,7 @@ philipsIntellivueCommunicator.Connect(
     TimeSpan.FromSeconds(1), 
     ExtendedPollProfileOptions.POLL_EXT_PERIOD_NU_1SEC | ExtendedPollProfileOptions.POLL_EXT_PERIOD_RTSA | ExtendedPollProfileOptions.POLL_EXT_ENUM);
 philipsIntellivueCommunicator.StartPolling(); // TODO: Add polling settings (which values and waves to poll)
+philipsIntellivueCommunicator.SendPatientDemographicsRequest();
 while (Console.ReadKey(true).Key != ConsoleKey.Escape);
 philipsIntellivueCommunicator.Disconnect();
 if(useSimulatedEnvironment)
