@@ -35,6 +35,7 @@ public class RemoteOperationError : IRemoteOperationResult
     public static RemoteOperationError Read(
         BigEndianBinaryReader binaryReader)
     {
+        var context = new AttributeContext(CommandMessageType.DataExport);
         var invokeId = binaryReader.ReadUInt16();
         var errorValue = (RemoteOperationErrorType)binaryReader.ReadUInt16();
         var length = binaryReader.ReadUInt16();
@@ -47,7 +48,7 @@ public class RemoteOperationError : IRemoteOperationResult
             RemoteOperationErrorType.SetListError => SetListError.Read(binaryReader),
             RemoteOperationErrorType.NoSuchAction => NoSuchActionError.Read(binaryReader),
             RemoteOperationErrorType.ProcessingFailure => ProcessingFailure.Read(binaryReader),
-            RemoteOperationErrorType.InvalidArgumentValue => ActionResultCommand.Read(binaryReader),
+            RemoteOperationErrorType.InvalidArgumentValue => ActionResultCommand.Read(binaryReader, context),
             RemoteOperationErrorType.InvalidScope => InvalidScopeError.Read(binaryReader),
             RemoteOperationErrorType.InvalidObjectInstance => InvalidObjectInstanceError.Read(binaryReader),
             _ => throw new ArgumentOutOfRangeException()

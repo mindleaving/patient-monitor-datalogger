@@ -30,7 +30,8 @@ public class AttributeValueAssertion : ISerializable
     }
 
     public static AttributeValueAssertion Read(
-        BigEndianBinaryReader binaryReader)
+        BigEndianBinaryReader binaryReader,
+        AttributeContext context)
     {
         var attributeId = binaryReader.ReadUInt16();
         var length = binaryReader.ReadUInt16();
@@ -38,7 +39,7 @@ public class AttributeValueAssertion : ISerializable
         var bytesRead = binaryReader.Read(attributeValueBytes);
         if (bytesRead != length)
             throw new EndOfStreamException();
-        if(!TryParseTypedAttributeValue(attributeId, attributeValueBytes, out var attributeValue))
+        if(!TryParseTypedAttributeValue(attributeId, attributeValueBytes, context, out var attributeValue))
             attributeValue = new UnknownAttributeValue(attributeValueBytes);
         return new AttributeValueAssertion(attributeId, attributeValue);
     }
@@ -46,15 +47,26 @@ public class AttributeValueAssertion : ISerializable
     private static bool TryParseTypedAttributeValue(
         ushort attributeId,
         byte[] attributeValueBytes,
+        AttributeContext context,
         out ISerializable attributeValue)
     {
         var binaryReader = new BigEndianBinaryReader(new MemoryStream(attributeValueBytes));
         try
         {
+            if (context.MessageType == CommandMessageType.Association)
+            {
+                switch (attributeId)
+                {
+                    case (ushort)ProtocolIdentification.NOM_POLL_PROFILE_SUPPORT:
+                        attributeValue = PollProfileSupport.Read(binaryReader, context);
+                        return true;
+                    case (ushort)ProtocolIdentification.NOM_ATTR_POLL_PROFILE_EXT:
+                        attributeValue = ExtendedPollProfile.Read(binaryReader, context);
+                        return true;
+                }
+            }
             attributeValue = attributeId switch
             {
-                (ushort)ProtocolIdentification.NOM_POLL_PROFILE_SUPPORT => PollProfileSupport.Read(binaryReader),
-                (ushort)ProtocolIdentification.NOM_ATTR_POLL_PROFILE_EXT => ExtendedPollProfile.Read(binaryReader),
                 (ushort)OIDType.NOM_ATTR_ID_TYPE => NomenclatureReference.Read(binaryReader),
                 (ushort)OIDType.NOM_ATTR_ID_HANDLE => Handle.Read(binaryReader),
                 (ushort)OIDType.NOM_ATTR_METRIC_SPECN => MetricSpecification.Read(binaryReader),

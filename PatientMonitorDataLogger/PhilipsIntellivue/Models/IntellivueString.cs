@@ -21,14 +21,13 @@ public class IntellivueString : ISerializable
         var bytesRead = binaryReader.Read(bytes);
         if (bytesRead != length)
             throw new EndOfStreamException();
-        var hasNullByte = bytes.Length % 2 == 1 && bytes[^1] == 0x00;
-        var str = Encoding.Unicode.GetString(hasNullByte ? bytes[..^1] : bytes);
+        var str = Encoding.BigEndianUnicode.GetString(bytes);
         return new(str);
     }
 
     public byte[] Serialize()
     {
-        var stringBytes = Encoding.Unicode.GetBytes(Value).Concat([ (byte)0x00 ]).ToArray();
+        var stringBytes = Encoding.BigEndianUnicode.GetBytes(Value).Concat([ (byte)0x00 ]).ToArray();
         return
         [
             ..BigEndianBitConverter.GetBytes((ushort)stringBytes.Length),

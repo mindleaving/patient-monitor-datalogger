@@ -25,10 +25,11 @@ public class AttributeModification : ISerializable
     }
 
     public static AttributeModification Read(
-        BigEndianBinaryReader binaryReader)
+        BigEndianBinaryReader binaryReader,
+        AttributeContext context)
     {
         var modifyOperator = (ModifyOperator)binaryReader.ReadUInt16();
-        var attribute = AttributeValueAssertion.Read(binaryReader);
+        var attribute = AttributeValueAssertion.Read(binaryReader, context);
         return new(modifyOperator, attribute);
     }
 }

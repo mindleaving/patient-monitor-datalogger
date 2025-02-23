@@ -25,10 +25,11 @@ public class SingleContextPoll : ISerializable
     }
 
     public static SingleContextPoll Read(
-        BigEndianBinaryReader binaryReader)
+        BigEndianBinaryReader binaryReader,
+        AttributeContext context)
     {
         var contextId = binaryReader.ReadUInt16();
-        var pollInfo = List<ObservationPoll>.Read(binaryReader, ObservationPoll.Read);
+        var pollInfo = List<ObservationPoll>.Read(binaryReader, x => ObservationPoll.Read(x, context));
         return new(contextId, pollInfo);
     }
 }

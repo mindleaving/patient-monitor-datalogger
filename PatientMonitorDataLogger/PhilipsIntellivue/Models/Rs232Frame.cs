@@ -27,8 +27,6 @@ public class Rs232Frame : ISerializable
         var headerBytes = buffer[1..5];
         var header = Rs232FrameHeader.Parse(headerBytes);
         var userDataBytes = buffer[5..(5 + header.UserDataLength)];
-        var commandMessageReader = new CommandMessageReader();
-        var userData = commandMessageReader.Read(new MemoryStream(userDataBytes));
         var oneComplementChecksum = BitConverter.ToUInt16(buffer, 5 + header.UserDataLength); // LSB byte-order. 1's-complement.
         var checksum = (ushort)~oneComplementChecksum;
         if (!IsChecksumCorrect(headerBytes, userDataBytes, checksum))
@@ -36,6 +34,9 @@ public class Rs232Frame : ISerializable
         var eof = buffer[7 + header.UserDataLength];
         if(eof != TransparencyByteUnescapedStream.FrameEndCharacter)
             throw new ArgumentException($"Invalid frame data. Expected 0x{TransparencyByteUnescapedStream.FrameEndCharacter:X} as End of Frame but got 0x{eof:X}");
+
+        var commandMessageReader = new CommandMessageReader();
+        var userData = commandMessageReader.Read(new MemoryStream(userDataBytes));
         return new(header, userData, checksum);
     }
 

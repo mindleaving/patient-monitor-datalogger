@@ -25,10 +25,11 @@ public class GetResultCommand : IRemoteOperationResultData
     }
 
     public static GetResultCommand Read(
-        BigEndianBinaryReader binaryReader)
+        BigEndianBinaryReader binaryReader,
+        AttributeContext context)
     {
         var managedObject = ManagedObjectId.Read(binaryReader);
-        var attributes = List<AttributeValueAssertion>.Read(binaryReader, AttributeValueAssertion.Read);
+        var attributes = List<AttributeValueAssertion>.Read(binaryReader, x => AttributeValueAssertion.Read(x, context));
         return new(managedObject, attributes);
     }
 }

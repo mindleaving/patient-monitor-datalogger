@@ -45,15 +45,16 @@ public class MdseUserInfoStd : IAssociationCommandUserData
     }
 
     public static MdseUserInfoStd Read(
-        BigEndianBinaryReader binaryReader)
+        BigEndianBinaryReader binaryReader,
+        AttributeContext context)
     {
         var protocolVersion = (ProtocolVersion)binaryReader.ReadUInt32();
         var nomenclatureVersion = (NomenclatureVersion)binaryReader.ReadUInt32();
         var functionalUnits = (FunctionalUnits)binaryReader.ReadUInt32();
         var systemType = (SystemType)binaryReader.ReadUInt32();
         var startupMode = (StartupMode)binaryReader.ReadUInt32();
-        var options = List<AttributeValueAssertion>.Read(binaryReader, AttributeValueAssertion.Read);
-        var supportedApplicationProfiles = List<AttributeValueAssertion>.Read(binaryReader, AttributeValueAssertion.Read);
+        var options = List<AttributeValueAssertion>.Read(binaryReader, x => AttributeValueAssertion.Read(x, context));
+        var supportedApplicationProfiles = List<AttributeValueAssertion>.Read(binaryReader, x => AttributeValueAssertion.Read(x, context));
         return new(
             protocolVersion,
             nomenclatureVersion,

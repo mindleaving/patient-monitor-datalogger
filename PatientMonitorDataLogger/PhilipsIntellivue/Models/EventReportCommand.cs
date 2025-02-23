@@ -36,7 +36,8 @@ public class EventReportCommand : IRemoteOperationInvokeData
     }
 
     public static EventReportCommand Read(
-        BigEndianBinaryReader binaryReader)
+        BigEndianBinaryReader binaryReader,
+        AttributeContext context)
     {
         var managedObject = ManagedObjectId.Read(binaryReader);
         var eventTime = RelativeTime.Read(binaryReader);
@@ -44,7 +45,7 @@ public class EventReportCommand : IRemoteOperationInvokeData
         var length = binaryReader.ReadUInt16();
         var data = eventType switch
         {
-            OIDType.NOM_NOTI_MDS_CREAT => MdsCreateInfo.Read(binaryReader),
+            OIDType.NOM_NOTI_MDS_CREAT => MdsCreateInfo.Read(binaryReader, context),
             _ => throw new ArgumentOutOfRangeException(nameof(eventType), $"Invalid event report type {eventType}")
         };
         return new(managedObject, eventTime, eventType, length, data);

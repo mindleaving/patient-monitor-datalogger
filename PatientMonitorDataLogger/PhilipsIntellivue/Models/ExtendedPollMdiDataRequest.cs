@@ -40,10 +40,11 @@ public class ExtendedPollMdiDataRequest : PollMdiDataRequest
     }
 
     public new static ExtendedPollMdiDataRequest Read(
-        BigEndianBinaryReader binaryReader)
+        BigEndianBinaryReader binaryReader,
+        AttributeContext context)
     {
         var baseObject = PollMdiDataRequest.Read(binaryReader);
-        var attributes = List<AttributeValueAssertion>.Read(binaryReader, AttributeValueAssertion.Read);
+        var attributes = List<AttributeValueAssertion>.Read(binaryReader, x => AttributeValueAssertion.Read(x, context));
         return new(
             baseObject.PollNumber,
             baseObject.ObjectType,

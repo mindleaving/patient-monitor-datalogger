@@ -33,15 +33,16 @@ public class ActionResultCommand : IRemoteOperationResultData, IRemoteOperationE
     }
 
     public static ActionResultCommand Read(
-        BigEndianBinaryReader binaryReader)
+        BigEndianBinaryReader binaryReader,
+        AttributeContext context)
     {
         var managedObject = ManagedObjectId.Read(binaryReader);
         var actionType = (OIDType)binaryReader.ReadUInt16();
         var length = binaryReader.ReadUInt16();
         IActionResultData data = actionType switch
         {
-            OIDType.NOM_ACT_POLL_MDIB_DATA_EXT => ExtendedPollMdiDataReply.Read(binaryReader),
-            OIDType.NOM_ACT_POLL_MDIB_DATA => PollMdiDataReply.Read(binaryReader),
+            OIDType.NOM_ACT_POLL_MDIB_DATA_EXT => ExtendedPollMdiDataReply.Read(binaryReader, context),
+            OIDType.NOM_ACT_POLL_MDIB_DATA => PollMdiDataReply.Read(binaryReader, context),
             _ => throw new ArgumentOutOfRangeException(nameof(actionType))
         };
         return new(managedObject, actionType, length, data);

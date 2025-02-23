@@ -27,11 +27,12 @@ public class SetCommand : IRemoteOperationInvokeData
     }
 
     public static SetCommand Read(
-        BigEndianBinaryReader binaryReader)
+        BigEndianBinaryReader binaryReader,
+        AttributeContext context)
     {
         var managedObject = ManagedObjectId.Read(binaryReader);
         var scope = binaryReader.ReadUInt32();
-        var modificationList = List<AttributeModification>.Read(binaryReader, AttributeModification.Read);
+        var modificationList = List<AttributeModification>.Read(binaryReader, x => AttributeModification.Read(x, context));
         return new(managedObject, modificationList);
     }
 }

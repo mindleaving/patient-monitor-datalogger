@@ -35,16 +35,17 @@ public class RemoteOperationInvoke : IRemoteOperation
     public static RemoteOperationInvoke Read(
         BigEndianBinaryReader binaryReader)
     {
+        var context = new AttributeContext(CommandMessageType.DataExport);
         var invokeId = binaryReader.ReadUInt16();
         var commandType = (DataExportCommandType)binaryReader.ReadUInt16();
         var length = binaryReader.ReadUInt16();
         IRemoteOperationInvokeData data = commandType switch
         {
-            DataExportCommandType.EventReport => EventReportCommand.Read(binaryReader),
-            DataExportCommandType.ConfirmedEventReport => EventReportCommand.Read(binaryReader),
+            DataExportCommandType.EventReport => EventReportCommand.Read(binaryReader, context),
+            DataExportCommandType.ConfirmedEventReport => EventReportCommand.Read(binaryReader, context),
             DataExportCommandType.Get => GetCommand.Read(binaryReader),
-            DataExportCommandType.Set => SetCommand.Read(binaryReader),
-            DataExportCommandType.ConfirmedSet => SetCommand.Read(binaryReader),
+            DataExportCommandType.Set => SetCommand.Read(binaryReader, context),
+            DataExportCommandType.ConfirmedSet => SetCommand.Read(binaryReader, context),
             DataExportCommandType.ConfirmedAction => ActionCommand.Read(binaryReader),
             _ => throw new ArgumentOutOfRangeException()
         };

@@ -18,8 +18,9 @@ public class AssociationRequestUserData : IAssociationCommandUserData
     public static AssociationRequestUserData Read(
         BigEndianBinaryReader binaryReader)
     {
+        var context = new AttributeContext(CommandMessageType.Association);
         var length = ASNLength.Read(binaryReader);
-        var userInfo = MdseUserInfoStd.Read(binaryReader);
+        var userInfo = MdseUserInfoStd.Read(binaryReader, context);
         return new(length, userInfo);
     }
 

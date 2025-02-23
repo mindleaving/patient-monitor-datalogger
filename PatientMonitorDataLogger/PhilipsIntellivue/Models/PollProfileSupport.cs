@@ -34,7 +34,8 @@ public class PollProfileSupport : ISerializable
     public List<AttributeValueAssertion> OptionalPackages { get; }
 
     public static PollProfileSupport Read(
-        BigEndianBinaryReader binaryReader)
+        BigEndianBinaryReader binaryReader,
+        AttributeContext context)
     {
         var profileRevision = (PollProfileRevision)binaryReader.ReadUInt32();
         var minimumPollPeriod = RelativeTime.Read(binaryReader);
@@ -42,7 +43,7 @@ public class PollProfileSupport : ISerializable
         var maxMtuTx = binaryReader.ReadUInt32();
         var maxTransmitBandwidth = binaryReader.ReadUInt32();
         var options = (PollProfileOptions)binaryReader.ReadUInt32();
-        var optionalPackages = List<AttributeValueAssertion>.Read(binaryReader, AttributeValueAssertion.Read);
+        var optionalPackages = List<AttributeValueAssertion>.Read(binaryReader, x => AttributeValueAssertion.Read(x, context));
         return new(profileRevision, minimumPollPeriod, maxMtuRx, maxMtuTx, maxTransmitBandwidth, options, optionalPackages);
     }
 

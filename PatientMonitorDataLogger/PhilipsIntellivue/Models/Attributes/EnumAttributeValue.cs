@@ -4,9 +4,13 @@ namespace PatientMonitorDataLogger.PhilipsIntellivue.Models.Attributes;
 
 public class EnumAttributeValue<T> : ISerializable where T: struct
 {
+    private readonly byte[] serializedValue;
+
     public EnumAttributeValue(
-        T value)
+        T value,
+        byte[] serializedValue)
     {
+        this.serializedValue = serializedValue;
         Value = value;
     }
 
@@ -14,13 +18,7 @@ public class EnumAttributeValue<T> : ISerializable where T: struct
 
     public byte[] Serialize()
     {
-        return Value switch
-        {
-            byte b => BigEndianBitConverter.GetBytes(b),
-            ushort u => BigEndianBitConverter.GetBytes(u),
-            uint integer => BigEndianBitConverter.GetBytes(integer),
-            _ => throw new ArgumentOutOfRangeException(nameof(Value))
-        };
+        return serializedValue;
     }
 
     public static EnumAttributeValue<T> Parse(
@@ -33,6 +31,6 @@ public class EnumAttributeValue<T> : ISerializable where T: struct
             sizeof(byte) => (T)Enum.ToObject(typeof(T), bytes[0]),
             _ => throw new Exception("Cannot determine size of enum")
         };
-        return new EnumAttributeValue<T>(value);
+        return new EnumAttributeValue<T>(value, bytes);
     }
 }

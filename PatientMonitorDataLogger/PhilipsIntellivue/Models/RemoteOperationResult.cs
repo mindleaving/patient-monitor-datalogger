@@ -50,14 +50,15 @@ public class RemoteOperationResult : IRemoteOperation
         BigEndianBinaryReader binaryReader,
         DataExportCommandType commandType)
     {
+        var context = new AttributeContext(CommandMessageType.DataExport);
         return commandType switch
         {
             DataExportCommandType.EventReport => EventReportResultCommand.Read(binaryReader),
             DataExportCommandType.ConfirmedEventReport => EventReportResultCommand.Read(binaryReader),
-            DataExportCommandType.Get => GetResultCommand.Read(binaryReader),
-            DataExportCommandType.Set => SetResultCommand.Read(binaryReader),
-            DataExportCommandType.ConfirmedSet => SetResultCommand.Read(binaryReader),
-            DataExportCommandType.ConfirmedAction => ActionResultCommand.Read(binaryReader),
+            DataExportCommandType.Get => GetResultCommand.Read(binaryReader, context),
+            DataExportCommandType.Set => SetResultCommand.Read(binaryReader, context),
+            DataExportCommandType.ConfirmedSet => SetResultCommand.Read(binaryReader, context),
+            DataExportCommandType.ConfirmedAction => ActionResultCommand.Read(binaryReader, context),
             _ => throw new ArgumentOutOfRangeException(nameof(commandType))
         };
     }

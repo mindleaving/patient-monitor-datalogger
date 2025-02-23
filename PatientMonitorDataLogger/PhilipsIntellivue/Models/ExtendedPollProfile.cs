@@ -16,10 +16,11 @@ public class ExtendedPollProfile : ISerializable
     public List<AttributeValueAssertion> ExtendedAttributes { get; }
 
     public static ExtendedPollProfile Read(
-        BigEndianBinaryReader binaryReader)
+        BigEndianBinaryReader binaryReader,
+        AttributeContext context)
     {
         var options = (ExtendedPollProfileOptions)binaryReader.ReadUInt32();
-        var extendedAttributes = List<AttributeValueAssertion>.Read(binaryReader, AttributeValueAssertion.Read);
+        var extendedAttributes = List<AttributeValueAssertion>.Read(binaryReader, x => AttributeValueAssertion.Read(x, context));
         return new(options, extendedAttributes);
     }
 

@@ -15,6 +15,7 @@ export enum MeasurementType {
     HeartRateSpO2 = "HeartRateSpO2",
     SpO2 = "SpO2",
     SpO2preDuctal = "SpO2preDuctal",
+    Pleth = "Pleth",
     RespirationRate = "RespirationRate",
     EcgLeadI = "EcgLeadI",
     EcgLeadII = "EcgLeadII",

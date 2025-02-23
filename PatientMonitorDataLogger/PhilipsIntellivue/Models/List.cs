@@ -31,7 +31,12 @@ public class List<T> : ISerializable where T: ISerializable
     {
         var count = binaryReader.ReadUInt16();
         var length = binaryReader.ReadUInt16();
-        var values = Enumerable.Range(0, count).Select(_ => itemReader(binaryReader)).ToList();
+        var values = new System.Collections.Generic.List<T>();
+        for (int i = 0; i < count; i++)
+        {
+            var value = itemReader(binaryReader);
+            values.Add(value);
+        }
         return new(values);
     }
 }

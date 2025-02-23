@@ -34,7 +34,8 @@ public class ExtendedPollMdiDataReply : PollMdiDataReply
     }
 
     public new static ExtendedPollMdiDataReply Read(
-        BigEndianBinaryReader binaryReader)
+        BigEndianBinaryReader binaryReader,
+        AttributeContext context)
     {
         var pollNumber = binaryReader.ReadUInt16();
         var sequenceNumber = binaryReader.ReadUInt16();
@@ -42,7 +43,7 @@ public class ExtendedPollMdiDataReply : PollMdiDataReply
         var absoluteTimeStamp = AbsoluteTime.Read(binaryReader);
         var objectType = NomenclatureReference.Read(binaryReader);
         var attributeGroup = (OIDType)binaryReader.ReadUInt16();
-        var pollContexts = List<SingleContextPoll>.Read(binaryReader, SingleContextPoll.Read);
+        var pollContexts = List<SingleContextPoll>.Read(binaryReader, x => SingleContextPoll.Read(x, context));
         return new(
             pollNumber,
             sequenceNumber,

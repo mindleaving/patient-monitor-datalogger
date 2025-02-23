@@ -41,14 +41,15 @@ public class PollMdiDataReply : IActionResultData
     }
 
     public static PollMdiDataReply Read(
-        BigEndianBinaryReader binaryReader)
+        BigEndianBinaryReader binaryReader,
+        AttributeContext context)
     {
         var pollNumber = binaryReader.ReadUInt16();
         var relativeTime = RelativeTime.Read(binaryReader);
         var absoluteTime = AbsoluteTime.Read(binaryReader);
         var objectType = NomenclatureReference.Read(binaryReader);
         var attributeGroup = (OIDType)binaryReader.ReadUInt16();
-        var pollContexts = List<SingleContextPoll>.Read(binaryReader, SingleContextPoll.Read);
+        var pollContexts = List<SingleContextPoll>.Read(binaryReader, x => SingleContextPoll.Read(x, context));
         return new(
             pollNumber,
             relativeTime,

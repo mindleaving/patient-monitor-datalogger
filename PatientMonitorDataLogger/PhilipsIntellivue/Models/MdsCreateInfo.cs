@@ -16,10 +16,11 @@ public class MdsCreateInfo : IEventReportData
     public List<AttributeValueAssertion> AttributeList { get; }
 
     public static MdsCreateInfo Read(
-        BigEndianBinaryReader binaryReader)
+        BigEndianBinaryReader binaryReader,
+        AttributeContext context)
     {
         var managedObject = ManagedObjectId.Read(binaryReader);
-        var attributeList = List<AttributeValueAssertion>.Read(binaryReader, AttributeValueAssertion.Read);
+        var attributeList = List<AttributeValueAssertion>.Read(binaryReader, x => AttributeValueAssertion.Read(x, context));
         return new(managedObject, attributeList);
     }
 
