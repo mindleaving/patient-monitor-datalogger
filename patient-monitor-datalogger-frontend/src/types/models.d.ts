@@ -33,6 +33,7 @@ export namespace Models {
         outputDirectory: string;
     }
     interface PatientInfo {
+        logSessionId: string;
         patientId: string;
         encounterId: string;
         firstName: string;
@@ -53,12 +54,8 @@ export namespace Models {
     }
     export namespace RequestBodies {
         interface CopyDataToUsbDriveRequest {
+            logSessionId: string;
             usbDrivePath: string;
-        }
-    }
-    export namespace Converters {
-        interface PatientMonitorSettingsJsonConverter extends Newtonsoft.Json.JsonConverter<Models.PatientMonitorSettings> {
-            
         }
     }
     export namespace DataExport {
@@ -249,17 +246,6 @@ export namespace System {
         }
         interface IUnaryNegationOperators<TSelf,TResult> {
             
-        }
-    }
-}
-export namespace Newtonsoft {
-    export namespace Json {
-        interface JsonConverter<T> extends Newtonsoft.Json.JsonConverter {
-            
-        }
-        interface JsonConverter {
-            canRead: boolean;
-            canWrite: boolean;
         }
     }
 }

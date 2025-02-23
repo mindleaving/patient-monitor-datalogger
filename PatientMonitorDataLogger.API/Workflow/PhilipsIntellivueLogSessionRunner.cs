@@ -1,6 +1,7 @@
-﻿using PatientMonitorDataLogger.API.Models;
-using PatientMonitorDataLogger.DataExport;
-using PatientMonitorDataLogger.DataExport.Models;
+﻿using Newtonsoft.Json;
+using PatientMonitorDataLogger.API.Models;
+using PatientMonitorDataLogger.API.Models.DataExport;
+using PatientMonitorDataLogger.API.Workflow.DataExport;
 using PatientMonitorDataLogger.PhilipsIntellivue;
 using PatientMonitorDataLogger.PhilipsIntellivue.Models;
 
@@ -9,7 +10,6 @@ namespace PatientMonitorDataLogger.API.Workflow;
 public class PhilipsIntellivueLogSessionRunner : ILogSessionRunner
 {
     private readonly LogSessionSettings logSessionSettings;
-    private readonly MonitorDataWriterSettings writerSettings;
     private readonly PhilipsIntellivueClient monitorClient;
     private readonly IPatientMonitorInfo monitorInfo;
     private readonly PhilipsIntellivueNumericsAndWavesExtractor numericsAndWavesExtractor = new();
@@ -17,6 +17,7 @@ public class PhilipsIntellivueLogSessionRunner : ILogSessionRunner
     private DateTime? connectTime;
     private readonly System.Collections.Generic.List<MeasurementType> numericsTypes = new();
     private readonly System.Collections.Generic.List<MeasurementType> waveTypes = new();
+    private readonly string logSessionOutputDirectory;
     private readonly INumericsWriter numericsWriter;
     private readonly Dictionary<MeasurementType, IWaveWriter> waveWriters = new();
 
@@ -28,14 +29,17 @@ public class PhilipsIntellivueLogSessionRunner : ILogSessionRunner
     {
         LogSessionId = logSessionId;
         this.logSessionSettings = logSessionSettings;
-        this.writerSettings = writerSettings;
         monitorInfo = new PhilipsIntellivuePatientMonitorInfo();
         var clientSettings = PhilipsIntellivueClientSettings.CreateForPhysicalSerialPort(
             settings.SerialPortName,
             settings.SerialPortBaudRate,
             TimeSpan.FromSeconds(30));
         monitorClient = new PhilipsIntellivueClient(clientSettings);
-        var numericsOutputFilePath = Path.Combine(writerSettings.OutputDirectory, $"numerics_{DateTime.UtcNow:yyyy-MM-dd_HHmmss}.csv");
+        logSessionOutputDirectory = Path.Combine(writerSettings.OutputDirectory, logSessionId.ToString());
+        if (!Directory.Exists(logSessionOutputDirectory))
+            Directory.CreateDirectory(logSessionOutputDirectory);
+        WriteSettings();
+        var numericsOutputFilePath = Path.Combine(logSessionOutputDirectory, $"numerics_{DateTime.UtcNow:yyyy-MM-dd_HHmmss}.csv");
         numericsWriter = new CsvNumericsWriter(numericsOutputFilePath, logSessionSettings.CsvSeparator);
     }
 
@@ -74,7 +78,7 @@ public class PhilipsIntellivueLogSessionRunner : ILogSessionRunner
         object? sender,
         ICommandMessage message)
     {
-        if(patientInfoExtractor.TryExtract(message, out var patientInfo))
+        if(patientInfoExtractor.TryExtract(LogSessionId, message, out var patientInfo))
             PatientInfoAvailable?.Invoke(this, patientInfo!);
         foreach (var monitorData in numericsAndWavesExtractor.Extract(LogSessionId, message))
         {
@@ -103,7 +107,7 @@ public class PhilipsIntellivueLogSessionRunner : ILogSessionRunner
     private IWaveWriter CreateWaveWriter(
         MeasurementType measurementType)
     {
-        var waveOutputFilePath = Path.Combine(writerSettings.OutputDirectory, $"{measurementType}_{DateTime.UtcNow:yyyy-MM-dd_HHmmss}.csv");
+        var waveOutputFilePath = Path.Combine(logSessionOutputDirectory, $"{measurementType}_{DateTime.UtcNow:yyyy-MM-dd_HHmmss}.csv");
         IWaveWriter waveWriter = new CsvWaveWriter(measurementType, waveOutputFilePath, logSessionSettings.CsvSeparator);
         if (!waveWriters.TryAdd(measurementType, waveWriter))
         {
@@ -111,6 +115,21 @@ public class PhilipsIntellivueLogSessionRunner : ILogSessionRunner
             waveWriter = waveWriters[measurementType];
         }
         return waveWriter;
+    }
+
+    private void WriteSettings()
+    {
+        File.WriteAllText(
+            Path.Combine(logSessionOutputDirectory, "settings.json"), 
+            JsonConvert.SerializeObject(logSessionSettings));
+    }
+
+    public void WritePatientInfo(
+        PatientInfo patientInfo)
+    {
+        File.WriteAllText(
+            Path.Combine(logSessionOutputDirectory, "patient.json"), 
+            JsonConvert.SerializeObject(patientInfo));
     }
 
 

@@ -1,5 +1,5 @@
-﻿using PatientMonitorDataLogger.API.Workflow;
-using PatientMonitorDataLogger.DataExport.Models;
+﻿using PatientMonitorDataLogger.API.Models.DataExport;
+using PatientMonitorDataLogger.API.Workflow;
 
 namespace PatientMonitorDataLogger.API.Models;
 
@@ -26,7 +26,7 @@ public class LogSession : IDisposable, IAsyncDisposable
 
     public Guid Id { get; }
     public LogSessionSettings Settings { get; }
-    public PatientInfo? PatientInfo { get; private set; }
+    public PatientInfo? PatientInfo { get; set; }
     public event EventHandler<PatientInfo>? PatientInfoAvailable;
     public Dictionary<MeasurementType, NumericsValue> LatestMeasurements { get; } = new();
     public event EventHandler<NumericsData>? NewNumericsData;
@@ -81,6 +81,7 @@ public class LogSession : IDisposable, IAsyncDisposable
                 PatientInfo.Comment = newPatientInfo.Comment;
         }
         PatientInfoAvailable?.Invoke(this, PatientInfo);
+        sessionRunner.WritePatientInfo(PatientInfo);
     }
 
     private void SessionRunner_StatusChanged(

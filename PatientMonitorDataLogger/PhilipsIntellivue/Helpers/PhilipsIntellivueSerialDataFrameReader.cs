@@ -134,8 +134,15 @@ public class PhilipsIntellivueSerialDataFrameReader : IDisposable
                 return;
 
             IsListening = false;
-            cancellationTokenSource?.Cancel();
-            listeningTask?.Wait();
+            try
+            {
+                cancellationTokenSource?.Cancel();
+                listeningTask?.Wait(TimeSpan.FromSeconds(10));
+            }
+            catch
+            {
+                // Ignore
+            }
         }
     }
 

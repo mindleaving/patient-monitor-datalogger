@@ -2,6 +2,9 @@
 
 public static class Constants
 {
+    public const string SettingsFileName = "settings.json";
+    public const string PatientInfoFileName = "patientInfo.json";
+
     public static readonly Dictionary<string, string> RepositoryPaths = new()
     {
         {"stationary-win8", @"F:\Projects\patient-monitor-datalogger"},

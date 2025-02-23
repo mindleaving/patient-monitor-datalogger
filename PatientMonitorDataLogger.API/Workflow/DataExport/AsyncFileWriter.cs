@@ -1,6 +1,6 @@
 ﻿using System.Collections.Concurrent;
 
-namespace PatientMonitorDataLogger.DataExport;
+namespace PatientMonitorDataLogger.API.Workflow.DataExport;
 
 public abstract class AsyncFileWriter<T> : IDisposable, IAsyncDisposable
 {

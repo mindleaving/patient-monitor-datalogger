@@ -5,6 +5,8 @@ import { AccordionCard } from "./AccordionCard";
 import { deleteObject, sendPostRequest } from "../communication/ApiRequests";
 import { PatientMonitorType } from "../types/enums";
 import { DeleteButton } from "./DeleteButon";
+import { CopyToUsbModal } from "./CopyToUsbModal";
+import { confirmAlert } from "react-confirm-alert";
 
 interface LogSessionListItemProps {
     logSession: Models.LogSession;
@@ -21,6 +23,7 @@ export const LogSessionListItem = (props: LogSessionListItemProps) => {
 
     const [ isStartingStopping, setIsStartingStopping ] = useState<boolean>(false);
     const [ isDeleting, setIsDeleting ] = useState<boolean>(false);
+    const [ showCopyToUsbModal, setShowCopyToUsbModal ] = useState<boolean>(false);
 
     const startLogging = async () => {
         setIsStartingStopping(true);
@@ -39,7 +42,24 @@ export const LogSessionListItem = (props: LogSessionListItemProps) => {
             () => setIsStartingStopping(false)
         );
     }
-    const stopLogging = async () => {
+    const stopLogging = async (force: boolean = false) => {
+        if(!force) {
+            confirmAlert({
+                title: "Stop recording?",
+                message: "Are you sure you want to stop recording?",
+                closeOnClickOutside: true,
+                buttons: [
+                    {
+                        label: "No, cancel"
+                    },
+                    {
+                        label: "Yes, stop recording",
+                        onClick: () => stopLogging(true)
+                    }
+                ]
+            });
+            return;
+        }
         setIsStartingStopping(true);
         await sendPostRequest(
             `api/log/${logSession.id}/stop`, {},
@@ -80,6 +100,10 @@ export const LogSessionListItem = (props: LogSessionListItemProps) => {
                     {logSession.status.isRunning ? 'Recording' : 'Stopped'}
                 </Badge>
             </Col>
+            {logSession.patientInfo
+            ? <Col>
+                {logSession.patientInfo.firstName} {logSession.patientInfo.lastName}
+            </Col> : null}
             <Col>
                 ID: {logSession.id}
             </Col>
@@ -126,7 +150,7 @@ export const LogSessionListItem = (props: LogSessionListItemProps) => {
             <Col>
                 <Button
                     variant="danger"
-                    onClick={stopLogging}
+                    onClick={() => stopLogging()}
                     className="w-100 mx-3"
                     style={{ height: '200px' }}
                     disabled={isStartingStopping || !status.isRunning}
@@ -159,6 +183,22 @@ export const LogSessionListItem = (props: LogSessionListItemProps) => {
                 </Col>);
             })}
         </Row> : null}
+        <Row className="my-2">
+            <Col></Col>
+            <Col xs="auto">
+                <Button
+                    onClick={() => setShowCopyToUsbModal(true)}
+                    size="lg"
+                >
+                    Copy to USB-drive
+                </Button>
+            </Col>
+        </Row>
+        <CopyToUsbModal
+            show={showCopyToUsbModal}
+            onClose={() => setShowCopyToUsbModal(false)}
+            logSessionId={logSession.id}
+        />
     </AccordionCard>);
 
 }

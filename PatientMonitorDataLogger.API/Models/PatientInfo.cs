@@ -2,6 +2,14 @@
 
 public class PatientInfo
 {
+    public PatientInfo(
+        Guid logSessionId)
+    {
+        LogSessionId = logSessionId;
+    }
+
+    public Guid LogSessionId { get; }
+
     public string? PatientId { get; set; }
     public string? EncounterId { get; set; }
     public string? FirstName { get; set; }

@@ -7,11 +7,12 @@ import { Models } from "../types/models";
 
 interface NumericsSignalRConnectionIndicatorProps {
     onNewNumericsDataAvailable: (data: Models.DataExport.NumericsData) => void;
+    onPatientInfoAvailable: (patientInfo: Models.PatientInfo) => void;
 }
 
 export const NumericsSignalRConnectionIndicator = (props: NumericsSignalRConnectionIndicatorProps) => {
 
-    const { onNewNumericsDataAvailable } = props;
+    const { onNewNumericsDataAvailable, onPatientInfoAvailable } = props;
 
     const [ isConnecting, setIsConnecting ] = useState<boolean>(true);
     const [ isConnected, setIsConnected ] = useState<boolean>(false);
@@ -26,6 +27,7 @@ export const NumericsSignalRConnectionIndicator = (props: NumericsSignalRConnect
             try {
                 await notificationsConnection.start();
                 notificationsConnection.on('ReceiveNumerics', onNewNumericsDataAvailable);
+                notificationsConnection.on('ReceivePatientInfo', onPatientInfoAvailable);
                 setIsConnected(true);
             } catch(error: any) {
                 showErrorAlert("Could not subscribe to real-time numerics data", error.message);

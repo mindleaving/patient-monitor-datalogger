@@ -31,6 +31,7 @@ public class PhilipsIntellivueClient : IDisposable, IAsyncDisposable
             Timeout.Infinite);
     }
 
+    private bool IsConfigured { get; set; }
     public bool IsConnected { get; private set; }
     public bool IsListening => serialPortCommunicator?.IsListening ?? false;
     public event EventHandler<ICommandMessage>? NewMessage;
@@ -48,17 +49,34 @@ public class PhilipsIntellivueClient : IDisposable, IAsyncDisposable
                 return;
 
             ConfigureSerialPort();
+            serialPort!.Open();
             serialPortCommunicator!.Start();
 
-            SendAssociationRequest(minimumPollPeriod, pollOptions);
-            var associationResult = WaitForAssociationCommandMessage(AssociationCommandType.AssociationAccepted, AssociationCommandType.Refuse);
-            if (associationResult.SessionHeader.Type == AssociationCommandType.Refuse)
+            try
             {
-                serialPortCommunicator.Stop();
-                throw new Exception("Monitor refused association");
+                SendAssociationRequest(minimumPollPeriod, pollOptions);
+                var associationResult = WaitForAssociationCommandMessage(AssociationCommandType.AssociationAccepted, AssociationCommandType.Refuse);
+                if (associationResult.SessionHeader.Type == AssociationCommandType.Refuse)
+                    throw new Exception("Monitor refused association");
             }
-            var mdsCreateEventReport = WaitForDataExportCommandMessage(RemoteOperationType.Invoke, DataExportCommandType.ConfirmedEventReport);
-            SendMdsCreateEventResult(mdsCreateEventReport);
+            catch
+            {
+                serialPort!.Close();
+                serialPortCommunicator.Stop();
+                throw;
+            }
+
+            try
+            {
+                var mdsCreateEventReport = WaitForDataExportCommandMessage(RemoteOperationType.Invoke, DataExportCommandType.ConfirmedEventReport);
+                SendMdsCreateEventResult(mdsCreateEventReport);
+            }
+            catch
+            {
+                serialPort!.Close();
+                serialPortCommunicator.Stop();
+                throw;
+            }
             IsConnected = true;
             Log("Connected");
             ConnectionStatusChanged?.Invoke(this, MonitorConnectionChangeEventType.Connected);
@@ -74,6 +92,8 @@ public class PhilipsIntellivueClient : IDisposable, IAsyncDisposable
 
     private void ConfigureSerialPort()
     {
+        if(IsConfigured)
+            return;
         serialPort = settings.UseSimulatedSerialPort
             ? settings.SimulatedSerialPort!
             : new PhysicalSerialPort(
@@ -83,10 +103,10 @@ public class PhilipsIntellivueClient : IDisposable, IAsyncDisposable
                 8,
                 StopBits.One);
         serialPort.Encoding = Encoding.Unicode;
-        serialPort.Open();
         serialPortCommunicator = new SerialPortCommunicator(serialPort, settings.MessageRetentionPeriod, nameof(PhilipsIntellivueClient));
         serialPortCommunicator.NewMessage += ReportNewMessage;
         serialPortCommunicator.ConnectionStatusChanged += OnConnectionStatusChanged;
+        IsConfigured = true;
     }
 
     private void OnConnectionStatusChanged(
@@ -241,14 +261,43 @@ public class PhilipsIntellivueClient : IDisposable, IAsyncDisposable
                 return;
 
             IsConnected = false;
-            ConnectionStatusChanged?.Invoke(this, MonitorConnectionChangeEventType.Disconnected);
-            StopPolling();
+            try
+            {
+                ConnectionStatusChanged?.Invoke(this, MonitorConnectionChangeEventType.Disconnected);
+            }
+            catch
+            {
+                // Ignore
+            }
 
-            SendAssociationReleaseRequest();
-            WaitForAssociationCommandMessage(AssociationCommandType.Released);
+            try
+            {
+                StopPolling();
+            }
+            catch
+            {
+                // Ignore
+            }
 
-            serialPortCommunicator?.Stop();
-            serialPort?.Close();
+            try
+            {
+                SendAssociationReleaseRequest();
+                WaitForAssociationCommandMessage(AssociationCommandType.Released);
+            }
+            catch
+            {
+                // Ignore
+            }
+
+            try
+            {
+                serialPort?.Close();
+                serialPortCommunicator?.Stop();
+            }
+            catch
+            {
+                // Ignore
+            }
             Log("Disconnected");
         }
     }

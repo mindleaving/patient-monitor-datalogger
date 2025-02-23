@@ -1,4 +1,4 @@
-﻿namespace PatientMonitorDataLogger.DataExport.Models;
+﻿namespace PatientMonitorDataLogger.API.Models.DataExport;
 
 public class NumericsData : IMonitorData
 {

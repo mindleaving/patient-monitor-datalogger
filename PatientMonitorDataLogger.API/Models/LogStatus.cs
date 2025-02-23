@@ -1,4 +1,4 @@
-﻿using PatientMonitorDataLogger.DataExport.Models;
+﻿using PatientMonitorDataLogger.API.Models.DataExport;
 
 namespace PatientMonitorDataLogger.API.Models;
 

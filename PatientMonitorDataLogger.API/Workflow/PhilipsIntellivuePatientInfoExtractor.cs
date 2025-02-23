@@ -7,6 +7,7 @@ namespace PatientMonitorDataLogger.API.Workflow;
 public class PhilipsIntellivuePatientInfoExtractor
 {
     public bool TryExtract(
+        Guid logSessionId,
         ICommandMessage message,
         out PatientInfo? patientInfo)
     {
@@ -36,7 +37,7 @@ public class PhilipsIntellivuePatientInfoExtractor
                             var attributeValue = observationAttribute.AttributeValue as IntellivueString;
                             if (attributeValue != null)
                             {
-                                patientInfo ??= new PatientInfo();
+                                patientInfo ??= new PatientInfo(logSessionId);
                                 patientInfo.FirstName = attributeValue.Value;
                             }
                             break;
@@ -46,7 +47,7 @@ public class PhilipsIntellivuePatientInfoExtractor
                             var attributeValue = observationAttribute.AttributeValue as IntellivueString;
                             if (attributeValue != null)
                             {
-                                patientInfo ??= new PatientInfo();
+                                patientInfo ??= new PatientInfo(logSessionId);
                                 patientInfo.LastName = attributeValue.Value;
                             }
                             break;
@@ -56,7 +57,7 @@ public class PhilipsIntellivuePatientInfoExtractor
                             var attributeValue = observationAttribute.AttributeValue as IntellivueString;
                             if (attributeValue != null)
                             {
-                                patientInfo ??= new PatientInfo();
+                                patientInfo ??= new PatientInfo(logSessionId);
                                 patientInfo.PatientId = attributeValue.Value;
                             }
                             break;
@@ -76,7 +77,7 @@ public class PhilipsIntellivuePatientInfoExtractor
                             var attributeValue = observationAttribute.AttributeValue as EnumAttributeValue<PatientSex>;
                             if (attributeValue != null)
                             {
-                                patientInfo ??= new PatientInfo();
+                                patientInfo ??= new PatientInfo(logSessionId);
                                 patientInfo.Sex = attributeValue.Value switch
                                 {
                                     PatientSex.SEX_UNKNOWN => Sex.Undefined,
@@ -94,7 +95,7 @@ public class PhilipsIntellivuePatientInfoExtractor
                             var attributeValue = observationAttribute.AttributeValue as IntellivueString;
                             if (attributeValue != null)
                             {
-                                patientInfo ??= new PatientInfo();
+                                patientInfo ??= new PatientInfo(logSessionId);
                                 patientInfo.Comment = !string.IsNullOrEmpty(patientInfo.Comment) 
                                     ? patientInfo.Comment + ". " + attributeValue.Value 
                                     : attributeValue.Value;

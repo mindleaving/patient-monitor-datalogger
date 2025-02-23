@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 using PatientMonitorDataLogger.API.Hubs;
-using PatientMonitorDataLogger.DataExport.Models;
+using PatientMonitorDataLogger.API.Models;
+using PatientMonitorDataLogger.API.Models.DataExport;
 
 namespace PatientMonitorDataLogger.API.Workflow;
 
@@ -19,5 +20,12 @@ public class MeasurementDataDistributor
         NumericsData data)
     {
         await dataHub.Clients.All.ReceiveNumerics(logSessionId, data);
+    }
+
+    public async Task Distribute(
+        Guid logSessionId,
+        PatientInfo data)
+    {
+        await dataHub.Clients.All.ReceivePatientInfo(logSessionId, data);
     }
 }

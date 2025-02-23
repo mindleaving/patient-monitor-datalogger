@@ -1,7 +1,7 @@
 ﻿using System.Globalization;
-using PatientMonitorDataLogger.DataExport.Models;
+using PatientMonitorDataLogger.API.Models.DataExport;
 
-namespace PatientMonitorDataLogger.DataExport;
+namespace PatientMonitorDataLogger.API.Workflow.DataExport;
 
 public class CsvWaveWriter : AsyncFileWriter<WaveData>, IWaveWriter
 {

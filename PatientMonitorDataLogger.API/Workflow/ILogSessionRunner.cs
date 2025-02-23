@@ -1,5 +1,5 @@
 ﻿using PatientMonitorDataLogger.API.Models;
-using PatientMonitorDataLogger.DataExport.Models;
+using PatientMonitorDataLogger.API.Models.DataExport;
 
 namespace PatientMonitorDataLogger.API.Workflow;
 
@@ -12,4 +12,7 @@ public interface ILogSessionRunner : IDisposable, IAsyncDisposable
 
     Task Start();
     Task Stop();
+
+    void WritePatientInfo(
+        PatientInfo patientInfo);
 }

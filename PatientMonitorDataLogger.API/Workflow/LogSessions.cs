@@ -1,6 +1,7 @@
 ﻿using System.Collections.Concurrent;
+using Newtonsoft.Json;
 using PatientMonitorDataLogger.API.Models;
-using PatientMonitorDataLogger.DataExport.Models;
+using PatientMonitorDataLogger.API.Models.DataExport;
 
 namespace PatientMonitorDataLogger.API.Workflow;
 
@@ -20,16 +21,66 @@ public class LogSessions
 
     public List<LogSession> All => sessions.Values.ToList();
 
+    public void LoadFromDisk(
+        MonitorDataWriterSettings writerSettings)
+    {
+        if(!Directory.Exists(writerSettings.OutputDirectory))
+            return;
+        var logSessionDirectories = Directory.EnumerateDirectories(writerSettings.OutputDirectory)
+            .Where(directoryName => Guid.TryParse(new DirectoryInfo(directoryName).Name, out _));
+        foreach (var logSessionDirectory in logSessionDirectories)
+        {
+            var logSessionId = Guid.Parse(new DirectoryInfo(logSessionDirectory).Name);
+            var settingsFilePath = Path.Combine(logSessionDirectory, Constants.SettingsFileName);
+            if(!File.Exists(settingsFilePath))
+                continue;
+            LogSessionSettings settings;
+            try
+            {
+                var json = File.ReadAllText(settingsFilePath);
+                settings = JsonConvert.DeserializeObject<LogSessionSettings>(json)!;
+            }
+            catch
+            {
+                continue;
+            }
+
+            var logSession = new LogSession(logSessionId, settings, writerSettings);
+            var patientInfoFilePath = Path.Combine(logSessionDirectory, Constants.PatientInfoFileName);
+            if (File.Exists(patientInfoFilePath))
+            {
+                try
+                {
+                    var json = File.ReadAllText(patientInfoFilePath);
+                    var patientInfo = JsonConvert.DeserializeObject<PatientInfo>(json);
+                    logSession.PatientInfo = patientInfo;
+                }
+                catch
+                {
+                    // Ignore
+                }
+            }
+            AddAndSetupLogSession(logSession);
+        }
+    }
+
     public async Task<LogSession> CreateNew(
         LogSessionSettings settings,
         MonitorDataWriterSettings writerSettings)
     {
         var sessionId = Guid.NewGuid();
         var logSession = new LogSession(sessionId, settings, writerSettings);
+        AddAndSetupLogSession(logSession);
+        return logSession;
+    }
+
+    private void AddAndSetupLogSession(
+        LogSession logSession)
+    {
         sessions.TryAdd(logSession.Id, logSession);
         logSession.NewNumericsData += DistributeNumericsData;
+        logSession.PatientInfoAvailable += DistributePatientInfo;
         logSessionSupervisor.Register(logSession);
-        return logSession;
     }
 
     public bool TryGet(
@@ -46,6 +97,7 @@ public class LogSessions
         if (sessions.TryRemove(sessionId, out logSession))
         {
             logSession.NewNumericsData -= DistributeNumericsData;
+            logSession.PatientInfoAvailable -= DistributePatientInfo;
             logSessionSupervisor.Unregister(logSession);
             return true;
         }
@@ -53,10 +105,17 @@ public class LogSessions
         return false;
     }
 
-    private async void DistributeNumericsData(
+    private void DistributeNumericsData(
         object? sender,
         NumericsData numericsData)
     {
-        await measurementDataDistributor.Distribute(numericsData.LogSessionId, numericsData);
+        measurementDataDistributor.Distribute(numericsData.LogSessionId, numericsData);
+    }
+
+    private void DistributePatientInfo(
+        object? sender,
+        PatientInfo patientInfo)
+    {
+        measurementDataDistributor.Distribute(patientInfo.LogSessionId, patientInfo);
     }
 }
