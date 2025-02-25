@@ -22,7 +22,7 @@ public class TypescriptGeneratorRunner
             .CustomizeType(x => x == typeof(DateOnly), _ => "Date")
             .CustomizeType(x => x == typeof(TimeOnly), _ => "string")
             .CustomizeType(x => x == typeof(char), _ => "string")
-            .CustomizeType(x => x == typeof(Dictionary<MeasurementType,NumericsValue>), _ => "{ [measurementType: string]: Models.DataExport.NumericsValue }")
+            //.CustomizeType(x => x == typeof(Dictionary<string,NumericsValue>), _ => "{ [measurementType: string]: Models.DataExport.NumericsValue }")
             .SetOutputDirectory(Path.Combine(repositoryPath, "patient-monitor-datalogger-frontend", "src", "types"))
             .Generate();
     }

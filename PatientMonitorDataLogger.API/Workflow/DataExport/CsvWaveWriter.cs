@@ -5,11 +5,11 @@ namespace PatientMonitorDataLogger.API.Workflow.DataExport;
 
 public class CsvWaveWriter : AsyncFileWriter<WaveData>, IWaveWriter
 {
-    public MeasurementType MeasurementType { get; }
+    public string MeasurementType { get; }
     private readonly char separator;
 
     public CsvWaveWriter(
-        MeasurementType measurementType,
+        string measurementType,
         string outputFilePath,
         char separator = ';')
         : base(outputFilePath)

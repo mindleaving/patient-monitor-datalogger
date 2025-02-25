@@ -6,7 +6,7 @@ namespace PatientMonitorDataLogger.API.Workflow.DataExport;
 public class CsvNumericsWriter : AsyncFileWriter<NumericsData>, INumericsWriter
 {
     private readonly char separator;
-    private readonly Dictionary<MeasurementType, int> header = new();
+    private readonly Dictionary<string, int> header = new();
 
     public CsvNumericsWriter(
         string outputFilePath,

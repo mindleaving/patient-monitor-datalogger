@@ -9,8 +9,8 @@ public class LogStatus
         bool isRunning,
         IPatientMonitorInfo monitor,
         DateTime? startTime,
-        List<MeasurementType> recordedNumerics,
-        List<MeasurementType> recordedWaves)
+        List<string> recordedNumerics,
+        List<string> recordedWaves)
     {
         LogSessionId = logSessionId;
         IsRunning = isRunning;
@@ -24,6 +24,6 @@ public class LogStatus
     public bool IsRunning { get; }
     public IPatientMonitorInfo Monitor { get; }
     public DateTime? StartTime { get; }
-    public List<MeasurementType> RecordedNumerics { get; }
-    public List<MeasurementType> RecordedWaves { get; }
+    public List<string> RecordedNumerics { get; }
+    public List<string> RecordedWaves { get; }
 }

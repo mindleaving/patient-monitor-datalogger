@@ -4,7 +4,7 @@ public class WaveData: IMonitorData
 {
     public WaveData(
         Guid logSessionId,
-        MeasurementType measurementType,
+        string measurementType,
         DateTime timestampFirstDataPoint,
         double sampleRate,
         IList<float> values)
@@ -18,7 +18,7 @@ public class WaveData: IMonitorData
 
     public MonitorDataType Type => MonitorDataType.Wave;
     public Guid LogSessionId { get; }
-    public MeasurementType MeasurementType { get; }
+    public string MeasurementType { get; }
     public DateTime TimestampFirstDataPoint { get; }
     /// <summary>
     /// Samples per second

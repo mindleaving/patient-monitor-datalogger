@@ -5,7 +5,7 @@ public class NumericsData : IMonitorData
     public NumericsData(
         Guid logSessionId,
         DateTime timestamp,
-        Dictionary<MeasurementType, NumericsValue> values)
+        Dictionary<string, NumericsValue> values)
     {
         LogSessionId = logSessionId;
         Timestamp = timestamp;
@@ -15,5 +15,5 @@ public class NumericsData : IMonitorData
     public MonitorDataType Type => MonitorDataType.Numerics;
     public Guid LogSessionId { get; }
     public DateTime Timestamp { get; }
-    public Dictionary<MeasurementType,NumericsValue> Values { get; }
+    public Dictionary<string,NumericsValue> Values { get; }
 }

@@ -28,7 +28,7 @@ public class LogSession : IDisposable, IAsyncDisposable
     public LogSessionSettings Settings { get; }
     public PatientInfo? PatientInfo { get; set; }
     public event EventHandler<PatientInfo>? PatientInfoAvailable;
-    public Dictionary<MeasurementType, NumericsValue> LatestMeasurements { get; } = new();
+    public Dictionary<string, NumericsValue> LatestMeasurements { get; } = new();
     public event EventHandler<NumericsData>? NewNumericsData;
 
     public bool ShouldBeRunning { get; private set; }

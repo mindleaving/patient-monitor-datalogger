@@ -16,11 +16,11 @@ public class PhilipsIntellivueLogSessionRunner : ILogSessionRunner
     private readonly PhilipsIntellivueNumericsAndWavesExtractor numericsAndWavesExtractor = new();
     private readonly PhilipsIntellivuePatientInfoExtractor patientInfoExtractor = new();
     private DateTime? connectTime;
-    private readonly System.Collections.Generic.List<MeasurementType> numericsTypes = new();
-    private readonly System.Collections.Generic.List<MeasurementType> waveTypes = new();
+    private readonly System.Collections.Generic.List<string> numericsTypes = new();
+    private readonly System.Collections.Generic.List<string> waveTypes = new();
     private readonly string logSessionOutputDirectory;
     private readonly INumericsWriter numericsWriter;
-    private readonly Dictionary<MeasurementType, IWaveWriter> waveWriters = new();
+    private readonly Dictionary<string, IWaveWriter> waveWriters = new();
 
     public PhilipsIntellivueLogSessionRunner(
         Guid logSessionId,
@@ -118,7 +118,7 @@ public class PhilipsIntellivueLogSessionRunner : ILogSessionRunner
     }
 
     private IWaveWriter CreateWaveWriter(
-        MeasurementType measurementType)
+        string measurementType)
     {
         var waveOutputFilePath = Path.Combine(logSessionOutputDirectory, $"{measurementType}_{DateTime.UtcNow:yyyy-MM-dd_HHmmss}.csv");
         IWaveWriter waveWriter = new CsvWaveWriter(measurementType, waveOutputFilePath, logSessionSettings.CsvSeparator);

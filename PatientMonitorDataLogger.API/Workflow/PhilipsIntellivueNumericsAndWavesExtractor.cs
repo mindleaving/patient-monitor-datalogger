@@ -23,7 +23,7 @@ public class PhilipsIntellivueNumericsAndWavesExtractor
         if(actionResult.Data is not PollMdiDataReply pollResult)
             yield break;
         var timestamp = GetAbsoluteTime(pollResult.RelativeTimeStamp);
-        var numericsData = new NumericsData(logSessionId, timestamp, new Dictionary<MeasurementType, NumericsValue>());
+        var numericsData = new NumericsData(logSessionId, timestamp, new Dictionary<string, NumericsValue>());
         foreach (var singleContextPoll in pollResult.PollContexts.Values)
         {
             var contextId = singleContextPoll.ContextId;
@@ -40,7 +40,7 @@ public class PhilipsIntellivueNumericsAndWavesExtractor
                                 continue;
                             if(sampleArray.State != MeasurementState.VALID)
                                 continue;
-                            var sampleRate = GetSampleRate(measurementType);
+                            var sampleRate = sampleArray.Values.Values.Length * 4; // 4 messages per second
                             var translatedWaveSampleValues = TranslateWaveValues(sampleArray.Values.Values);
                             var waveData = new WaveData(
                                 logSessionId,
@@ -73,7 +73,7 @@ public class PhilipsIntellivueNumericsAndWavesExtractor
     }
 
     private double GetSampleRate(
-        MeasurementType measurementType)
+        string measurementType)
     {
         return 128;
         switch (measurementType)
@@ -93,35 +93,37 @@ public class PhilipsIntellivueNumericsAndWavesExtractor
     private bool TryTranslateToMeasurementType(
         NomenclatureReference objectType,
         SCADAType physioId,
-        out MeasurementType measurementType)
+        out string measurementType)
     {
-        measurementType = MeasurementType.Undefined;
-        if (objectType.Partition != NomenclaturePartition.NOM_PART_OBJ)
-            return false;
-        switch ((ObjectClass)objectType.Code)
-        {
-            case ObjectClass.NOM_MOC_VMO_METRIC_NU:
-                measurementType = physioId switch
-                {
-                    SCADAType.NOM_AWAY_RESP_RATE => MeasurementType.RespirationRate,
-                    SCADAType.NOM_PLETH_PULS_RATE => MeasurementType.HeartRateSpO2,
-                    SCADAType.NOM_PULS_OXIM_SAT_O2 => MeasurementType.SpO2,
-                    SCADAType.NOM_ECG_CARD_BEAT_RATE => MeasurementType.HeartRateEcg,
-                    // TODO: Add all relevant
-                    _ => MeasurementType.Undefined
-                };
-                return measurementType != MeasurementType.Undefined;
-            case ObjectClass.NOM_MOC_VMO_METRIC_SA_RT:
-                measurementType = physioId switch
-                {
-                    SCADAType.NOM_ECG_ELEC_POTL_I => MeasurementType.EcgLeadI,
-                    SCADAType.NOM_PLETH => MeasurementType.Pleth,
-                    // TODO: Add all relevant
-                    _ => MeasurementType.Undefined
-                };
-                return measurementType != MeasurementType.Undefined;
-        }
-        return false;
+        measurementType = physioId.ToString();
+        return true;
+        //measurementType = null;
+        //if (objectType.Partition != NomenclaturePartition.NOM_PART_OBJ)
+        //    return false;
+        //switch ((ObjectClass)objectType.Code)
+        //{
+        //    case ObjectClass.NOM_MOC_VMO_METRIC_NU:
+        //        measurementType = physioId switch
+        //        {
+        //            SCADAType.NOM_AWAY_RESP_RATE => MeasurementType.RespirationRate,
+        //            SCADAType.NOM_PLETH_PULS_RATE => MeasurementType.HeartRateSpO2,
+        //            SCADAType.NOM_PULS_OXIM_SAT_O2 => MeasurementType.SpO2,
+        //            SCADAType.NOM_ECG_CARD_BEAT_RATE => MeasurementType.HeartRateEcg,
+        //            // TODO: Add all relevant
+        //            _ => MeasurementType.Undefined
+        //        };
+        //        return measurementType != MeasurementType.Undefined;
+        //    case ObjectClass.NOM_MOC_VMO_METRIC_SA_RT:
+        //        measurementType = physioId switch
+        //        {
+        //            SCADAType.NOM_ECG_ELEC_POTL_I => MeasurementType.EcgLeadI,
+        //            SCADAType.NOM_PLETH => MeasurementType.Pleth,
+        //            // TODO: Add all relevant
+        //            _ => MeasurementType.Undefined
+        //        };
+        //        return measurementType != MeasurementType.Undefined;
+        //}
+        //return false;
     }
 
     private DateTime GetAbsoluteTime(
