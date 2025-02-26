@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.Text;
 
 namespace PatientMonitorDataLogger.API.Workflow.DataExport;
 
@@ -26,8 +27,10 @@ public abstract class AsyncFileWriter<T> : IDisposable, IAsyncDisposable
         {
             if(IsRunning)
                 return;
-            
-            streamWriter = new StreamWriter(File.OpenWrite(outputFilePath));
+
+            var fileStream = File.OpenWrite(outputFilePath);
+            fileStream.Seek(0, SeekOrigin.End); // Append
+            streamWriter = new StreamWriter(fileStream);
             streamWriter.AutoFlush = true;
             writeTask = Task.Factory.StartNew(
                 WriteToFile,

@@ -2,6 +2,7 @@
 using System.Text;
 using PatientMonitorDataLogger.PhilipsIntellivue.Helpers;
 using PatientMonitorDataLogger.PhilipsIntellivue.Models;
+using PatientMonitorDataLogger.SharedModels;
 
 namespace PatientMonitorDataLogger.PhilipsIntellivue;
 
@@ -148,7 +149,7 @@ public class PhilipsIntellivueClient : IDisposable, IAsyncDisposable
                 return commandTypes.Contains(associationCommandMessage.SessionHeader.Type);
             });
         serialPortCommunicator!.WaitForMessage(waitRequest);
-        if(!waitRequest.WaitHandle.WaitOne(TimeSpan.FromSeconds(10)))
+        if(!waitRequest.WaitHandle.WaitOne(TimeSpan.FromSeconds(5)))
             throw new TimeoutException($"Didn't receive Association command message of type {string.Join('|', commandTypes)}");
         return (AssociationCommandMessage)waitRequest.MatchingItem!;
     }
@@ -205,11 +206,15 @@ public class PhilipsIntellivueClient : IDisposable, IAsyncDisposable
         return (DataExportCommandMessage)waitRequest.MatchingItem!;
     }
 
-    public void StartPolling()
+    public void StartPolling(
+        MonitorDataSettings monitorDataSettings)
     {
-        alertPollTimer.Change(TimeSpan.Zero, TimeSpan.FromSeconds(settings.PollMode == PollMode.Extended ? 30 : 10));
-        numericsPollTimer.Change(TimeSpan.Zero, TimeSpan.FromSeconds(settings.PollMode == PollMode.Extended ? 10 : 1));
-        wavesPollTimer.Change(TimeSpan.Zero, TimeSpan.FromSeconds(settings.PollMode == PollMode.Extended ? 10 : 1));
+        if(monitorDataSettings.IncludeAlerts)
+            alertPollTimer.Change(TimeSpan.Zero, TimeSpan.FromSeconds(settings.PollMode == PollMode.Extended ? 30 : 10));
+        if(monitorDataSettings.IncludeNumerics)
+            numericsPollTimer.Change(TimeSpan.Zero, TimeSpan.FromSeconds(settings.PollMode == PollMode.Extended ? 10 : 1));
+        if(monitorDataSettings.IncludeWaves)
+            wavesPollTimer.Change(TimeSpan.Zero, TimeSpan.FromSeconds(settings.PollMode == PollMode.Extended ? 10 : 1));
         Log("Started polling for alerts and numerics");
     }
 

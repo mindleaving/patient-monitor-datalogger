@@ -2,7 +2,7 @@ import { FormEvent, useCallback, useEffect, useState } from "react";
 import { loadObject, sendPostRequest } from "../communication/ApiRequests";
 import { Models } from "../types/models";
 import { PatientMonitorType } from "../types/enums";
-import { Form, FormControl, FormGroup, FormLabel } from "react-bootstrap";
+import { Form, FormCheck, FormControl, FormGroup, FormLabel } from "react-bootstrap";
 import { Center } from "../components/Center";
 import { AsyncButton } from "../components/AsyncButton";
 import { useNavigate } from "react-router";
@@ -25,6 +25,10 @@ export const CreateNewLogSessionPage = (props: CreateNewLogSessionPageProps) => 
     const [ availableSerialPorts, setAvailableSerialPorts ] = useState<string[]>([]);
     const [ serialPortName, setSerialPortName ] = useState<string>();
     const [ serialPortBaudRate, setSerialPortBaudRate ] = useState<number>(19200);
+    const [ includeAlerts, setIncludeAlerts ] = useState<boolean>(false);
+    const [ includeNumerics, setIncludeNumerics ] = useState<boolean>(true);
+    const [ includeWaves, setIncludeWaves ] = useState<boolean>(false);
+    const [ includePatientInfo, setIncludePatientInfo ] = useState<boolean>(true);
     const [ csvSeparator, setCsvSeparator ] = useState<string>(';');
     const [ isSubmitting, setIsSubmitting ] = useState<boolean>(false);
     const navigate = useNavigate();
@@ -58,10 +62,17 @@ export const CreateNewLogSessionPage = (props: CreateNewLogSessionPageProps) => 
             default:
                 throw new Error(`Unsupported monitor type ${selectedMonitorType}`);
         }
-        const logSessionSettings: Models.LogSessionSettings = {
-            monitorSettings: monitorSettings,
+        const monitorDataSettings: Models.MonitorDataSettings = {
+            includeAlerts: includeAlerts,
+            includeNumerics: includeNumerics,
+            includeWaves: includeWaves,
+            includePatientInfo: includePatientInfo,
             selectedNumericsTypes: [],
             selectedWaveTypes: [],
+        };
+        const logSessionSettings: Models.LogSessionSettings = {
+            monitorSettings: monitorSettings,
+            monitorDataSettings: monitorDataSettings,
             csvSeparator: csvSeparator,
         };
         setIsSubmitting(true);
@@ -141,6 +152,34 @@ export const CreateNewLogSessionPage = (props: CreateNewLogSessionPageProps) => 
             </FormControl>
         </FormGroup> : null}
         <FormGroup>
+            <FormLabel>Parameters to be recorded</FormLabel>
+            <div className="ms-3">
+                <FormCheck
+                    required={!includeNumerics && !includeWaves}
+                    checked={includeAlerts}
+                    onChange={e => setIncludeAlerts(e.target.checked)}
+                    label="Alerts"
+                />
+                <FormCheck
+                    required={!includeAlerts && !includeWaves}
+                    checked={includeNumerics}
+                    onChange={e => setIncludeNumerics(e.target.checked)}
+                    label="Numerics (Heart rate, SpO2, respiration rate,...)"
+                />
+                <FormCheck
+                    required={!includeAlerts && !includeNumerics}
+                    checked={includeWaves}
+                    onChange={e => setIncludeWaves(e.target.checked)}
+                    label="Waves (ECG, Pleth,...)"
+                />
+                <FormCheck
+                    checked={includePatientInfo}
+                    onChange={e => setIncludePatientInfo(e.target.checked)}
+                    label="Patient info"
+                />
+            </div>
+        </FormGroup>
+        <FormGroup>
             <FormLabel>CSV separator</FormLabel>
             <FormControl
                 as="select"
@@ -158,6 +197,7 @@ export const CreateNewLogSessionPage = (props: CreateNewLogSessionPageProps) => 
                 activeText="Create"
                 executingText="Create"
                 size="lg"
+                disabled={!includeAlerts && !includeNumerics && !includeWaves}
             />
         </Center>
     </Form>

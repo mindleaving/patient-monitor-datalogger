@@ -37,6 +37,8 @@ public class SimulatedPhilipsIntellivueMonitor : IDisposable
 
     public void Start()
     {
+        if(IsListening)
+            return;
         serialPortCommunicator.Start();
         serialPortCommunicator.NewMessage += ProcessMessage;
     }
@@ -269,6 +271,7 @@ public class SimulatedPhilipsIntellivueMonitor : IDisposable
         ClearPeriodicPollReplies();
         AbortConnection(null);
         serialPortCommunicator.Stop();
+        serialPortCommunicator.NewMessage -= ProcessMessage;
     }
 
     public void Dispose()

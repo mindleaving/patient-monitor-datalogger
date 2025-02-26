@@ -7,8 +7,8 @@ npm run build
 Compress-Archive -Path dist -DestinationPath ../PatientMonitorDataLogger.Frontend.zip -Force
 cd ..
 
-#scp F:\Projects\patient-monitor-datalogger\PatientMonitorDataLogger.*.zip datalogger-3bplus:~
-#ssh datalogger-3bplus "./deploy_patient-monitor-datalogger.sh"
+scp F:\Projects\patient-monitor-datalogger\PatientMonitorDataLogger.*.zip datalogger-3bplus:~
+ssh datalogger-3bplus "./deploy_patient-monitor-datalogger.sh"
 
-scp F:\Projects\patient-monitor-datalogger\PatientMonitorDataLogger.*.zip datalogger-4b:~
-ssh datalogger-4b "./deploy_patient-monitor-datalogger.sh"
+#scp F:\Projects\patient-monitor-datalogger\PatientMonitorDataLogger.*.zip datalogger-4b:~
+#ssh datalogger-4b "./deploy_patient-monitor-datalogger.sh"

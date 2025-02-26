@@ -8,7 +8,7 @@ sudo cp -R config/* /
 rm -rf config
 
 sudo nmtui
-sudo apt install -y ufw nginx unzip rsyslog usbmount
+sudo apt install -y ufw nginx unzip rsyslog
 sudo ufw allow 22/tcp
 sudo ufw allow 80/tcp
 sudo ufw logging off
@@ -33,4 +33,4 @@ sudo systemctl enable patient-monitor-datalogger-api.service
 
 cd ~
 rm install.sh
-rm config.sh
+rm config.zip

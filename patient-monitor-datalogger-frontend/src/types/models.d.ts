@@ -1,6 +1,14 @@
 import * as Enums from './enums';
 
 export namespace Models {
+    interface MonitorDataSettings {
+        includeAlerts: boolean;
+        includeNumerics: boolean;
+        includeWaves: boolean;
+        includePatientInfo: boolean;
+        selectedNumericsTypes: string[];
+        selectedWaveTypes: string[];
+    }
     interface GEDashPatientMonitorInfo extends Models.IPatientMonitorInfo {
         name: string;
     }
@@ -24,8 +32,7 @@ export namespace Models {
     }
     interface LogSessionSettings {
         monitorSettings: Models.PatientMonitorSettings;
-        selectedNumericsTypes: string[];
-        selectedWaveTypes: string[];
+        monitorDataSettings: Models.MonitorDataSettings;
         csvSeparator: string;
     }
     interface LogStatus extends Models.ILogSessionData {

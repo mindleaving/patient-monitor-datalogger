@@ -8,6 +8,7 @@ import { DeleteButton } from "./DeleteButon";
 import { CopyToUsbModal } from "./CopyToUsbModal";
 import { confirmAlert } from "react-confirm-alert";
 import { MonitorSettingsDescription } from "./MonitorSettingsDescription";
+import { MonitorDataSettingsDescription } from "./MonitorDataSettingsDescription";
 
 interface LogSessionListItemProps {
     logSession: Models.LogSession;
@@ -21,6 +22,7 @@ export const LogSessionListItem = (props: LogSessionListItemProps) => {
     const { logSession, numericsData, onChange, onDeleted } = props;
     const status = logSession.status;
     const monitorSettings = logSession.settings.monitorSettings;
+    const monitorDataSettings = logSession.settings.monitorDataSettings;
 
     const [ isStartingStopping, setIsStartingStopping ] = useState<boolean>(false);
     const [ isDeleting, setIsDeleting ] = useState<boolean>(false);
@@ -113,6 +115,9 @@ export const LogSessionListItem = (props: LogSessionListItemProps) => {
         <Row className="mb-2">
             <Col xs="auto">
                 <MonitorSettingsDescription monitorSettings={monitorSettings} />
+            </Col>
+            <Col xs="auto">
+                <MonitorDataSettingsDescription monitorDataSettings={monitorDataSettings} />
             </Col>
             <Col />
             <Col xs="auto">

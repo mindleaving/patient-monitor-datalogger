@@ -39,6 +39,8 @@ public class LogSessions
             {
                 var json = File.ReadAllText(settingsFilePath);
                 settings = JsonConvert.DeserializeObject<LogSessionSettings>(json)!;
+                if(settings.MonitorDataSettings == null)
+                    continue;
             }
             catch
             {

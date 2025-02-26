@@ -13,6 +13,7 @@ public class NumericsGenerator
     {
         this.lowerLimit = lowerLimit;
         this.upperLimit = upperLimit;
+        currentValue = lowerLimit + rng.NextSingle() * (upperLimit - lowerLimit);
     }
 
     public float GetValue()

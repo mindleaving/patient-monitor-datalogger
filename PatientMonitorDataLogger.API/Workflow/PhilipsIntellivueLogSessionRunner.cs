@@ -58,8 +58,9 @@ public class PhilipsIntellivueLogSessionRunner : LogSessionRunner
         monitorClient.Connect(
             TimeSpan.FromSeconds(1),
             ExtendedPollProfileOptions.POLL_EXT_PERIOD_NU_1SEC | ExtendedPollProfileOptions.POLL_EXT_PERIOD_RTSA | ExtendedPollProfileOptions.POLL_EXT_ENUM);
-        monitorClient.StartPolling();
-        monitorClient.SendPatientDemographicsRequest();
+        monitorClient.StartPolling(logSessionSettings.MonitorDataSettings);
+        if(logSessionSettings.MonitorDataSettings.IncludePatientInfo)
+            monitorClient.SendPatientDemographicsRequest();
         connectTime = DateTime.UtcNow;
     }
 
