@@ -28,7 +28,7 @@ public class ObservedValueArray : ISerializable
     {
         return
         [
-            ..BigEndianBitConverter.GetBytes(Values.Length * sizeof(ushort)),
+            ..BigEndianBitConverter.GetBytes((ushort)(Values.Length * sizeof(ushort))),
             ..Values.SelectMany(BigEndianBitConverter.GetBytes)
         ];
     }

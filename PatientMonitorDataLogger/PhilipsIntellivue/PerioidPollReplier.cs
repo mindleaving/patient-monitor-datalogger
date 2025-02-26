@@ -43,6 +43,7 @@ public class PerioidPollReplier : IDisposable, IAsyncDisposable
             replyPeriod,
             replyPeriod);
         lastPollRequestTime = DateTime.UtcNow;
+        IsActive = true;
     }
 
     public bool IsActive { get; private set; }
