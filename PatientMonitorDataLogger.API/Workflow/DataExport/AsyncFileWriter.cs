@@ -6,9 +6,8 @@ public abstract class AsyncFileWriter<T> : IDisposable, IAsyncDisposable
 {
     private readonly string outputFilePath;
     private StreamWriter? streamWriter;
-    protected readonly BlockingCollection<T> dataQueue = new();
+    protected BlockingCollection<T> dataQueue = new();
     private readonly object startStopLock = new();
-    private CancellationTokenSource? cancellationTokenSource;
     private Task? writeTask;
 
     protected AsyncFileWriter(
@@ -27,25 +26,21 @@ public abstract class AsyncFileWriter<T> : IDisposable, IAsyncDisposable
         {
             if(IsRunning)
                 return;
-            if (streamWriter == null)
-            {
-                streamWriter = new StreamWriter(File.OpenWrite(outputFilePath));
-                streamWriter.AutoFlush = true;
-            }
-            cancellationTokenSource = new CancellationTokenSource();
+            
+            streamWriter = new StreamWriter(File.OpenWrite(outputFilePath));
+            streamWriter.AutoFlush = true;
             writeTask = Task.Factory.StartNew(
-                () => WriteToFile(cancellationTokenSource.Token),
-                cancellationTokenSource.Token,
+                WriteToFile,
+                CancellationToken.None,
                 TaskCreationOptions.LongRunning,
                 TaskScheduler.Default);
             IsRunning = true;
         }
     }
 
-    private void WriteToFile(
-        CancellationToken cancellationToken)
+    private void WriteToFile()
     {
-        foreach (var data in dataQueue.GetConsumingEnumerable(cancellationToken))
+        foreach (var data in dataQueue.GetConsumingEnumerable())
         {
             var lines = Serialize(data);
             foreach (var line in lines)
@@ -65,17 +60,18 @@ public abstract class AsyncFileWriter<T> : IDisposable, IAsyncDisposable
                 return;
 
             IsRunning = false;
-            cancellationTokenSource?.Cancel();
+            dataQueue.CompleteAdding();
             try
             {
-                streamWriter?.Flush();
                 writeTask?.Wait();
+                streamWriter?.Dispose();
             }
             catch (AggregateException aggregateException)
             {
                 if (aggregateException.InnerException is not (TaskCanceledException or OperationCanceledException))
                     throw;
             }
+            dataQueue = new BlockingCollection<T>();
         }
     }
 
@@ -85,13 +81,10 @@ public abstract class AsyncFileWriter<T> : IDisposable, IAsyncDisposable
     public void Dispose()
     {
         Stop();
-        streamWriter?.Dispose();
     }
 
     public async ValueTask DisposeAsync()
     {
         Stop();
-        if (streamWriter != null) 
-            await streamWriter.DisposeAsync();
     }
 }

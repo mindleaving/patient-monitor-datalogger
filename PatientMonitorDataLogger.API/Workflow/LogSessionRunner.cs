@@ -79,17 +79,10 @@ public abstract class LogSessionRunner : ILogSessionRunner
                 return;
 
             IsRunning = false;
-            try
+            numericsWriter.Stop();
+            foreach(var waveWriter in waveWriters.Values)
             {
-                numericsWriter.Stop();
-                foreach(var waveWriter in waveWriters.Values)
-                {
-                    waveWriter.Stop();
-                }
-            }
-            catch
-            {
-                // Ignore
+                waveWriter.Stop();
             }
             StopImpl();
         }

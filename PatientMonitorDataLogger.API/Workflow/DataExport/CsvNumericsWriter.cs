@@ -19,6 +19,8 @@ public class CsvNumericsWriter : AsyncFileWriter<NumericsData>, INumericsWriter
     public void Write(
         NumericsData data)
     {
+        if(dataQueue.IsAddingCompleted)
+            return;
         dataQueue.Add(data);
     }
 

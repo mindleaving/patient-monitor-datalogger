@@ -67,7 +67,7 @@ public class PhilipsIntellivueLogSessionRunner : LogSessionRunner
         object? sender,
         ICommandMessage message)
     {
-        WriteRawMessage(message);
+        //WriteRawMessage(message);
         if (patientInfoExtractor.TryExtract(LogSessionId, message, out var patientInfo))
             OnPatientInfoAvailable(this, patientInfo!);
         foreach (var monitorData in numericsAndWavesExtractor.Extract(LogSessionId, message))
@@ -118,11 +118,13 @@ public class PhilipsIntellivueLogSessionRunner : LogSessionRunner
 
     public override void Dispose()
     {
+        Stop();
         monitorClient?.Dispose();
     }
 
     public override async ValueTask DisposeAsync()
     {
+        Stop();
         if (monitorClient != null) 
             await monitorClient.DisposeAsync();
     }

@@ -52,11 +52,13 @@ public class LogSession : IDisposable, IAsyncDisposable
 
     public void Dispose()
     {
+        Stop();
         sessionRunner.Dispose();
     }
 
     public async ValueTask DisposeAsync()
     {
+        Stop();
         await sessionRunner.DisposeAsync();
     }
 

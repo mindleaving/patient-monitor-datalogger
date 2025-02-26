@@ -96,10 +96,10 @@ public class MonitorDataGenerator
                 return new(
                 [
                     new ObservationPoll(0, new([
-                        GenerateNumericsObservation(SCADAType.NOM_PLETH_PULS_RATE),
-                        GenerateNumericsObservation(SCADAType.NOM_ECG_CARD_BEAT_RATE),
-                        GenerateNumericsObservation(SCADAType.NOM_PULS_OXIM_SAT_O2),
-                        GenerateNumericsObservation(SCADAType.NOM_AWAY_RESP_RATE),
+                        GenerateNumericsObservation(SCADAType.NOM_PLETH_PULS_RATE, UnitCodes.NOM_DIM_PER_MIN),
+                        GenerateNumericsObservation(SCADAType.NOM_ECG_CARD_BEAT_RATE, UnitCodes.NOM_DIM_PER_MIN),
+                        GenerateNumericsObservation(SCADAType.NOM_PULS_OXIM_SAT_O2, UnitCodes.NOM_DIM_PERCENT),
+                        GenerateNumericsObservation(SCADAType.NOM_AWAY_RESP_RATE, UnitCodes.NOM_DIM_PER_MIN),
                     ]))
                 ]);
             }
@@ -170,17 +170,18 @@ public class MonitorDataGenerator
     }
 
     private AttributeValueAssertion GenerateNumericsObservation(
-        SCADAType physioId)
+        SCADAType physioId,
+        UnitCodes unitCode)
     {
         NumericObservedValue observation;
         if (numericsGenerators.TryGetValue(physioId, out var numericsGenerator))
         {
             var value = numericsGenerator.GetValue();
-            observation = new NumericObservedValue(physioId, MeasurementState.VALID, UnitCodes.NOM_DIM_PER_MIN, new(value));
+            observation = new NumericObservedValue(physioId, MeasurementState.VALID, unitCode, new(value));
         }
         else
         {
-            observation = new NumericObservedValue(physioId, MeasurementState.INVALID, UnitCodes.NOM_DIM_PER_MIN, new(float.NaN));
+            observation = new NumericObservedValue(physioId, MeasurementState.INVALID, unitCode, new(float.NaN));
         }
 
         return new AttributeValueAssertion(

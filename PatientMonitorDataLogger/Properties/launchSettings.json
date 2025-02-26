@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "PatientMonitorDataLogger": {
+      "commandName": "Project",
+      "commandLineArgs": "simulate"
+    }
+  }
+}

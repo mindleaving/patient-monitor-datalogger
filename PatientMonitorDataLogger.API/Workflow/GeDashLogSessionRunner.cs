@@ -31,10 +31,12 @@ public class GeDashLogSessionRunner : LogSessionRunner
 
     public override void Dispose()
     {
+        Stop();
     }
 
     public override ValueTask DisposeAsync()
     {
+        Stop();
         return ValueTask.CompletedTask;
     }
 }

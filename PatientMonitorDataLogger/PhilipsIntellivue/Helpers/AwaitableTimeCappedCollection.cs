@@ -40,7 +40,7 @@ public class AwaitableTimeCappedCollection<T> : ICollection<T>, IDisposable, IAs
             {
                 if (newWaitRequest.Predicate(itemWithTime.Item))
                 {
-                    newWaitRequest.Complete(itemWithTime.Item);
+                    CompleteWaitRequest(newWaitRequest, itemWithTime.Item);
                     break;
                 }
             }
@@ -51,9 +51,17 @@ public class AwaitableTimeCappedCollection<T> : ICollection<T>, IDisposable, IAs
             foreach (var waitRequest in waitRequests.Values)
             {
                 if (waitRequest.Predicate(newItem)) 
-                    waitRequest.Complete(newItem);
+                    CompleteWaitRequest(waitRequest, newItem);
             }
         }
+    }
+
+    private void CompleteWaitRequest(
+        WaitForRequest<T> waitRequest,
+        T item)
+    {
+        waitRequest.Complete(item);
+        waitRequests.TryRemove(waitRequest.Id, out _);
     }
 
     private void RemoveExpiredItems(

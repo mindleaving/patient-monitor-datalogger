@@ -11,7 +11,6 @@ public class SerialPortCommunicator : IDisposable
     private readonly AwaitableTimeCappedCollection<ICommandMessage> messageCollection;
     private readonly object startStopLock = new();
     private BlockingCollection<ICommandMessage>? outgoingMessages = new();
-    private CancellationTokenSource? sendCancellationTokenSource;
     private Task? sendTask;
 
     public SerialPortCommunicator(
@@ -67,10 +66,9 @@ public class SerialPortCommunicator : IDisposable
 
             if (!IsSending)
             {
-                sendCancellationTokenSource = new CancellationTokenSource();
                 sendTask = Task.Factory.StartNew(
-                    () => Send(sendCancellationTokenSource.Token),
-                    sendCancellationTokenSource.Token,
+                    Send,
+                    CancellationToken.None,
                     TaskCreationOptions.LongRunning,
                     TaskScheduler.Default);
                 IsSending = true;
@@ -79,10 +77,9 @@ public class SerialPortCommunicator : IDisposable
         }
     }
 
-    private void Send(
-        CancellationToken token)
+    private void Send()
     {
-        foreach (var message in outgoingMessages!.GetConsumingEnumerable(token))
+        foreach (var message in outgoingMessages!.GetConsumingEnumerable())
         {
             byte[] frameBytes;
             try
@@ -124,7 +121,6 @@ public class SerialPortCommunicator : IDisposable
             {
                 IsSending = false;
                 outgoingMessages?.CompleteAdding();
-                sendCancellationTokenSource?.Cancel();
                 try
                 {
                     sendTask?.Wait();

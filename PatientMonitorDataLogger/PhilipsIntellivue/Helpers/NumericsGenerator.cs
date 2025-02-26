@@ -18,7 +18,7 @@ public class NumericsGenerator
     public float GetValue()
     {
         var normalizedDelta = 2 * (rng.NextDouble() - 0.5);
-        var delta = (float)(0.01 * normalizedDelta);
+        var delta = (float)(0.1 * normalizedDelta);
         currentValue = Math.Clamp(currentValue + delta, lowerLimit, upperLimit);
         return currentValue;
     }
