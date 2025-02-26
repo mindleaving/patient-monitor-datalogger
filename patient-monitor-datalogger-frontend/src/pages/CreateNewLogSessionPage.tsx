@@ -35,12 +35,12 @@ export const CreateNewLogSessionPage = (props: CreateNewLogSessionPageProps) => 
 
     const createNewLogSession = async (e?: FormEvent) => {
         e?.preventDefault();
-        if(!serialPortName) {
-            return;
-        }
         let monitorSettings: Models.PatientMonitorSettings;
         switch(selectedMonitorType) {
             case PatientMonitorType.PhilipsIntellivue:
+                if(!serialPortName) {
+                    return;
+                }
                 monitorSettings = {
                     type: PatientMonitorType.PhilipsIntellivue,
                     serialPortName: serialPortName,
@@ -53,6 +53,9 @@ export const CreateNewLogSessionPage = (props: CreateNewLogSessionPageProps) => 
                 } as Models.SimulatedPhilipsIntellivuePatientMonitorSettings;
                 break;
             case PatientMonitorType.GEDash:
+                if(!serialPortName) {
+                    return;
+                }
                 monitorSettings = {
                     type: PatientMonitorType.GEDash,
                     serialPortName: serialPortName,
@@ -197,7 +200,9 @@ export const CreateNewLogSessionPage = (props: CreateNewLogSessionPageProps) => 
                 activeText="Create"
                 executingText="Create"
                 size="lg"
-                disabled={!includeAlerts && !includeNumerics && !includeWaves}
+                disabled={
+                    ([ PatientMonitorType.PhilipsIntellivue, PatientMonitorType.GEDash ].includes(selectedMonitorType) && !serialPortName)
+                    || (!includeAlerts && !includeNumerics && !includeWaves)}
             />
         </Center>
     </Form>
