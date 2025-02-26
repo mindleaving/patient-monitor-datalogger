@@ -3,18 +3,23 @@ using PatientMonitorDataLogger.PhilipsIntellivue.Models.Attributes;
 
 namespace PatientMonitorDataLogger.PhilipsIntellivue.Models;
 
-public class ExtendedPollMdiDataRequest : PollMdiDataRequest
+public class ExtendedPollMdiDataRequest : IActionData
 {
     public ExtendedPollMdiDataRequest(
         ushort pollNumber,
         NomenclatureReference objectType,
         OIDType attributeGroup,
         List<AttributeValueAssertion> attributes)
-        : base(pollNumber, objectType, attributeGroup)
     {
+        PollNumber = pollNumber;
+        ObjectType = objectType;
+        AttributeGroup = attributeGroup;
         Attributes = attributes;
     }
 
+    public ushort PollNumber { get; }
+    public NomenclatureReference ObjectType { get; }
+    public OIDType AttributeGroup { get; }
     public List<AttributeValueAssertion> Attributes { get; }
 
     public void SetTimePeriodicDataPoll(
@@ -30,25 +35,29 @@ public class ExtendedPollMdiDataRequest : PollMdiDataRequest
         Attributes.Values.Add(new((ushort)OIDType.NOM_ATTR_POLL_OBJ_PRIO_NUM, new UshortAttributeValue(count)));
     }
 
-    public override byte[] Serialize()
+    public byte[] Serialize()
     {
         return
         [
-            ..base.Serialize(),
+            ..BigEndianBitConverter.GetBytes(PollNumber),
+            ..ObjectType.Serialize(),
+            ..BigEndianBitConverter.GetBytes((ushort)AttributeGroup),
             ..Attributes.Serialize()
         ];
     }
 
-    public new static ExtendedPollMdiDataRequest Read(
+    public static ExtendedPollMdiDataRequest Read(
         BigEndianBinaryReader binaryReader,
         AttributeContext context)
     {
-        var baseObject = PollMdiDataRequest.Read(binaryReader);
+        var pollNumber = binaryReader.ReadUInt16();
+        var objectType = NomenclatureReference.Read(binaryReader);
+        var attributeGroup = (OIDType)binaryReader.ReadUInt16();
         var attributes = List<AttributeValueAssertion>.Read(binaryReader, x => AttributeValueAssertion.Read(x, context));
         return new(
-            baseObject.PollNumber,
-            baseObject.ObjectType,
-            baseObject.AttributeGroup,
+            pollNumber,
+            objectType,
+            attributeGroup,
             attributes);
     }
 }

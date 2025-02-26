@@ -1,6 +1,6 @@
 ﻿namespace PatientMonitorDataLogger.API.Models.DataExport;
 
-public class NumericsData : IMonitorData
+public class NumericsData : IMonitorData, ILogSessionData
 {
     public NumericsData(
         Guid logSessionId,

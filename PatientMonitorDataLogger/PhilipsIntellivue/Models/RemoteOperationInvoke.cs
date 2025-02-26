@@ -46,7 +46,7 @@ public class RemoteOperationInvoke : IRemoteOperation
             DataExportCommandType.Get => GetCommand.Read(binaryReader),
             DataExportCommandType.Set => SetCommand.Read(binaryReader, context),
             DataExportCommandType.ConfirmedSet => SetCommand.Read(binaryReader, context),
-            DataExportCommandType.ConfirmedAction => ActionCommand.Read(binaryReader),
+            DataExportCommandType.ConfirmedAction => ActionCommand.Read(binaryReader, context),
             _ => throw new ArgumentOutOfRangeException()
         };
         return new(invokeId, commandType, length, data);

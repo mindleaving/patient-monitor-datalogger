@@ -24,10 +24,7 @@ public class IntellivueFloat : ISerializable
         var isExponentNegative = (exponent & 0x80) > 0;
         if (isExponentNegative)
             exponent = (int)(exponent | 0xffffff00);
-        var isMantissaNegative = (bytes & 0x00800000) > 0;
         var mantissa = (int)(bytes & 0x00ffffff);
-        if (isMantissaNegative)
-            mantissa = (int)(mantissa | 0xff000000);
         switch (mantissa)
         {
             case 0x7fffff:
@@ -39,12 +36,21 @@ public class IntellivueFloat : ISerializable
             case 0x800002:
                 return new(float.NegativeInfinity);
         }
+        var isMantissaNegative = (bytes & 0x00800000) > 0;
+        if (isMantissaNegative)
+            mantissa = (int)(mantissa | 0xff000000);
         var number = (float)(mantissa * Math.Pow(10, exponent));
         return new IntellivueFloat(number);
     }
 
     public byte[] Serialize()
     {
+        if (float.IsNaN(Value))
+            return Serialize(0, 0x7fffff);
+        if (float.IsPositiveInfinity(Value))
+            return Serialize(0, 0x7ffffe);
+        if(float.IsNegativeInfinity(Value))
+            return Serialize(0, 0x800002);
         int mantissa, exponent;
         var floatAsString = Value.ToString(CultureInfo.InvariantCulture);
         var decimalPointPosition = floatAsString.IndexOf('.');
@@ -60,7 +66,14 @@ public class IntellivueFloat : ISerializable
             mantissa = (int)Math.Round(Value * Math.Pow(10, -exponent));
         }
 
-        var value = (int)((exponent << 24) | (mantissa & 0x00ffffff));
+        return Serialize(exponent, mantissa);
+    }
+
+    private static byte[] Serialize(
+        int exponent,
+        int mantissa)
+    {
+        var value = (exponent << 24) | (mantissa & 0x00ffffff);
         return BigEndianBitConverter.GetBytes(value);
     }
 }

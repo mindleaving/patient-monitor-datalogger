@@ -1,4 +1,5 @@
-﻿using PatientMonitorDataLogger.PhilipsIntellivue.Helpers;
+﻿using System.Collections.Concurrent;
+using PatientMonitorDataLogger.PhilipsIntellivue.Helpers;
 using PatientMonitorDataLogger.PhilipsIntellivue.Models;
 
 namespace PatientMonitorDataLogger.PhilipsIntellivue;
@@ -9,29 +10,21 @@ public class SimulatedPhilipsIntellivueMonitor : IDisposable
     private readonly SerialPortCommunicator serialPortCommunicator;
     private readonly CommandMessageCreator messageCreator = new();
     private ushort nextInvokeId;
-    private readonly DateTime startTime;
-    private readonly Timer pollReplyTimer;
-    private ExtendPollSettings? extendedPollSettings;
+    private readonly RelativeToAbsoluteTimeTranslator timeTranslator = new(0, DateTime.UtcNow);
+    private readonly ConcurrentDictionary<PollObjectTypeAndAttributeGroup, PerioidPollReplier> periodicPollRepliers = new();
     private readonly Timer connectionTimeoutTimer;
     private TimeSpan minimumPollPeriod = TimeSpan.FromSeconds(60);
     private TimeSpan ConnectionTimeoutLength => minimumPollPeriod < TimeSpan.FromSeconds(3.3) ? TimeSpan.FromSeconds(10) 
         : minimumPollPeriod < TimeSpan.FromSeconds(43) ? 3 * minimumPollPeriod 
         : TimeSpan.FromSeconds(130);
-    private DateTime? lastPollRequestTime;
-    private readonly MonitorDataGenerator pollDataGenerator;
+    private readonly MonitorDataGenerator monitorDataGenerator;
 
     public SimulatedPhilipsIntellivueMonitor(
         SimulatedSerialPort serialPort)
     {
         this.serialPort = serialPort;
         serialPortCommunicator = new SerialPortCommunicator(serialPort, TimeSpan.FromSeconds(10), nameof(SimulatedPhilipsIntellivueMonitor));
-        startTime = DateTime.UtcNow;
-        pollDataGenerator = new MonitorDataGenerator();
-        pollReplyTimer = new Timer(
-            SendPollReply,
-            null,
-            Timeout.Infinite,
-            Timeout.Infinite);
+        monitorDataGenerator = new MonitorDataGenerator();
         connectionTimeoutTimer = new Timer(
             AbortConnection,
             null,
@@ -78,7 +71,7 @@ public class SimulatedPhilipsIntellivueMonitor : IDisposable
                                     PresentationContextId = Constants.DefaultPresentationContextId
                                 };
 
-                                var eventTime = GetCurrentRelativeTime();
+                                var eventTime = timeTranslator.GetCurrentRelativeTime();
                                 var mdsCreateEventMessage = messageCreator.CreateMdsCreateEvent(CurrentAssociation.PresentationContextId, nextInvokeId++, eventTime);
                                 serialPortCommunicator.Enqueue(mdsCreateEventMessage);
                             }
@@ -159,64 +152,65 @@ public class SimulatedPhilipsIntellivueMonitor : IDisposable
         ushort invokeId,
         ExtendedPollMdiDataRequest pollRequest)
     {
-        var periodicPollAttribute = pollRequest.Attributes.Values.Find(attribute => attribute.AttributeId == (ushort)OIDType.NOM_ATTR_TIME_PD_POLL);
-        var isPeriodic = periodicPollAttribute != null;
-        if (!isPeriodic)
-        {
-            HandlePollRequest(invokeId, pollRequest);
-            return;
-        }
-        //var binaryReader = new BigEndianBinaryReader(new MemoryStream(periodicPollAttribute!.AttributeValue));
-        //var pollPeriod = PollDataRequestPeriod.Read(binaryReader);
-
-        lastPollRequestTime = DateTime.UtcNow;
-        extendedPollSettings = new ExtendPollSettings(invokeId, pollRequest);
-        var resultPeriod = DetermineExtendedPollResultPeriod(pollRequest.ObjectType);
-        pollReplyTimer.Change(TimeSpan.Zero, resultPeriod); // Send first response immediately
-    }
-
-    private TimeSpan DetermineExtendedPollResultPeriod(
-        NomenclatureReference objectType)
-    {
-        if (objectType == PollObjectTypes.Alerts)
-        {
-            return TimeSpan.FromSeconds(1);
-        }
-
-        if (objectType == PollObjectTypes.Numerics)
-        {
-            return TimeSpan.FromSeconds(1);
-        }
-
-        if (objectType == PollObjectTypes.Waves)
-        {
-            return TimeSpan.FromMilliseconds(256);
-        }
-
-        throw new ArgumentOutOfRangeException(nameof(objectType), $"Cannot determine result period for {objectType}. It is not supported for extended polling.");
-    }
-
-    private void SendPollReply(
-        object? state)
-    {
-        if(extendedPollSettings == null)
-            return;
         if(CurrentAssociation == null)
             return;
-        if(DateTime.UtcNow - lastPollRequestTime > minimumPollPeriod)
-        {
-            pollReplyTimer.Change(Timeout.Infinite, Timeout.Infinite);
-            return;
-        }
 
-        var attributes = pollDataGenerator.Generate(extendedPollSettings.PollRequest.ObjectType, extendedPollSettings.PollRequest.AttributeGroup);
+        SendExtendedPollReply(
+            pollRequest.ObjectType,
+            pollRequest.AttributeGroup,
+            invokeId,
+            0, // Even if periodic data are currently send, this message is out of sequence and intentionally has sequence number 0, as specified by the protocol.
+            pollRequest);
+
+        var periodicPollAttribute = pollRequest.Attributes.Values.Find(attribute => attribute.AttributeId == (ushort)OIDType.NOM_ATTR_TIME_PD_POLL);
+        var isPeriodic = periodicPollAttribute != null;
+        if (isPeriodic)
+        {
+            var key = new PollObjectTypeAndAttributeGroup(pollRequest.ObjectType, pollRequest.AttributeGroup);
+            var inactivePollRepliers = periodicPollRepliers.Where(kvp => !kvp.Value.IsActive).Select(kvp => kvp.Key).ToList();
+            foreach (var objectTypeAndAttributeGroup in inactivePollRepliers)
+            {
+                if(periodicPollRepliers.TryRemove(objectTypeAndAttributeGroup, out var inactivePollReplier))
+                    inactivePollReplier.Dispose();
+            }
+            if (!periodicPollRepliers.TryGetValue(key, out var perioidPollReplier))
+            {
+                perioidPollReplier = new PerioidPollReplier(
+                    CurrentAssociation,
+                    invokeId,
+                    pollRequest,
+                    minimumPollPeriod,
+                    serialPortCommunicator,
+                    timeTranslator,
+                    messageCreator,
+                    monitorDataGenerator);
+                periodicPollRepliers.TryAdd(key, perioidPollReplier);
+            }
+            else
+            {
+                perioidPollReplier.RenewPoll(pollRequest);
+            }
+        }
+    }
+
+    private void SendExtendedPollReply(
+        NomenclatureReference objectType,
+        OIDType attributeGroup,
+        ushort invokeId,
+        ushort sequenceNumber,
+        ExtendedPollMdiDataRequest pollRequest)
+    {
+        if(CurrentAssociation == null)
+            return;
+
+        var observations = monitorDataGenerator.Generate(objectType, attributeGroup);
         var replyMessage = messageCreator.CreateExtendedPollReply(
             CurrentAssociation.PresentationContextId,
-            extendedPollSettings.InvokeId,
-            extendedPollSettings.SequenceNumber++,
-            extendedPollSettings.PollRequest,
-            GetCurrentRelativeTime(),
-            attributes);
+            invokeId,
+            sequenceNumber,
+            pollRequest,
+            timeTranslator.GetCurrentRelativeTime(),
+            observations);
         serialPortCommunicator.Enqueue(replyMessage);
     }
 
@@ -227,12 +221,12 @@ public class SimulatedPhilipsIntellivueMonitor : IDisposable
         if(CurrentAssociation == null)
             return;
 
-        var attributes = pollDataGenerator.Generate(pollMdiDataRequest.ObjectType, pollMdiDataRequest.AttributeGroup);
+        var attributes = monitorDataGenerator.Generate(pollMdiDataRequest.ObjectType, pollMdiDataRequest.AttributeGroup);
         var replyMessage = messageCreator.CreatePollReply(
             CurrentAssociation.PresentationContextId,
             invokeId,
             pollMdiDataRequest,
-            GetCurrentRelativeTime(),
+            timeTranslator.GetCurrentRelativeTime(),
             attributes);
         serialPortCommunicator.Enqueue(replyMessage);
     }
@@ -242,46 +236,86 @@ public class SimulatedPhilipsIntellivueMonitor : IDisposable
     {
         var abortMessage = messageCreator.CreateAssociationAbort();
         serialPortCommunicator.Enqueue(abortMessage);
-        pollReplyTimer.Change(Timeout.Infinite, Timeout.Infinite);
+        ClearPeriodicPollReplies();
         CurrentAssociation = null;
+    }
+
+    private void ClearPeriodicPollReplies()
+    {
+        foreach (var pollReplyTimer in periodicPollRepliers.Values)
+        {
+            pollReplyTimer.Dispose();
+        }
+        periodicPollRepliers.Clear();
     }
 
     private void Log(string message) => Console.WriteLine($"{nameof(SimulatedPhilipsIntellivueMonitor)} - {DateTime.UtcNow:yyyy-MM-dd HH:mm:ss.fff}: {message}");
 
     public void Stop()
     {
+        ClearPeriodicPollReplies();
         serialPortCommunicator.Stop();
     }
 
     public void Dispose()
     {
+        Stop();
         serialPortCommunicator.Dispose();
     }
 
-    private RelativeTime GetCurrentRelativeTime()
-    {
-        var now = DateTime.UtcNow;
-        var secondsSinceStart = (now - startTime).TotalSeconds;
-        return new(TimeSpan.FromSeconds(secondsSinceStart));
-    }
 
-    private class ExtendPollSettings
+    private class PollObjectTypeAndAttributeGroup : IEquatable<PollObjectTypeAndAttributeGroup>
     {
-        public ExtendPollSettings(
-            ushort invokeId,
-            ExtendedPollMdiDataRequest pollRequest)
+        public PollObjectTypeAndAttributeGroup(
+            NomenclatureReference objectType,
+            OIDType attributeGroup)
         {
-            InvokeId = invokeId;
-            PollRequest = pollRequest;
+            ObjectType = objectType;
+            AttributeGroup = attributeGroup;
         }
 
-        public ushort InvokeId { get; }
-        public ExtendedPollMdiDataRequest PollRequest { get; }
-        public ushort SequenceNumber { get; set; }
-    }
+        public NomenclatureReference ObjectType { get; }
+        public OIDType AttributeGroup { get; }
 
-    public class Association
-    {
-        public ushort PresentationContextId { get; set; }
+        public bool Equals(
+            PollObjectTypeAndAttributeGroup? other)
+        {
+            if (other is null) return false;
+            if (ReferenceEquals(this, other)) return true;
+            return ObjectType.Equals(other.ObjectType) && AttributeGroup == other.AttributeGroup;
+        }
+
+        public override bool Equals(
+            object? obj)
+        {
+            if (obj is null) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != GetType()) return false;
+            return Equals((PollObjectTypeAndAttributeGroup)obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(ObjectType, (int)AttributeGroup);
+        }
+
+        public static bool operator ==(
+            PollObjectTypeAndAttributeGroup? left,
+            PollObjectTypeAndAttributeGroup? right)
+        {
+            return Equals(left, right);
+        }
+
+        public static bool operator !=(
+            PollObjectTypeAndAttributeGroup? left,
+            PollObjectTypeAndAttributeGroup? right)
+        {
+            return !Equals(left, right);
+        }
     }
+}
+
+public class Association
+{
+    public ushort PresentationContextId { get; set; }
 }

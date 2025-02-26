@@ -71,7 +71,7 @@ public class LogController : ApiController
             return NotFound();
         try
         {
-            await logSession!.Start();
+            logSession!.Start();
             return Ok(logSession.Status);
         }
         catch (Exception e)
@@ -88,7 +88,7 @@ public class LogController : ApiController
             return NotFound();
         try
         {
-            await logSession!.Stop();
+            logSession!.Stop();
             return Ok(logSession.Status);
         }
         catch (Exception e)
@@ -103,7 +103,7 @@ public class LogController : ApiController
     {
         if (logSessions.TryRemove(id, out var logSession))
         {
-            await logSession!.Stop();
+            logSession!.Stop();
             await logSession.DisposeAsync();
         }
         return Ok();

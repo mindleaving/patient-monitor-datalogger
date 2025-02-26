@@ -27,10 +27,11 @@ public class PatientMonitorSettingsJsonConverter : JsonConverter<PatientMonitorS
             throw new FormatException($"Missing or unexpected {nameof(PatientMonitorSettings.Type)} field");
         if (!Enum.TryParse<PatientMonitorType>(typeString.Value<string>(), ignoreCase: true, out var monitorType))
             throw new FormatException($"Unknown monitor type {typeString}");
-        var monitorSettings = monitorType switch
+        PatientMonitorSettings monitorSettings = monitorType switch
         {
             PatientMonitorType.PhilipsIntellivue => new PhilipsIntellivuePatientMonitorSettings(),
-            PatientMonitorType.GEDash => new PhilipsIntellivuePatientMonitorSettings(),
+            PatientMonitorType.SimulatedPhilipsIntellivue => new SimulatedPhilipsIntellivuePatientMonitorSettings(),
+            PatientMonitorType.GEDash => new GEDashPatientMonitorSettings(),
             _ => throw new ArgumentOutOfRangeException(nameof(monitorType))
         };
         serializer.Populate(jObject.CreateReader(), monitorSettings);

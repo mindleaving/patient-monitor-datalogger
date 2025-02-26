@@ -1,6 +1,6 @@
 ﻿namespace PatientMonitorDataLogger.API.Models;
 
-public class PatientInfo
+public class PatientInfo : ILogSessionData
 {
     public PatientInfo(
         Guid logSessionId)

@@ -7,15 +7,12 @@ namespace PatientMonitorDataLogger.API.Hubs;
 public interface IDataHubClient
 {
     Task ReceiveNumerics(
-        Guid logSessionId,
         NumericsData data);
 
     Task ReceivePatientInfo(
-        Guid logSessionId,
         PatientInfo patientInfo);
 
     Task ReceiveStatusChange(
-        Guid logSessionId,
         LogStatus logStatus);
 }
 

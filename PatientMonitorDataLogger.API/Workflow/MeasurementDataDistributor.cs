@@ -16,16 +16,20 @@ public class MeasurementDataDistributor
     }
 
     public async Task Distribute(
-        Guid logSessionId,
         NumericsData data)
     {
-        await dataHub.Clients.All.ReceiveNumerics(logSessionId, data);
+        await dataHub.Clients.All.ReceiveNumerics(data);
     }
 
     public async Task Distribute(
-        Guid logSessionId,
         PatientInfo data)
     {
-        await dataHub.Clients.All.ReceivePatientInfo(logSessionId, data);
+        await dataHub.Clients.All.ReceivePatientInfo(data);
+    }
+
+    public async Task Distribute(
+        LogStatus logStatus)
+    {
+        await dataHub.Clients.All.ReceiveStatusChange(logStatus);
     }
 }

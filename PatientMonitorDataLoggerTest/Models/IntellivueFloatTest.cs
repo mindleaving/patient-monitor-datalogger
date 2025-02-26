@@ -13,6 +13,7 @@ public class IntellivueFloatTest
     [TestCase(-0.43f)]
     [TestCase(879168.284f)]
     [TestCase(-879168.284f)]
+    
     public void SerializationRoundtrip(float number)
     {
         var sut = new IntellivueFloat(number);
@@ -21,6 +22,20 @@ public class IntellivueFloatTest
         var reconstructed = IntellivueFloat.Read(binaryReader);
         
         Assert.That(reconstructed.Value, Is.EqualTo(number).Within(1e-3 * Math.Abs(number)));
+    }
+
+    [Test]
+    [TestCase(float.NaN)]
+    [TestCase(float.PositiveInfinity)]
+    [TestCase(float.NegativeInfinity)]
+    public void SerializationRoundtripForSpecialValues(float value)
+    {
+        var sut = new IntellivueFloat(value);
+        var serialized = sut.Serialize();
+        var binaryReader = new BigEndianBinaryReader(new MemoryStream(serialized));
+        var reconstructed = IntellivueFloat.Read(binaryReader);
+
+        Assert.That(reconstructed.Value, Is.EqualTo(value));
     }
 
     [Test]

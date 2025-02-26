@@ -1,6 +1,6 @@
 ﻿namespace PatientMonitorDataLogger.PhilipsIntellivue.Models;
 
-public enum UnitCodes
+public enum UnitCodes : ushort
 {
     NOM_DIM_NOS = 0, // NOS (no dimension )
     NOM_DIM_DIV = 2, // / (/ )

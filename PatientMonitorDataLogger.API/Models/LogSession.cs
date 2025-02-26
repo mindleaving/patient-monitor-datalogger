@@ -14,9 +14,11 @@ public class LogSession : IDisposable, IAsyncDisposable
     {
         Id = id;
         Settings = settings;
-        sessionRunner = settings.MonitorSettings switch
+        sessionRunner = settings.MonitorSettings.Type switch
         {
-            PhilipsIntellivuePatientMonitorSettings philipsIntellivueSettings => new PhilipsIntellivueLogSessionRunner(id, philipsIntellivueSettings, settings, writerSettings),
+            PatientMonitorType.PhilipsIntellivue => new PhilipsIntellivueLogSessionRunner(id, settings, writerSettings),
+            PatientMonitorType.SimulatedPhilipsIntellivue => new SimulatedPhilipsIntellivueLogSessionRunner(id, settings, writerSettings),
+            PatientMonitorType.GEDash => new GeDashLogSessionRunner(id, settings, writerSettings),
             _ => throw new NotSupportedException()
         };
         sessionRunner.PatientInfoAvailable += UpdatePatientInfo;
@@ -35,16 +37,17 @@ public class LogSession : IDisposable, IAsyncDisposable
     public LogStatus Status => sessionRunner.Status;
     public event EventHandler<LogStatus>? StatusChanged;
 
-    public Task Start()
+    public void Start()
     {
         ShouldBeRunning = true;
-        return sessionRunner.Start();
+        sessionRunner.Initialize();
+        sessionRunner.Start();
     }
 
-    public Task Stop()
+    public void Stop()
     {
         ShouldBeRunning = false;
-        return sessionRunner.Stop();
+        sessionRunner.Stop();
     }
 
     public void Dispose()

@@ -1,8 +1,6 @@
-﻿using PatientMonitorDataLogger.API.Models.DataExport;
+﻿namespace PatientMonitorDataLogger.API.Models;
 
-namespace PatientMonitorDataLogger.API.Models;
-
-public class LogStatus
+public class LogStatus : ILogSessionData
 {
     public LogStatus(
         Guid logSessionId,

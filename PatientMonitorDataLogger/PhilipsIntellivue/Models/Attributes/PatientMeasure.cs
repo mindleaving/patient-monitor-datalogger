@@ -6,20 +6,20 @@ public class PatientMeasure : ISerializable
 {
     public PatientMeasure(
         IntellivueFloat value,
-        OIDType unit)
+        UnitCodes unit)
     {
         Value = value;
         Unit = unit;
     }
 
     public IntellivueFloat Value { get; }
-    public OIDType Unit { get; }
+    public UnitCodes Unit { get; }
 
     public static PatientMeasure Read(
         BigEndianBinaryReader binaryReader)
     {
         var value = IntellivueFloat.Read(binaryReader);
-        var unit = (OIDType)binaryReader.ReadUInt16();
+        var unit = (UnitCodes)binaryReader.ReadUInt16();
         return new(value, unit);
     }
 

@@ -18,7 +18,7 @@ public class PollMdiDataRequest : IActionData
     public NomenclatureReference ObjectType { get; }
     public OIDType AttributeGroup { get; }
 
-    public virtual byte[] Serialize()
+    public byte[] Serialize()
     {
         return
         [

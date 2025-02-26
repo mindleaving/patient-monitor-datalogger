@@ -151,7 +151,11 @@ public class SerialPortCommunicator : IDisposable
     public void Enqueue(
         ICommandMessage message)
     {
-        outgoingMessages!.Add(message);
+        if(outgoingMessages == null)
+            return;
+        if(outgoingMessages.IsAddingCompleted)
+            return;
+        outgoingMessages.Add(message);
     }
 
     private static Rs232Frame BuildFrame(

@@ -228,7 +228,7 @@ public class CommandMessageCreator
         ushort invokeId,
         PollMdiDataRequest pollRequest,
         RelativeTime currentTime,
-        Models.List<AttributeValueAssertion> attributes)
+        Models.List<ObservationPoll> observations)
     {
         var pollReply = new PollMdiDataReply(
             pollRequest.PollNumber,
@@ -238,12 +238,7 @@ public class CommandMessageCreator
             pollRequest.AttributeGroup,
             new(
             [
-                new(
-                    0,
-                    new(
-                    [
-                        new(0, attributes)
-                    ]))
+                new(1, observations)
             ]));
         var pollReplyBytes = pollReply.Serialize();
         var resultData = new ActionResultCommand(
@@ -290,7 +285,7 @@ public class CommandMessageCreator
         ushort sequenceNumber,
         ExtendedPollMdiDataRequest pollRequest,
         RelativeTime currentTime,
-        Models.List<AttributeValueAssertion> attributes)
+        Models.List<ObservationPoll> observations)
     {
         var pollReply = new ExtendedPollMdiDataReply(
             pollRequest.PollNumber,
@@ -301,12 +296,7 @@ public class CommandMessageCreator
             pollRequest.AttributeGroup,
             new(
             [
-                new(
-                    0,
-                    new(
-                    [
-                        new(0, attributes)
-                    ]))
+                new(1, observations)
             ]));
         var pollReplyBytes = pollReply.Serialize();
         var resultData = new ActionResultCommand(

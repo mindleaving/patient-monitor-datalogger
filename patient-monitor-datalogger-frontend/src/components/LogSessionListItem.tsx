@@ -7,6 +7,7 @@ import { PatientMonitorType } from "../types/enums";
 import { DeleteButton } from "./DeleteButon";
 import { CopyToUsbModal } from "./CopyToUsbModal";
 import { confirmAlert } from "react-confirm-alert";
+import { MonitorSettingsDescription } from "./MonitorSettingsDescription";
 
 interface LogSessionListItemProps {
     logSession: Models.LogSession;
@@ -102,17 +103,16 @@ export const LogSessionListItem = (props: LogSessionListItemProps) => {
             </Col>
             {logSession.patientInfo
             ? <Col>
-                {logSession.patientInfo.firstName} {logSession.patientInfo.lastName}
+                <span className="text-nowrap">{logSession.patientInfo.firstName} {logSession.patientInfo.lastName}</span>
             </Col> : null}
             <Col>
-                ID: {logSession.id}
+                <span className="text-nowrap">ID: {logSession.id}</span>
             </Col>
         </Row>}
     >
-        {monitorSettings.type === PatientMonitorType.PhilipsIntellivue
-        ? <Row className="mb-2">
+        <Row className="mb-2">
             <Col xs="auto">
-                Serial port: {(monitorSettings as Models.PhilipsIntellivuePatientMonitorSettings).serialPortName} @ {(monitorSettings as Models.PhilipsIntellivuePatientMonitorSettings).serialPortBaudRate} bit/s
+                <MonitorSettingsDescription monitorSettings={monitorSettings} />
             </Col>
             <Col />
             <Col xs="auto">
@@ -126,7 +126,7 @@ export const LogSessionListItem = (props: LogSessionListItemProps) => {
                     className="m-0"
                 />
             </Col>
-        </Row> : null}
+        </Row>
         <Row>
             <Col>
                 <Button
@@ -174,7 +174,7 @@ export const LogSessionListItem = (props: LogSessionListItemProps) => {
                 return (<Col key={measurementType}>
                     <div>{measurementType}</div>
                     <div className="text-center align-items-end">
-                        <span className="display-5">{numericsValue.value}</span>
+                        <span className="display-5">{numericsValue.value.toFixed(1)}</span>
                         <span className="text-secondary">{numericsValue.unit}</span>
                     </div>
                     <div>

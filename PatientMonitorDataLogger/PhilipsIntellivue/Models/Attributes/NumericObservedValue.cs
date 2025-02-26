@@ -7,7 +7,7 @@ public class NumericObservedValue : ISerializable
     public NumericObservedValue(
         SCADAType physioId,
         MeasurementState state,
-        ushort unitCode,
+        UnitCodes unitCode,
         IntellivueFloat value)
     {
         PhysioId = physioId;
@@ -18,7 +18,7 @@ public class NumericObservedValue : ISerializable
 
     public SCADAType PhysioId { get; }
     public MeasurementState State { get; }
-    public ushort UnitCode { get; }
+    public UnitCodes UnitCode { get; }
     public IntellivueFloat Value { get; }
 
     public static NumericObservedValue Read(
@@ -26,7 +26,7 @@ public class NumericObservedValue : ISerializable
     {
         var physioId = (SCADAType)binaryReader.ReadUInt16();
         var state = (MeasurementState)binaryReader.ReadUInt16();
-        var unitCode = binaryReader.ReadUInt16();
+        var unitCode = (UnitCodes)binaryReader.ReadUInt16();
         var value = IntellivueFloat.Read(binaryReader);
         return new(
             physioId,

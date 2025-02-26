@@ -106,24 +106,24 @@ public class LogSessions
         return false;
     }
 
-    private void DistributeNumericsData(
+    private async void DistributeNumericsData(
         object? sender,
         NumericsData numericsData)
     {
-        measurementDataDistributor.Distribute(numericsData.LogSessionId, numericsData);
+        await measurementDataDistributor.Distribute(numericsData);
     }
 
-    private void DistributePatientInfo(
+    private async void DistributePatientInfo(
         object? sender,
         PatientInfo patientInfo)
     {
-        measurementDataDistributor.Distribute(patientInfo.LogSessionId, patientInfo);
+        await measurementDataDistributor.Distribute(patientInfo);
     }
 
-    private void DistributeStatusChange(
+    private async void DistributeStatusChange(
         object? sender,
         LogStatus logStatus)
     {
-
+        await measurementDataDistributor.Distribute(logStatus);
     }
 }

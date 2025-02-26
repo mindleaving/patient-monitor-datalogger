@@ -14,6 +14,7 @@ interface CreateNewLogSessionPageProps {
 
 const monitorNames: { [key:string]: string } = {
     [PatientMonitorType.PhilipsIntellivue]: "Philips Intellivue",
+    [PatientMonitorType.SimulatedPhilipsIntellivue]: "Simulated Philips Intellivue",
     [PatientMonitorType.GEDash]: "GE Dash",
 }
 export const CreateNewLogSessionPage = (props: CreateNewLogSessionPageProps) => {
@@ -41,6 +42,11 @@ export const CreateNewLogSessionPage = (props: CreateNewLogSessionPageProps) => 
                     serialPortName: serialPortName,
                     serialPortBaudRate: serialPortBaudRate
                 } as Models.PhilipsIntellivuePatientMonitorSettings;
+                break;
+            case PatientMonitorType.SimulatedPhilipsIntellivue:
+                monitorSettings = {
+                    type: PatientMonitorType.SimulatedPhilipsIntellivue
+                } as Models.SimulatedPhilipsIntellivuePatientMonitorSettings;
                 break;
             case PatientMonitorType.GEDash:
                 monitorSettings = {
@@ -109,7 +115,8 @@ export const CreateNewLogSessionPage = (props: CreateNewLogSessionPageProps) => 
                 )}
             </FormControl>
         </FormGroup>
-        <FormGroup>
+        {[ PatientMonitorType.PhilipsIntellivue, PatientMonitorType.GEDash ].includes(selectedMonitorType)
+        ? <FormGroup>
             <FormLabel>Serial port - Name</FormLabel>
             <FormControl required
                 as="select"
@@ -120,8 +127,9 @@ export const CreateNewLogSessionPage = (props: CreateNewLogSessionPageProps) => 
                     <option key={name} value={name}>{name}</option>
                 ))}
             </FormControl>
-        </FormGroup>
-        <FormGroup>
+        </FormGroup> : null}
+        {[ PatientMonitorType.PhilipsIntellivue, PatientMonitorType.GEDash ].includes(selectedMonitorType)
+        ? <FormGroup>
             <FormLabel>Serial port - Baud rate</FormLabel>
             <FormControl
                 as="select"
@@ -131,7 +139,7 @@ export const CreateNewLogSessionPage = (props: CreateNewLogSessionPageProps) => 
                 <option value="19200">19200 bits/s</option>
                 <option value="115200">115200 bits/s</option>
             </FormControl>
-        </FormGroup>
+        </FormGroup> : null}
         <FormGroup>
             <FormLabel>CSV separator</FormLabel>
             <FormControl

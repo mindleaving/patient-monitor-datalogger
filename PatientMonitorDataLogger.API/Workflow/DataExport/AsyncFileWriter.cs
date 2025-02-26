@@ -5,7 +5,7 @@ namespace PatientMonitorDataLogger.API.Workflow.DataExport;
 public abstract class AsyncFileWriter<T> : IDisposable, IAsyncDisposable
 {
     private readonly string outputFilePath;
-    private readonly StreamWriter streamWriter;
+    private StreamWriter? streamWriter;
     protected readonly BlockingCollection<T> dataQueue = new();
     private readonly object startStopLock = new();
     private CancellationTokenSource? cancellationTokenSource;
@@ -15,8 +15,6 @@ public abstract class AsyncFileWriter<T> : IDisposable, IAsyncDisposable
         string outputFilePath)
     {
         this.outputFilePath = outputFilePath;
-        streamWriter = new StreamWriter(File.OpenWrite(outputFilePath));
-        streamWriter.AutoFlush = true;
     }
 
     public bool IsRunning { get; private set; }
@@ -29,12 +27,18 @@ public abstract class AsyncFileWriter<T> : IDisposable, IAsyncDisposable
         {
             if(IsRunning)
                 return;
+            if (streamWriter == null)
+            {
+                streamWriter = new StreamWriter(File.OpenWrite(outputFilePath));
+                streamWriter.AutoFlush = true;
+            }
             cancellationTokenSource = new CancellationTokenSource();
             writeTask = Task.Factory.StartNew(
                 () => WriteToFile(cancellationTokenSource.Token),
                 cancellationTokenSource.Token,
                 TaskCreationOptions.LongRunning,
                 TaskScheduler.Default);
+            IsRunning = true;
         }
     }
 
@@ -46,7 +50,7 @@ public abstract class AsyncFileWriter<T> : IDisposable, IAsyncDisposable
             var lines = Serialize(data);
             foreach (var line in lines)
             {
-                streamWriter.WriteLine(line);
+                streamWriter!.WriteLine(line);
             }
         }
     }
@@ -59,10 +63,12 @@ public abstract class AsyncFileWriter<T> : IDisposable, IAsyncDisposable
         {
             if(!IsRunning)
                 return;
+
+            IsRunning = false;
             cancellationTokenSource?.Cancel();
             try
             {
-                streamWriter.Flush();
+                streamWriter?.Flush();
                 writeTask?.Wait();
             }
             catch (AggregateException aggregateException)
@@ -79,12 +85,13 @@ public abstract class AsyncFileWriter<T> : IDisposable, IAsyncDisposable
     public void Dispose()
     {
         Stop();
-        streamWriter.Dispose();
+        streamWriter?.Dispose();
     }
 
     public async ValueTask DisposeAsync()
     {
         Stop();
-        await streamWriter.DisposeAsync();
+        if (streamWriter != null) 
+            await streamWriter.DisposeAsync();
     }
 }

@@ -8,6 +8,9 @@ export namespace Models {
         serialPortName: string;
         serialPortBaudRate: number;
     }
+    interface ILogSessionData {
+        logSessionId: string;
+    }
     interface IPatientMonitorInfo {
         type: Enums.PatientMonitorType;
     }
@@ -15,29 +18,27 @@ export namespace Models {
         id: string;
         settings: Models.LogSessionSettings;
         patientInfo: Models.PatientInfo;
-        latestMeasurements: { [measurementType: string]: Models.DataExport.NumericsValue };
+        latestMeasurements: { [key: string]: Models.DataExport.NumericsValue };
         shouldBeRunning: boolean;
         status: Models.LogStatus;
     }
     interface LogSessionSettings {
         monitorSettings: Models.PatientMonitorSettings;
-        selectedNumericsTypes: Enums.MeasurementType[];
-        selectedWaveTypes: Enums.MeasurementType[];
+        selectedNumericsTypes: string[];
+        selectedWaveTypes: string[];
         csvSeparator: string;
     }
-    interface LogStatus {
-        logSessionId: string;
+    interface LogStatus extends Models.ILogSessionData {
         isRunning: boolean;
         monitor: Models.IPatientMonitorInfo;
         startTime?: Date | null;
-        recordedNumerics: Enums.MeasurementType[];
-        recordedWaves: Enums.MeasurementType[];
+        recordedNumerics: string[];
+        recordedWaves: string[];
     }
     interface MonitorDataWriterSettings {
         outputDirectory: string;
     }
-    interface PatientInfo {
-        logSessionId: string;
+    interface PatientInfo extends Models.ILogSessionData {
         patientId: string;
         encounterId: string;
         firstName: string;
@@ -56,6 +57,9 @@ export namespace Models {
         serialPortName: string;
         serialPortBaudRate: number;
     }
+    interface SimulatedPhilipsIntellivuePatientMonitorSettings extends Models.PatientMonitorSettings {
+        
+    }
     export namespace RequestBodies {
         interface CopyDataToUsbDriveRequest {
             logSessionId: string;
@@ -67,9 +71,9 @@ export namespace Models {
             type: Enums.MonitorDataType;
             logSessionId: string;
         }
-        interface NumericsData extends Models.DataExport.IMonitorData {
+        interface NumericsData extends Models.DataExport.IMonitorData, Models.ILogSessionData {
             timestamp: Date;
-            values: { [measurementType: string]: Models.DataExport.NumericsValue };
+            values: { [key: string]: Models.DataExport.NumericsValue };
         }
         interface NumericsValue {
             timestamp: Date;
@@ -81,7 +85,7 @@ export namespace Models {
             name: string;
         }
         interface WaveData extends Models.DataExport.IMonitorData {
-            measurementType: Enums.MeasurementType;
+            measurementType: string;
             timestampFirstDataPoint: Date;
             sampleRate: number;
             values: System.Single[];

@@ -36,6 +36,8 @@ public class PhilipsIntellivueNumericsAndWavesExtractor
                     {
                         case SampleArrayObservedValue sampleArray:
                         {
+                            if(sampleArray.Values.Values.Length == 0)
+                                continue;
                             if (!TryTranslateToMeasurementType(pollResult.ObjectType, sampleArray.PhysioId, out var measurementType))
                                 continue;
                             if(sampleArray.State != MeasurementState.VALID)
