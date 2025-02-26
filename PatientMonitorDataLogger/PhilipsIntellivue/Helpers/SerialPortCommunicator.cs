@@ -134,6 +134,7 @@ public class SerialPortCommunicator : IDisposable
                     outgoingMessages = new();
                 }
             }
+            messageCollection.Clear();
             ConnectionStatusChanged?.Invoke(this, MonitorConnectionChangeEventType.Disconnected);
         }
     }

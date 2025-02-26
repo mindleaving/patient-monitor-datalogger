@@ -77,9 +77,10 @@ public class SimulatedPhilipsIntellivueMonitor : IDisposable
                             }
                             break;
                         case AssociationCommandType.RequestRelease:
-                            var releaseResponseMessage = messageCreator.CreateAssociationReleaseResponse();
-                            serialPortCommunicator.Enqueue(releaseResponseMessage);
+                        {
+                            ReleaseAssociation();
                             break;
+                        }
                     }
                     break;
                 case DataExportCommandMessage dataExportCommandMessage:
@@ -146,6 +147,16 @@ public class SimulatedPhilipsIntellivueMonitor : IDisposable
         {
             Log($"Couldn't process message: {e.Message}");
         }
+    }
+
+    private void ReleaseAssociation()
+    {
+        if(CurrentAssociation == null)
+            return;
+        CurrentAssociation = null;
+        ClearPeriodicPollReplies();
+        var releaseResponseMessage = messageCreator.CreateAssociationReleaseResponse();
+        serialPortCommunicator.Enqueue(releaseResponseMessage);
     }
 
     private void HandleExtendedPollRequest(
@@ -234,6 +245,8 @@ public class SimulatedPhilipsIntellivueMonitor : IDisposable
     private void AbortConnection(
         object? state)
     {
+        if(CurrentAssociation == null)
+            return;
         var abortMessage = messageCreator.CreateAssociationAbort();
         serialPortCommunicator.Enqueue(abortMessage);
         ClearPeriodicPollReplies();
@@ -254,6 +267,7 @@ public class SimulatedPhilipsIntellivueMonitor : IDisposable
     public void Stop()
     {
         ClearPeriodicPollReplies();
+        AbortConnection(null);
         serialPortCommunicator.Stop();
     }
 
