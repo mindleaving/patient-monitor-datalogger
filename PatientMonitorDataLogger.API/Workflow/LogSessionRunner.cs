@@ -115,14 +115,14 @@ public abstract class LogSessionRunner : ILogSessionRunner
     {
         File.WriteAllText(
             Path.Combine(logSessionOutputDirectory, "patient.json"), 
-            JsonConvert.SerializeObject(patientInfo));
+            JsonConvert.SerializeObject(patientInfo, Formatting.Indented, Constants.JsonSerializerSettings));
     }
 
     private void WriteSettings()
     {
         File.WriteAllText(
             Path.Combine(logSessionOutputDirectory, "settings.json"), 
-            JsonConvert.SerializeObject(logSessionSettings));
+            JsonConvert.SerializeObject(logSessionSettings, Formatting.Indented, Constants.JsonSerializerSettings));
     }
 
     protected IWaveWriter CreateWaveWriter(
