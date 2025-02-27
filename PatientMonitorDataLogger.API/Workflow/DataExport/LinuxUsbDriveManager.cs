@@ -1,4 +1,5 @@
-﻿using PatientMonitorDataLogger.API.Models.DataExport;
+﻿using System.Text.RegularExpressions;
+using PatientMonitorDataLogger.API.Models.DataExport;
 
 namespace PatientMonitorDataLogger.API.Workflow.DataExport;
 
@@ -6,9 +7,10 @@ public class LinuxUsbDriveManager : IUsbDriveManager
 {
     public List<UsbDriveInfo> DiscoverUsbDrives()
     {
-        return DriveInfo.GetDrives()
-            .Where(usbDrive => usbDrive.DriveType == DriveType.Removable && usbDrive.IsReady)
-            .Select(x => new UsbDriveInfo(x.RootDirectory.FullName, TryGetLabel(x)))
+        var mounts = File.ReadAllLines("/proc/mounts").Select(ParseMountEntry).Where(mount => mount != null).Cast<MountEntry>();
+        return mounts
+            .Where(mount => mount.DevicePath.StartsWith("/") && mount.MountPoint.StartsWith("/media/"))
+            .Select(mount => new UsbDriveInfo(mount.MountPoint, mount.MountPoint))
             .ToList();
     }
 
@@ -25,18 +27,31 @@ public class LinuxUsbDriveManager : IUsbDriveManager
         }
     }
 
-    private string? TryGetLabel(
-        DriveInfo driveInfo)
+    private MountEntry? ParseMountEntry(string line)
     {
-        try
-        {
-            if(driveInfo.IsReady)
-                return driveInfo.VolumeLabel;
+        var splitted = Regex.Split(line, "\\s+");
+        if (splitted.Length < 3)
             return null;
-        }
-        catch
+        var devicePath = splitted[0];
+        var mountPoint = splitted[1];
+        var options = splitted[2];
+        return new MountEntry(devicePath, mountPoint, options);
+    }
+
+    private class MountEntry
+    {
+        public MountEntry(
+            string devicePath,
+            string mountPoint,
+            string options)
         {
-            return null;
+            DevicePath = devicePath;
+            MountPoint = mountPoint;
+            Options = options;
         }
+
+        public string DevicePath { get; }
+        public string MountPoint { get; }
+        public string Options { get; }
     }
 }
