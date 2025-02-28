@@ -55,10 +55,20 @@ public class PhilipsIntellivueLogSessionRunner : LogSessionRunner
             throw new InvalidOperationException("Monitor client is not initialized");
         monitorClient.NewMessage += HandleMonitorMessage;
         monitorClient.ConnectionStatusChanged += OnConnectionStatusChanged;
-        monitorClient.Connect(
-            TimeSpan.FromSeconds(1),
-            ExtendedPollProfileOptions.POLL_EXT_PERIOD_NU_1SEC | ExtendedPollProfileOptions.POLL_EXT_PERIOD_RTSA | ExtendedPollProfileOptions.POLL_EXT_ENUM);
+        var pollOptions = ExtendedPollProfileOptions.None;
+        if (logSessionSettings.MonitorDataSettings.IncludeNumerics)
+            pollOptions |= ExtendedPollProfileOptions.POLL_EXT_PERIOD_NU_1SEC;
+        if (logSessionSettings.MonitorDataSettings.IncludeWaves)
+            pollOptions |= ExtendedPollProfileOptions.POLL_EXT_PERIOD_RTSA;
+        monitorClient.Connect(TimeSpan.FromSeconds(1), pollOptions);
         monitorClient.StartPolling(logSessionSettings.MonitorDataSettings);
+        monitorClient.SetWavePriorityList(
+        [
+            Waves.NLS_NOM_PRESS_BLD_ART_ABP.Label,
+            Waves.NLS_NOM_PRESS_BLD_ART.Label,
+            Waves.NLS_NOM_PULS_OXIM_PLETH.Label,
+            Waves.NLS_NOM_RESP.Label
+        ]);
         if(logSessionSettings.MonitorDataSettings.IncludePatientInfo)
             monitorClient.SendPatientDemographicsRequest();
         connectTime = DateTime.UtcNow;
@@ -68,7 +78,7 @@ public class PhilipsIntellivueLogSessionRunner : LogSessionRunner
         object? sender,
         ICommandMessage message)
     {
-        //WriteRawMessage(message);
+        WriteRawMessage(message);
         if (patientInfoExtractor.TryExtract(LogSessionId, message, out var patientInfo))
             OnPatientInfoAvailable(this, patientInfo!);
         foreach (var monitorData in numericsAndWavesExtractor.Extract(LogSessionId, message))
@@ -99,7 +109,7 @@ public class PhilipsIntellivueLogSessionRunner : LogSessionRunner
     {
         File.AppendAllText(
             Path.Combine(logSessionOutputDirectory, "messages.json"),
-            JsonConvert.SerializeObject(message) + Environment.NewLine);
+            JsonConvert.SerializeObject(message, Constants.JsonSerializerSettings) + Environment.NewLine);
     }
 
     protected override void StopImpl()

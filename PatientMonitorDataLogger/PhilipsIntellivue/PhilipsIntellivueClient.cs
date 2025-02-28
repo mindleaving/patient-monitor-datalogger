@@ -75,7 +75,10 @@ public class PhilipsIntellivueClient : IDisposable, IAsyncDisposable
 
             try
             {
-                var mdsCreateEventReport = WaitForDataExportCommandMessage(RemoteOperationType.Invoke, DataExportCommandType.ConfirmedEventReport);
+                var mdsCreateEventReport = WaitForDataExportCommandMessage(
+                    TimeSpan.FromSeconds(10),
+                    RemoteOperationType.Invoke,
+                    DataExportCommandType.ConfirmedEventReport);
                 SendMdsCreateEventResult(mdsCreateEventReport);
             }
             catch
@@ -134,7 +137,7 @@ public class PhilipsIntellivueClient : IDisposable, IAsyncDisposable
         var associationRequestMessage = messageCreator.CreateAssociationRequest(
             minimumPollPeriod,
             pollOptions);
-        serialPortCommunicator!.Enqueue(associationRequestMessage);
+        Send(associationRequestMessage);
     }
 
     private AssociationCommandMessage WaitForAssociationCommandMessage(
@@ -160,10 +163,11 @@ public class PhilipsIntellivueClient : IDisposable, IAsyncDisposable
         var invokeId = mdsCreateEventReport.RemoteOperationData.InvokeId;
         var managedObject = ((MdsCreateInfo)((EventReportCommand)((RemoteOperationInvoke)mdsCreateEventReport.RemoteOperationData).Data).Data).ManagedObject;
         var mdsCreateEventReportResult = messageCreator.CreateMdsCreateEventResult(Constants.DefaultPresentationContextId, invokeId, managedObject);
-        serialPortCommunicator!.Enqueue(mdsCreateEventReportResult);
+        Send(mdsCreateEventReportResult);
     }
 
     private DataExportCommandMessage WaitForDataExportCommandMessage(
+        TimeSpan maxWaitTime,
         RemoteOperationType operationType,
         DataExportCommandType? commandType = null,
         OIDType? actionType = null)
@@ -201,7 +205,7 @@ public class PhilipsIntellivueClient : IDisposable, IAsyncDisposable
                 return false;
             });
         serialPortCommunicator!.WaitForMessage(waitRequest);
-        if(!waitRequest.WaitHandle.WaitOne(TimeSpan.FromSeconds(10)))
+        if(!waitRequest.WaitHandle.WaitOne(maxWaitTime))
             throw new TimeoutException($"Didn't receive Data Export command message with operation {operationType} and command {commandType}");
         return (DataExportCommandMessage)waitRequest.MatchingItem!;
     }
@@ -233,7 +237,7 @@ public class PhilipsIntellivueClient : IDisposable, IAsyncDisposable
                 TimeSpan.FromSeconds(60)),
             _ => throw new ArgumentOutOfRangeException(nameof(settings.PollMode))
         };
-        serialPortCommunicator!.Enqueue(pollMessage);
+        Send(pollMessage);
     }
 
     private void SendNumericsPollRequest(
@@ -251,7 +255,7 @@ public class PhilipsIntellivueClient : IDisposable, IAsyncDisposable
                 TimeSpan.FromSeconds(60)),
             _ => throw new ArgumentOutOfRangeException(nameof(settings.PollMode))
         };
-        serialPortCommunicator!.Enqueue(pollMessage);
+        Send(pollMessage);
     }
 
     private void SendWavesPollRequest(
@@ -269,7 +273,7 @@ public class PhilipsIntellivueClient : IDisposable, IAsyncDisposable
                 TimeSpan.FromSeconds(30)),
             _ => throw new ArgumentOutOfRangeException(nameof(settings.PollMode))
         };
-        serialPortCommunicator!.Enqueue(pollMessage);
+        Send(pollMessage);
     }
 
     public void SendPatientDemographicsRequest()
@@ -278,7 +282,43 @@ public class PhilipsIntellivueClient : IDisposable, IAsyncDisposable
             Constants.DefaultPresentationContextId,
             PollObjectTypes.PatientDemographics,
             PollAttributeGroups.PatientDemographics.All);
-        serialPortCommunicator!.Enqueue(patientDemographicsRequestMessage);
+        Send(patientDemographicsRequestMessage);
+    }
+
+    public void SetWavePriorityList(
+        ICollection<Labels> waveLabels)
+    {
+        var setPriorityListRequest = messageCreator.CreateSetPriorityListRequest(
+            Constants.DefaultPresentationContextId,
+            MonitorDataType.Wave,
+            new Models.List<TextId>(waveLabels.Select(label => new TextId(label)).ToList()));
+        Send(setPriorityListRequest);
+    }
+
+    public void Send(ICommandMessage message) => serialPortCommunicator!.Enqueue(message);
+
+    public async Task<DataExportCommandMessage> SendAndWait(
+        DataExportCommandMessage request,
+        TimeSpan maxWaitTime)
+    {
+        if (request.RemoteOperationData is not RemoteOperationInvoke invokeOperation)
+            throw new ArgumentException("Request must be an invoke-command");
+        Send(request);
+        OIDType? actionType = invokeOperation.Data is ActionCommand actionCommand ? actionCommand.ActionType : null;
+
+        return await Task.Run(() => WaitForDataExportCommandMessage(
+            maxWaitTime,
+            request.RemoteOperationHeader.Type,
+            invokeOperation.CommandType,
+            actionType));
+    }
+
+    public void StopPolling()
+    {
+        alertPollTimer.Change(Timeout.Infinite, Timeout.Infinite);
+        numericsPollTimer.Change(Timeout.Infinite, Timeout.Infinite);
+        wavesPollTimer.Change(Timeout.Infinite, Timeout.Infinite);
+        Log("Stopped polling for alerts and numerics");
     }
 
     public void Disconnect()
@@ -330,14 +370,6 @@ public class PhilipsIntellivueClient : IDisposable, IAsyncDisposable
             }
             Log("Disconnected");
         }
-    }
-
-    public void StopPolling()
-    {
-        alertPollTimer.Change(Timeout.Infinite, Timeout.Infinite);
-        numericsPollTimer.Change(Timeout.Infinite, Timeout.Infinite);
-        wavesPollTimer.Change(Timeout.Infinite, Timeout.Infinite);
-        Log("Stopped polling for alerts and numerics");
     }
 
     private void SendAssociationReleaseRequest()

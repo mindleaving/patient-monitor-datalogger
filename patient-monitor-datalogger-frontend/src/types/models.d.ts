@@ -86,6 +86,7 @@ export namespace Models {
             timestamp: Date;
             value: number;
             unit: string;
+            state: Enums.MeasurementState;
         }
         interface UsbDriveInfo {
             path: string;

@@ -40,7 +40,7 @@ public class PhilipsIntellivueNumericsAndWavesExtractor
                                 continue;
                             if (!TryTranslateToMeasurementType(pollResult.ObjectType, sampleArray.PhysioId, out var measurementType))
                                 continue;
-                            if(sampleArray.State != MeasurementState.VALID)
+                            if(sampleArray.State == MeasurementState.INVALID)
                                 continue;
                             var sampleRate = sampleArray.Values.Values.Length * 4; // 4 messages per second
                             var translatedWaveSampleValues = TranslateWaveValues(sampleArray.Values.Values);
@@ -57,12 +57,13 @@ public class PhilipsIntellivueNumericsAndWavesExtractor
                         {
                             if(!TryTranslateToMeasurementType(pollResult.ObjectType, numericsObservation.PhysioId, out var measurementType))
                                 continue;
-                            if(numericsObservation.State != MeasurementState.VALID)
+                            if(numericsObservation.State == MeasurementState.INVALID)
                                 continue;
                             numericsData.Values[measurementType] = new(
                                 timestamp,
                                 numericsObservation.Value.Value,
-                                UnitCodesMap.GetValueOrDefault(numericsObservation.UnitCode, null));
+                                UnitCodesMap.GetValueOrDefault(numericsObservation.UnitCode, null),
+                                numericsObservation.State);
                             break;
                         }
                     }

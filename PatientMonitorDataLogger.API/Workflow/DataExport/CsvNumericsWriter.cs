@@ -37,11 +37,14 @@ public class CsvNumericsWriter : AsyncFileWriter<NumericsData>, INumericsWriter
                 hasNewMeasurementTypes = true;
                 columnIndex = columnCount;
                 header.Add(value.Key, columnIndex);
+                header.Add(value.Key + "_STATE", columnIndex + 1);
                 serializedValues.Add(string.Empty);
-                columnCount++;
+                serializedValues.Add(string.Empty);
+                columnCount += 2;
             }
 
             serializedValues[columnIndex] = value.Value.Value.ToString("F2", CultureInfo.InvariantCulture);
+            serializedValues[columnIndex + 1] = value.Value.State.ToString();
         }
 
         if (hasNewMeasurementTypes)

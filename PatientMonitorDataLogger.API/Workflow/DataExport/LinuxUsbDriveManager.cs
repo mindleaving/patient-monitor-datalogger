@@ -23,7 +23,7 @@ public class LinuxUsbDriveManager : IUsbDriveManager
         foreach (var sourceFilePath in Directory.EnumerateFiles(sourcePath))
         {
             var targetFilePath = Path.Combine(targetPath, Path.GetFileName(sourceFilePath));
-            File.Copy(sourceFilePath, targetFilePath);
+            File.Copy(sourceFilePath, targetFilePath, overwrite: true);
         }
     }
 

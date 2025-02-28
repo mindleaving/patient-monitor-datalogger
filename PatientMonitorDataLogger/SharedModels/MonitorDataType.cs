@@ -1,4 +1,4 @@
-﻿namespace PatientMonitorDataLogger.API.Models.DataExport;
+﻿namespace PatientMonitorDataLogger.SharedModels;
 
 public enum MonitorDataType
 {

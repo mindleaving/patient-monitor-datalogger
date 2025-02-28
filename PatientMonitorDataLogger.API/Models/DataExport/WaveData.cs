@@ -1,4 +1,6 @@
-﻿namespace PatientMonitorDataLogger.API.Models.DataExport;
+﻿using PatientMonitorDataLogger.SharedModels;
+
+namespace PatientMonitorDataLogger.API.Models.DataExport;
 
 public class WaveData: IMonitorData
 {

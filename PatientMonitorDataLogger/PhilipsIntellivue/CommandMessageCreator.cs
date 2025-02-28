@@ -1,4 +1,6 @@
-﻿using PatientMonitorDataLogger.PhilipsIntellivue.Models;
+﻿using System.ComponentModel.DataAnnotations;
+using PatientMonitorDataLogger.PhilipsIntellivue.Models;
+using PatientMonitorDataLogger.SharedModels;
 
 namespace PatientMonitorDataLogger.PhilipsIntellivue;
 
@@ -203,6 +205,118 @@ public class CommandMessageCreator
             new SessionPresentationHeader(presentationContextId),
             remoteOperationHeader,
             remoteOperationResult);
+    }
+
+    public DataExportCommandMessage CreateGetPriorityListRequest(
+        ushort presentationContextId,
+        MonitorDataType dataType)
+    {
+        var priorityListAttributeId = GetPriorityListAttributeId(dataType);
+        return CreateGetRequest(presentationContextId, new AttributeIdList([priorityListAttributeId]));
+    }
+
+    public DataExportCommandMessage CreateGetRequest(
+        ushort presentationContextId,
+        AttributeIdList attributeIds)
+    {
+        var invokeId = nextInvokeId++;
+        var getCommand = new GetCommand(new(OIDType.NOM_MOC_VMS_MDS, new(0, 0)), attributeIds);
+        var getCommandBytes = getCommand.Serialize();
+        var payload = new RemoteOperationInvoke(invokeId, DataExportCommandType.Get, (ushort)getCommandBytes.Length, getCommand);
+        var payloadBytes = payload.Serialize();
+        return new DataExportCommandMessage(
+            new SessionPresentationHeader(presentationContextId),
+            new RemoteOperationHeader(RemoteOperationType.Invoke, (ushort)payloadBytes.Length),
+            payload);
+    }
+
+    public DataExportCommandMessage CreateGetPriorityListResponse(
+        ushort presentationContextId,
+        ushort invokeId,
+        OIDType priorityListAttributeId,
+        Models.List<TextId> priorityList)
+    {
+        if (priorityListAttributeId != OIDType.NOM_ATTR_POLL_RTSA_PRIO_LIST && priorityListAttributeId != OIDType.NOM_ATTR_POLL_NU_PRIO_LIST)
+            throw new ArgumentOutOfRangeException(nameof(priorityListAttributeId));
+        return CreateGetResponse(
+            presentationContextId,
+            invokeId,
+            new Models.List<AttributeValueAssertion>(
+            [
+                new AttributeValueAssertion((ushort)priorityListAttributeId, priorityList)
+            ]));
+    }
+
+    public DataExportCommandMessage CreateGetResponse(
+        ushort presentationContextId,
+        ushort invokeId,
+        Models.List<AttributeValueAssertion> attributes)
+    {
+        var result = new GetResultCommand(new(OIDType.NOM_MOC_VMS_MDS, new(0, 0)), attributes);
+        var resultBytes = result.Serialize();
+        var payload = new RemoteOperationResult(invokeId, DataExportCommandType.Get, (ushort)resultBytes.Length, result);
+        var payloadBytes = payload.Serialize();
+        return new DataExportCommandMessage(
+            new SessionPresentationHeader(presentationContextId),
+            new RemoteOperationHeader(RemoteOperationType.Invoke, (ushort)payloadBytes.Length),
+            payload);
+    }
+
+    public DataExportCommandMessage CreateSetPriorityListRequest(
+        ushort presentationContextId,
+        MonitorDataType dataType,
+        Models.List<TextId> priorityList)
+    {
+        var invokeId = nextInvokeId++;
+        var priorityListAttributeId = GetPriorityListAttributeId(dataType);
+        var modifications = new Models.List<AttributeModification>(
+        [
+            new AttributeModification(
+                ModifyOperator.Replace, 
+                new AttributeValueAssertion((ushort)priorityListAttributeId, priorityList))
+        ]);
+        var setCommand = new SetCommand(new(OIDType.NOM_MOC_VMS_MDS, new(0, 0)), modifications);
+        var setCommandBytes = setCommand.Serialize();
+        var payload = new RemoteOperationInvoke(invokeId, DataExportCommandType.ConfirmedSet, (ushort)setCommandBytes.Length, setCommand);
+        var payloadBytes = payload.Serialize();
+        return new DataExportCommandMessage(
+            new SessionPresentationHeader(presentationContextId),
+            new RemoteOperationHeader(RemoteOperationType.Invoke, (ushort)payloadBytes.Length),
+            payload);
+    }
+
+    private static OIDType GetPriorityListAttributeId(
+        MonitorDataType dataType)
+    {
+        var priorityListAttributeId = dataType switch
+        {
+            MonitorDataType.Numerics => OIDType.NOM_ATTR_POLL_NU_PRIO_LIST,
+            MonitorDataType.Wave => OIDType.NOM_ATTR_POLL_RTSA_PRIO_LIST,
+            _ => throw new ArgumentOutOfRangeException(nameof(dataType))
+        };
+        return priorityListAttributeId;
+    }
+
+    public DataExportCommandMessage CreateSetPriorityListResponse(
+        ushort presentationContextId,
+        ushort invokeId,
+        OIDType priorityListAttributeId,
+        Models.List<TextId> priorityList)
+    {
+        if (priorityListAttributeId != OIDType.NOM_ATTR_POLL_RTSA_PRIO_LIST && priorityListAttributeId != OIDType.NOM_ATTR_POLL_NU_PRIO_LIST)
+            throw new ArgumentOutOfRangeException(nameof(priorityListAttributeId));
+        var result = new SetResultCommand(
+            new(OIDType.NOM_MOC_VMS_MDS, new(0, 0)), 
+            new Models.List<AttributeValueAssertion>([ 
+                new AttributeValueAssertion((ushort)priorityListAttributeId, priorityList) 
+            ]));
+        var resultBytes = result.Serialize();
+        var payload = new RemoteOperationResult(invokeId, DataExportCommandType.ConfirmedSet, (ushort)resultBytes.Length, result);
+        var payloadBytes = payload.Serialize();
+        return new DataExportCommandMessage(
+            new SessionPresentationHeader(presentationContextId),
+            new RemoteOperationHeader(RemoteOperationType.Invoke, (ushort)payloadBytes.Length),
+            payload);
     }
 
     public DataExportCommandMessage CreateSinglePollRequest(
