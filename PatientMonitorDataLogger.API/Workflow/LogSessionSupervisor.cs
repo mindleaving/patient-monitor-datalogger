@@ -36,21 +36,38 @@ public class LogSessionSupervisor : IDisposable, IAsyncDisposable
     {
         foreach (var logSession in logSessions.Values)
         {
+            if (logSessionsScheduledForRestart.TryRemove(logSession.Id, out _))
+            {
+                // Restart
+                try
+                {
+                    Console.WriteLine($"Restarting log session {logSession.Id}");
+                    logSession.Start();
+                    Console.WriteLine($"Successfully restarted log session {logSession.Id}");
+                }
+                catch (Exception e)
+                {
+                    // Ignore
+                    Console.WriteLine($"Could not restarted log session {logSession.Id}: {e.Message}");
+                }
+                continue;
+            }
             if(!logSession.ShouldBeRunning)
                 continue;
             if(logSession.Status.IsRunning)
                 continue;
-            if (logSessionsScheduledForRestart.TryRemove(logSession.Id, out _))
+
+            // Schedule for restart
+            try
             {
-                // Restart
-                logSession.Start();
-            }
-            else
-            {
-                // Schedule for restart
                 logSession.Stop();
-                logSessionsScheduledForRestart.TryAdd(logSession.Id, logSession);
             }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Scheduled log session {logSession.Id} for restart, because it stopped: {e.Message}");
+            }
+            logSession.ShouldBeRunning = true;
+            logSessionsScheduledForRestart.TryAdd(logSession.Id, logSession);
         }
     }
 

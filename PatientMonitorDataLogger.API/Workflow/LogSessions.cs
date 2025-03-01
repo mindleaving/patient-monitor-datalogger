@@ -101,6 +101,7 @@ public class LogSessions
         {
             logSession.NewNumericsData -= DistributeNumericsData;
             logSession.PatientInfoAvailable -= DistributePatientInfo;
+            logSession.StatusChanged -= DistributeStatusChange;
             logSessionSupervisor.Unregister(logSession);
             return true;
         }

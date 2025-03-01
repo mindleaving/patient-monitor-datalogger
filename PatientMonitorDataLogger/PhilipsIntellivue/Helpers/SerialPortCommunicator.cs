@@ -171,6 +171,8 @@ public class SerialPortCommunicator : IDisposable
     public void Dispose()
     {
         Stop();
+        frameReader.FrameAvailable -= QueueMessage;
+        frameReader.SerialPortFaulted -= OnSerialPortFaulted;
         frameReader.Dispose();
         messageCollection.Dispose();
     }

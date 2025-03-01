@@ -187,6 +187,11 @@ public class PhilipsIntellivueLogSessionRunner : LogSessionRunner
         {
             monitorClient?.StopPolling();
             monitorClient?.Disconnect();
+            if(monitorClient != null)
+            {
+                monitorClient.NewMessage -= HandleMonitorMessage;
+                monitorClient.ConnectionStatusChanged -= OnConnectionStatusChanged;
+            }
         }
         catch
         {

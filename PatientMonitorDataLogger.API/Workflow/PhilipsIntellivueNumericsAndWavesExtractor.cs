@@ -75,18 +75,6 @@ public class PhilipsIntellivueNumericsAndWavesExtractor
             yield return numericsData;
     }
 
-    private double GetSampleRate(
-        string measurementType)
-    {
-        return 128;
-        switch (measurementType)
-        {
-            
-        }
-
-        throw new NotImplementedException();
-    }
-
     private IList<float> TranslateWaveValues(
         ushort[] sampleValues)
     {

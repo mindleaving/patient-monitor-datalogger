@@ -380,6 +380,11 @@ public class PhilipsIntellivueClient : IDisposable, IAsyncDisposable
     public void Dispose()
     {
         Disconnect();
+        if(serialPortCommunicator != null)
+        {
+            serialPortCommunicator.NewMessage -= ReportNewMessage;
+            serialPortCommunicator.ConnectionStatusChanged -= OnConnectionStatusChanged;
+        }
     }
 
     public async ValueTask DisposeAsync()

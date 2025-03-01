@@ -33,7 +33,7 @@ public class LogSession : IDisposable, IAsyncDisposable
     public Dictionary<string, NumericsValue> LatestMeasurements { get; } = new();
     public event EventHandler<NumericsData>? NewNumericsData;
 
-    public bool ShouldBeRunning { get; private set; }
+    public bool ShouldBeRunning { get; set; }
     public LogStatus Status => sessionRunner.Status;
     public event EventHandler<LogStatus>? StatusChanged;
 
@@ -53,13 +53,15 @@ public class LogSession : IDisposable, IAsyncDisposable
     public void Dispose()
     {
         Stop();
+        sessionRunner.PatientInfoAvailable -= UpdatePatientInfo;
+        sessionRunner.StatusChanged -= SessionRunner_StatusChanged;
+        sessionRunner.NewNumericsData -= UpdateLatestMeasurements;
         sessionRunner.Dispose();
     }
 
     public async ValueTask DisposeAsync()
     {
-        Stop();
-        await sessionRunner.DisposeAsync();
+        Dispose();
     }
 
     private void UpdatePatientInfo(

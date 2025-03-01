@@ -23,3 +23,19 @@ export const waveTypeNames: { [waveType:string]: string } = {
     [WaveType.Respiration]: "Respiration",
     [WaveType.CO2]: "CO2",
 }
+export const formatDate = (dateOrString: Date | string) => {
+    const date = new Date(dateOrString);
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    const hours = date.getHours();
+    const minutes = date.getMinutes();
+    const seconds = date.getSeconds();
+    return `${padLeft(year, 4, '0')}-${padLeft(month, 2, '0')}-${padLeft(day, 2, '0')} ${padLeft(hours, 2, '0')}:${padLeft(minutes, 2, '0')}:${padLeft(seconds, 2, '0')}`;
+}
+const padLeft = (number: number, length: number, padding: string) => {
+    if(padding.length !== 1) {
+        throw new Error("Padding must be one character");
+    }
+    return (number + '').padStart(length, padding);
+}

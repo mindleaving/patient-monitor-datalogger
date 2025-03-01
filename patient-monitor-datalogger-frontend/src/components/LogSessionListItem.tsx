@@ -9,6 +9,7 @@ import { CopyToUsbModal } from "./CopyToUsbModal";
 import { confirmAlert } from "react-confirm-alert";
 import { MonitorSettingsDescription } from "./MonitorSettingsDescription";
 import { MonitorDataSettingsDescription } from "./MonitorDataSettingsDescription";
+import { formatDate } from "../helpers/Formatters";
 
 interface LogSessionListItemProps {
     logSession: Models.LogSession;
@@ -183,7 +184,7 @@ export const LogSessionListItem = (props: LogSessionListItemProps) => {
                         <span className="text-secondary">{numericsValue.unit}</span>
                     </div>
                     <div>
-                        <small>{numericsValue.timestamp as any}</small>
+                        <small>{formatDate(numericsValue.timestamp as unknown as string)}</small>
                     </div>
                 </Col>);
             })}
