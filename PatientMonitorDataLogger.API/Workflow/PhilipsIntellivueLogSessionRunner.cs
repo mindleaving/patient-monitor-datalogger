@@ -3,6 +3,7 @@ using PatientMonitorDataLogger.API.Models;
 using PatientMonitorDataLogger.API.Models.DataExport;
 using PatientMonitorDataLogger.PhilipsIntellivue;
 using PatientMonitorDataLogger.PhilipsIntellivue.Models;
+using PatientMonitorDataLogger.SharedModels;
 
 namespace PatientMonitorDataLogger.API.Workflow;
 
@@ -62,16 +63,84 @@ public class PhilipsIntellivueLogSessionRunner : LogSessionRunner
             pollOptions |= ExtendedPollProfileOptions.POLL_EXT_PERIOD_RTSA;
         monitorClient.Connect(TimeSpan.FromSeconds(1), pollOptions);
         monitorClient.StartPolling(logSessionSettings.MonitorDataSettings);
-        monitorClient.SetWavePriorityList(
-        [
-            Waves.NLS_NOM_PRESS_BLD_ART_ABP.Label,
-            Waves.NLS_NOM_PRESS_BLD_ART.Label,
-            Waves.NLS_NOM_PULS_OXIM_PLETH.Label,
-            Waves.NLS_NOM_RESP.Label
-        ]);
+        if (logSessionSettings.MonitorDataSettings.IncludeWaves && logSessionSettings.MonitorDataSettings.SelectedWaveTypes.Any())
+        {
+            var wavePriorityList = BuildWavePriorityListFromSettings(logSessionSettings.MonitorDataSettings);
+            monitorClient.SetWavePriorityList(wavePriorityList);
+        }
         if(logSessionSettings.MonitorDataSettings.IncludePatientInfo)
             monitorClient.SendPatientDemographicsRequest();
         connectTime = DateTime.UtcNow;
+    }
+
+    private static ICollection<Labels> BuildWavePriorityListFromSettings(
+        MonitorDataSettings monitorDataSettings)
+    {
+        if (monitorDataSettings.SelectedWaveTypes.Count == 0)
+        {
+            return
+            [
+                Waves.NLS_NOM_PRESS_BLD_ART_ABP.Label,
+                Waves.NLS_NOM_PRESS_BLD_ART.Label,
+                Waves.NLS_NOM_PULS_OXIM_PLETH.Label,
+                Waves.NLS_NOM_RESP.Label
+            ];
+        }
+        var waveLabels = new System.Collections.Generic.List<Labels>();
+        foreach (var selectedWaveType in monitorDataSettings.SelectedWaveTypes)
+        {
+            switch (selectedWaveType)
+            {
+                case WaveType.EcgDefault:
+                    waveLabels.Add(Labels.NLS_NOM_ECG_ELEC_POTL);
+                    break;
+                case WaveType.EcgI:
+                    waveLabels.Add(Labels.NLS_NOM_ECG_ELEC_POTL_I);
+                    break;
+                case WaveType.EcgII:
+                    waveLabels.Add(Labels.NLS_NOM_ECG_ELEC_POTL_II);
+                    break;
+                case WaveType.EcgIII:
+                    waveLabels.Add(Labels.NLS_NOM_ECG_ELEC_POTL_III);
+                    break;
+                case WaveType.EcgV1:
+                    waveLabels.Add(Labels.NLS_NOM_ECG_ELEC_POTL_V1);
+                    break;
+                case WaveType.EcgV2:
+                    waveLabels.Add(Labels.NLS_NOM_ECG_ELEC_POTL_V2);
+                    break;
+                case WaveType.EcgV3:
+                    waveLabels.Add(Labels.NLS_NOM_ECG_ELEC_POTL_V3);
+                    break;
+                case WaveType.EcgV4:
+                    waveLabels.Add(Labels.NLS_NOM_ECG_ELEC_POTL_V4);
+                    break;
+                case WaveType.EcgV5:
+                    waveLabels.Add(Labels.NLS_NOM_ECG_ELEC_POTL_V5);
+                    break;
+                case WaveType.EcgV6:
+                    waveLabels.Add(Labels.NLS_NOM_ECG_ELEC_POTL_V6);
+                    break;
+                case WaveType.Pleth:
+                    waveLabels.Add(Labels.NLS_NOM_PULS_OXIM_PLETH);
+                    break;
+                case WaveType.Pleth2:
+                    waveLabels.Add(Labels.NLS_NOM_EMFC_PLETH2);
+                    break;
+                case WaveType.ArterialBloodPressure:
+                    waveLabels.Add(Labels.NLS_NOM_PRESS_BLD_ART_ABP);
+                    waveLabels.Add(Labels.NLS_NOM_PRESS_BLD_ART);
+                    break;
+                case WaveType.CO2:
+                    waveLabels.Add(Labels.NLS_NOM_AWAY_CO2);
+                    break;
+                case WaveType.Respiration:
+                    waveLabels.Add(Labels.NLS_NOM_RESP);
+                    break;
+            }
+        }
+
+        return waveLabels;
     }
 
     private void HandleMonitorMessage(

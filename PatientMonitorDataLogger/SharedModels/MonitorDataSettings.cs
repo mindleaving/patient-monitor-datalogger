@@ -8,5 +8,5 @@ public class MonitorDataSettings
     public bool IncludePatientInfo { get; set; }
 
     public List<string> SelectedNumericsTypes { get; set; }
-    public List<string> SelectedWaveTypes { get; set; }
+    public List<WaveType> SelectedWaveTypes { get; set; }
 }

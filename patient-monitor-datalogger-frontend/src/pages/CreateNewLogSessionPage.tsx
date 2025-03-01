@@ -1,26 +1,24 @@
-import { FormEvent, useCallback, useEffect, useState } from "react";
+import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 import { loadObject, sendPostRequest } from "../communication/ApiRequests";
 import { Models } from "../types/models";
-import { PatientMonitorType } from "../types/enums";
-import { Form, FormCheck, FormControl, FormGroup, FormLabel } from "react-bootstrap";
+import { PatientMonitorType, WaveType } from "../types/enums";
+import { Alert, Button, Col, Form, FormCheck, FormControl, FormGroup, FormLabel, Row } from "react-bootstrap";
 import { Center } from "../components/Center";
 import { AsyncButton } from "../components/AsyncButton";
 import { useNavigate } from "react-router";
 import { showSuccessAlert } from "../helpers/AlertHelpers";
+import { monitorNames, waveTypeNames } from "../helpers/Formatters";
 
 interface CreateNewLogSessionPageProps {
     onLogSessionCreated: (logSession: Models.LogSession) => void;
 }
 
-const monitorNames: { [key:string]: string } = {
-    [PatientMonitorType.PhilipsIntellivue]: "Philips Intellivue",
-    [PatientMonitorType.SimulatedPhilipsIntellivue]: "Simulated Philips Intellivue",
-    [PatientMonitorType.GEDash]: "GE Dash",
-}
+const availableWaveTypes: WaveType[] = Object.values(WaveType).filter(x => x !== WaveType.Unknown);
 export const CreateNewLogSessionPage = (props: CreateNewLogSessionPageProps) => {
 
     const { onLogSessionCreated } = props;
 
+    const [ sessionName, setSessionName ] = useState<string>('');
     const [ selectedMonitorType, setSelectedMonitorType ] = useState<PatientMonitorType>(PatientMonitorType.PhilipsIntellivue);
     const [ availableSerialPorts, setAvailableSerialPorts ] = useState<string[]>([]);
     const [ serialPortName, setSerialPortName ] = useState<string>();
@@ -29,6 +27,19 @@ export const CreateNewLogSessionPage = (props: CreateNewLogSessionPageProps) => 
     const [ includeNumerics, setIncludeNumerics ] = useState<boolean>(true);
     const [ includeWaves, setIncludeWaves ] = useState<boolean>(false);
     const [ includePatientInfo, setIncludePatientInfo ] = useState<boolean>(true);
+    const [ selectedWaveTypes, setSelectedWaveTypes ] = useState<WaveType[]>([ 
+        WaveType.ArterialBloodPressure, 
+        WaveType.Pleth, 
+        WaveType.Pleth2, 
+        WaveType.Respiration, 
+        WaveType.EcgDefault 
+    ]);
+    const maxWaveCount = useMemo(() => {
+        if(selectedMonitorType === PatientMonitorType.PhilipsIntellivue && serialPortBaudRate <= 19200) { // Bandwidth supports no more than 3-4 waves
+            return 4;
+        }
+        return undefined;
+    }, [ selectedMonitorType, serialPortBaudRate ]);
     const [ csvSeparator, setCsvSeparator ] = useState<string>(';');
     const [ isSubmitting, setIsSubmitting ] = useState<boolean>(false);
     const navigate = useNavigate();
@@ -71,9 +82,10 @@ export const CreateNewLogSessionPage = (props: CreateNewLogSessionPageProps) => 
             includeWaves: includeWaves,
             includePatientInfo: includePatientInfo,
             selectedNumericsTypes: [],
-            selectedWaveTypes: [],
+            selectedWaveTypes: selectedWaveTypes,
         };
         const logSessionSettings: Models.LogSessionSettings = {
+            name: sessionName,
             monitorSettings: monitorSettings,
             monitorDataSettings: monitorDataSettings,
             csvSeparator: csvSeparator,
@@ -114,9 +126,48 @@ export const CreateNewLogSessionPage = (props: CreateNewLogSessionPageProps) => 
         }
     }, [ availableSerialPorts ]);
 
+    const toggleWaveType = (waveType: WaveType, isSelected: boolean) => {
+        setSelectedWaveTypes(state => {
+            if(isSelected) {
+                if(state.includes(waveType)) {
+                    return state;
+                }
+                return state.concat(waveType);
+            } else {
+                if(!state.includes(waveType)) {
+                    return state;
+                }
+                return state.filter(x => x !== waveType);
+            }
+        });
+    }
+
+    const changeWavePriority = (waveType: WaveType, priority: number) => {
+        if(priority < 0 || priority >= selectedWaveTypes.length) {
+            return;
+        }
+        setSelectedWaveTypes(state => {
+            const currentWavePriority = state.indexOf(waveType);
+            if(currentWavePriority < 0) {
+                return state;
+            }
+            const stateCopy = [ ...state ];
+            stateCopy.splice(currentWavePriority, 1);
+            stateCopy.splice(priority, 0, waveType);
+            return stateCopy;
+        });
+    }
+
     return (<>
     <h1>Create new data log session</h1>
     <Form onSubmit={createNewLogSession}>
+        <FormGroup>
+            <FormLabel>Name</FormLabel>
+            <FormControl
+                value={sessionName}
+                onChange={e => setSessionName(e.target.value)}
+            />
+        </FormGroup>
         <FormGroup>
             <FormLabel>Monitor</FormLabel>
             <FormControl required
@@ -125,7 +176,7 @@ export const CreateNewLogSessionPage = (props: CreateNewLogSessionPageProps) => 
                 onChange={e => setSelectedMonitorType(e.target.value as PatientMonitorType)}
             >
                 {Object.keys(PatientMonitorType).filter(x => x !== PatientMonitorType.Unknown).map(x => 
-                    <option key={x} value={x}>{monitorNames[x]}</option>
+                    <option key={x} value={x}>{monitorNames[x] ?? x}</option>
                 )}
             </FormControl>
         </FormGroup>
@@ -158,6 +209,11 @@ export const CreateNewLogSessionPage = (props: CreateNewLogSessionPageProps) => 
             <FormLabel>Parameters to be recorded</FormLabel>
             <div className="ms-3">
                 <FormCheck
+                    checked={includePatientInfo}
+                    onChange={e => setIncludePatientInfo(e.target.checked)}
+                    label="Patient info"
+                />
+                <FormCheck
                     required={!includeNumerics && !includeWaves}
                     checked={includeAlerts}
                     onChange={e => setIncludeAlerts(e.target.checked)}
@@ -175,11 +231,53 @@ export const CreateNewLogSessionPage = (props: CreateNewLogSessionPageProps) => 
                     onChange={e => setIncludeWaves(e.target.checked)}
                     label="Waves (ECG, Pleth,...)"
                 />
-                <FormCheck
-                    checked={includePatientInfo}
-                    onChange={e => setIncludePatientInfo(e.target.checked)}
-                    label="Patient info"
-                />
+                {includeWaves
+                ? <div className="ms-3">
+                    {selectedWaveTypes.map((waveType,priority) => (
+                        <Row className="my-2 align-items-center">
+                            <Col xs="auto">
+                                <Button
+                                    variant="primary"
+                                    onClick={() => changeWavePriority(waveType, priority - 1)}
+                                    disabled={priority === 0}
+                                    className="mx-2"
+                                    size="sm"
+                                >
+                                    <div style={{ rotate: '-90deg' }}>-&gt;</div>
+                                </Button>
+                                <Button
+                                    variant="primary"
+                                    onClick={() => changeWavePriority(waveType, priority + 1)}
+                                    disabled={priority >= selectedWaveTypes.length - 1}
+                                    className="mx-2"
+                                    size="sm"
+                                >
+                                    <div style={{ rotate: '90deg' }}>-&gt;</div>
+                                </Button>
+                            </Col>
+                            <Col>
+                                <FormCheck
+                                    checked={true}
+                                    onChange={e => toggleWaveType(waveType, e.target.checked)}
+                                    label={waveTypeNames[waveType] ?? waveType}
+                                />
+                            </Col>
+                        </Row>
+                    ))}
+                    {maxWaveCount && selectedWaveTypes.length >= maxWaveCount
+                    ? <Alert variant="danger" className="py-1">
+                        Selected baud rate doesn't support any more waves
+                    </Alert> : null}
+                    {availableWaveTypes.filter(waveType => !selectedWaveTypes.includes(waveType)).map(waveType => (
+                        <FormCheck
+                            key={waveType}
+                            checked={false}
+                            onChange={e => toggleWaveType(waveType, e.target.checked)}
+                            label={waveTypeNames[waveType] ?? waveType}
+                            disabled={maxWaveCount && selectedWaveTypes.length >= maxWaveCount}
+                        />
+                    ))}
+                </div> : null}
             </div>
         </FormGroup>
         <FormGroup>

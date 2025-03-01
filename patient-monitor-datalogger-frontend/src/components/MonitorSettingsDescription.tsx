@@ -14,7 +14,7 @@ export const MonitorSettingsDescription = (props: MonitorSettingsDescriptionProp
         { 
             const philipsIntellivueSettings = monitorSettings as Models.PhilipsIntellivuePatientMonitorSettings;
             return (<span>
-                Serial port: {philipsIntellivueSettings.serialPortName} @ {philipsIntellivueSettings.serialPortBaudRate} bit/s
+                Philips Intellivue: Serial port {philipsIntellivueSettings.serialPortName} @ {philipsIntellivueSettings.serialPortBaudRate} bit/s
             </span>);
         }
         case PatientMonitorType.SimulatedPhilipsIntellivue:
@@ -27,7 +27,7 @@ export const MonitorSettingsDescription = (props: MonitorSettingsDescriptionProp
         {
             const geDashSettings = monitorSettings as Models.GEDashPatientMonitorSettings;
             return (<span>
-                Serial port: {geDashSettings.serialPortName} @ {geDashSettings.serialPortBaudRate} bit/s
+                GE Dash: Serial port {geDashSettings.serialPortName} @ {geDashSettings.serialPortBaudRate} bit/s
             </span>);
         }
         default:

@@ -1,3 +1,26 @@
+export enum MonitorDataType {
+    Undefined = "Undefined",
+    Numerics = "Numerics",
+    Wave = "Wave"
+}
+export enum WaveType {
+    Unknown = "Unknown",
+    EcgDefault = "EcgDefault",
+    EcgI = "EcgI",
+    EcgII = "EcgII",
+    EcgIII = "EcgIII",
+    EcgV1 = "EcgV1",
+    EcgV2 = "EcgV2",
+    EcgV3 = "EcgV3",
+    EcgV4 = "EcgV4",
+    EcgV5 = "EcgV5",
+    EcgV6 = "EcgV6",
+    Pleth = "Pleth",
+    Pleth2 = "Pleth2",
+    ArterialBloodPressure = "ArterialBloodPressure",
+    CO2 = "CO2",
+    Respiration = "Respiration"
+}
 export enum PatientMonitorType {
     Unknown = "Unknown",
     PhilipsIntellivue = "PhilipsIntellivue",
@@ -9,11 +32,6 @@ export enum Sex {
     Female = "Female",
     Male = "Male",
     Other = "Other"
-}
-export enum MonitorDataType {
-    Undefined = "Undefined",
-    Numerics = "Numerics",
-    Wave = "Wave"
 }
 export enum MeasurementState {
     VALID = "VALID",

@@ -7,7 +7,7 @@ export namespace Models {
         includeWaves: boolean;
         includePatientInfo: boolean;
         selectedNumericsTypes: string[];
-        selectedWaveTypes: string[];
+        selectedWaveTypes: Enums.WaveType[];
     }
     interface GEDashPatientMonitorInfo extends Models.IPatientMonitorInfo {
         name: string;
@@ -31,6 +31,7 @@ export namespace Models {
         status: Models.LogStatus;
     }
     interface LogSessionSettings {
+        name: string;
         monitorSettings: Models.PatientMonitorSettings;
         monitorDataSettings: Models.MonitorDataSettings;
         csvSeparator: string;

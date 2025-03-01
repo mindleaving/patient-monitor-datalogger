@@ -114,7 +114,7 @@ public abstract class LogSessionRunner : ILogSessionRunner
         PatientInfo patientInfo)
     {
         File.WriteAllText(
-            Path.Combine(logSessionOutputDirectory, "patient.json"), 
+            Path.Combine(logSessionOutputDirectory, $"patient_{DateTime.UtcNow:yyyy-MM-dd_HHmmss}.json"), 
             JsonConvert.SerializeObject(patientInfo, Formatting.Indented, Constants.JsonSerializerSettings));
     }
 

@@ -108,7 +108,7 @@ export const LogSessionListItem = (props: LogSessionListItemProps) => {
                 <span className="text-nowrap">{logSession.patientInfo.firstName} {logSession.patientInfo.lastName}</span>
             </Col> : null}
             <Col>
-                <span className="text-nowrap">ID: {logSession.id}</span>
+                <span className="text-nowrap">{logSession.settings.name} ID: {logSession.id.substring(0, 6)}</span>
             </Col>
         </Row>}
     >

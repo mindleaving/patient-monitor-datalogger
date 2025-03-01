@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { Models } from "../types/models";
+import { waveTypeNames } from "../helpers/Formatters";
 
 interface MonitorDataSettingsDescriptionProps {
     monitorDataSettings: Models.MonitorDataSettings;
@@ -11,6 +12,9 @@ export const MonitorDataSettingsDescription = (props: MonitorDataSettingsDescrip
 
     const activatedParameters = useMemo(() => {
         const parameters: string[] = [];
+        if(monitorDataSettings.includePatientInfo) {
+            parameters.push("Patient Info");
+        }
         if(monitorDataSettings.includeAlerts) {
             parameters.push("Alerts");
         }
@@ -18,10 +22,12 @@ export const MonitorDataSettingsDescription = (props: MonitorDataSettingsDescrip
             parameters.push("Numerics");
         }
         if(monitorDataSettings.includeWaves) {
-            parameters.push("Waves");
-        }
-        if(monitorDataSettings.includePatientInfo) {
-            parameters.push("Patient Info");
+            if(monitorDataSettings.selectedWaveTypes.length > 0) {
+                const formattedWaves = monitorDataSettings.selectedWaveTypes.map(waveType => waveTypeNames[waveType] ?? waveType).join(", ");
+                parameters.push(`Waves (${formattedWaves})`);
+            } else {
+                parameters.push("Waves (All)");
+            }
         }
         if(parameters.length === 0) {
             parameters.push("Nothing");
