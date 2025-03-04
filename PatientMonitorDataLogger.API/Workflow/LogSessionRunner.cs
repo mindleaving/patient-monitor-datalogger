@@ -63,6 +63,10 @@ public abstract class LogSessionRunner : ILogSessionRunner
             if(IsRunning)
                 return;
             numericsWriter.Start();
+            foreach (var waveWriter in waveWriters.Values)
+            {
+                waveWriter.Start();
+            }
             StartImpl();
             IsRunning = true;
         }
