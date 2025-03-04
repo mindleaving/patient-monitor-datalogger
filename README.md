@@ -6,6 +6,10 @@ Currently supported:
 
 Built to run on Raspberry Pi.
 
+## Pre-assembled device
+
+If you don't feel comfortable following the steps below to build and setup a datalogger, feel free to ask for a quote for a pre-assembled device. I cannot promise that I will have time to help you and UNDER NO CIRCUMSTANCES DO I TAKE RESPONSIBILITY FOR THE DEVICE, ITS SAFETY, LEGALITY OR ANY CONSEQUENCES THAT MAY RESULT FROM IT'S USE, but I will try my best to help.
+
 ## Build physical devices
 
 **Parts**
@@ -45,6 +49,7 @@ Edit configuration as follows:
 -- Copy the content of the newly generate *public* key (.pub-file) to the Raspberry Pi Imager
 
 **Step 3 - Custom setup**
+
 As described in the installation instructions for the touch display in step 1, we need to modify the config.txt file on the micro-SD card's *bootfs* parition.
 Add the following to the end of the config.txt file:
 
@@ -92,13 +97,13 @@ Solder the 3 wires to the D-sub 9-pin male connector. Make sure you know which p
 
 **Step 4 - Test connection**
 
-Use a multimeter to test that all three pins of the RJ45 connector and the D-Sub connector are correctly connected AND there isn't any connection to any other pins or the housing.
+Use a multimeter to test that all three pins of the RJ45 connector and the D-Sub connector are correctly connected AND there isn't any connection to any other pins or the housing AND no shorts between pins.
 
 **Step 5 - Assemble connector housing**
 
 Assemble the connector housing.
 
-### Software installation
+## Software installation
 
 **Step 1 - Connect Raspberry Pi to internet**
 
