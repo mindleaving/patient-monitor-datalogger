@@ -1,11 +1,12 @@
 ﻿using PatientMonitorDataLogger.PhilipsIntellivue.Helpers;
+using PatientMonitorDataLogger.SharedModels;
 
 namespace PatientMonitorDataLogger.PhilipsIntellivue.Models;
 
-public class Rs232Frame : ISerializable
+public class PhilipsIntellivueFrame : ISerializable
 {
-    public Rs232Frame(
-        Rs232FrameHeader header,
+    public PhilipsIntellivueFrame(
+        PhilipsIntellivueFrameHeader header,
         ICommandMessage userData,
         ushort checksum)
     {
@@ -14,18 +15,18 @@ public class Rs232Frame : ISerializable
         Checksum = checksum;
     }
 
-    public Rs232FrameHeader Header { get; }
+    public PhilipsIntellivueFrameHeader Header { get; }
     public ICommandMessage UserData { get; }
     public ushort Checksum { get; }
 
-    public static Rs232Frame Parse(
+    public static PhilipsIntellivueFrame Parse(
         byte[] buffer)
     {
         var bof = buffer[0];
         if (bof != TransparencyByteUnescapedStream.FrameStartCharacter)
             throw new ArgumentException($"Invalid frame data. Expected 0x{TransparencyByteUnescapedStream.FrameStartCharacter:X} as Beginning of Frame but got 0x{bof:X}");
         var headerBytes = buffer[1..5];
-        var header = Rs232FrameHeader.Parse(headerBytes);
+        var header = PhilipsIntellivueFrameHeader.Parse(headerBytes);
         var userDataBytes = buffer[5..(5 + header.UserDataLength)];
         var oneComplementChecksum = BitConverter.ToUInt16(buffer, 5 + header.UserDataLength); // LSB byte-order. 1's-complement.
         var checksum = (ushort)~oneComplementChecksum;

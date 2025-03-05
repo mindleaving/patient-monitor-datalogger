@@ -1,7 +1,7 @@
 ﻿using PatientMonitorDataLogger.PhilipsIntellivue.Helpers;
 using PatientMonitorDataLogger.PhilipsIntellivue.Models;
 
-namespace PatientMonitorDataLoggerTest;
+namespace PatientMonitorDataLoggerTest.PhilipsIntellivue;
 
 public class TransparencyByteUnescapedStreamTest
 {

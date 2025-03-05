@@ -16,7 +16,7 @@ public class PhilipsIntellivueSerialDataFrameReader : IDisposable
         this.serialPort = serialPort;
     }
 
-    public event EventHandler<Rs232Frame>? FrameAvailable;
+    public event EventHandler<PhilipsIntellivueFrame>? FrameAvailable;
     public event EventHandler? SerialPortFaulted; 
     public bool IsListening { get; private set; }
 
@@ -88,7 +88,7 @@ public class PhilipsIntellivueSerialDataFrameReader : IDisposable
                             frameData.Add(b);
                             try
                             {
-                                var frame = Rs232Frame.Parse(frameData.ToArray());
+                                var frame = PhilipsIntellivueFrame.Parse(frameData.ToArray());
                                 FrameAvailable?.Invoke(this, frame);
                             }
                             catch (Exception e)

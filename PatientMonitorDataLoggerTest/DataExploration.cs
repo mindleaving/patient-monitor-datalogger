@@ -27,7 +27,7 @@ public class DataExploration
     public void DebugFaultyFrameWithPatientDemographicsResult()
     {
         var data = Convert.FromBase64String("wBEBASThAAACAAIBHAAAAAcBFgAhAAAAAAwWAQwAAAWe8gD//////////wABACoIBwABAPQAAAABAO4AUAAaAOgJIQACAFAJVwACAAIKGgACIADwAQAKyNnSEQ40UpooXAliAAIAAwoeAAIAAAldAAQAAgAACV8ABAACAAAJXAAQAA4ASwBvAGUAbgBpAGcAAPLUAAQAAgAACVoACgAIADEAMgAzAADy4QAEAAIAAPEpAAQAAgAA8SoABAACAAAJYQACAAIJWAAIAAAAAAAAAAAJ2AAGAH///wlACdwABgB///8FEQnfAAYAf///BsAJVgAGAH///wXA8ewAAgAB+egACAAAAAAAAAAA+ekAAvEL84oABAAAAADy4gAEgHUglfLjAASAiw2ZgmXB");
-        var frame = Rs232Frame.Parse(data);
+        var frame = PhilipsIntellivueFrame.Parse(data);
         Console.WriteLine(frame.UserData.ToString());
         var jsonSerializerSettings = new JsonSerializerSettings { Converters = { new StringEnumConverter() }};
         Console.WriteLine(JsonConvert.SerializeObject(frame.UserData, Formatting.Indented, jsonSerializerSettings));

@@ -1,7 +1,7 @@
 ﻿using PatientMonitorDataLogger.PhilipsIntellivue.Helpers;
 using PatientMonitorDataLogger.PhilipsIntellivue.Models;
 
-namespace PatientMonitorDataLoggerTest.Models;
+namespace PatientMonitorDataLoggerTest.PhilipsIntellivue.Models;
 
 public class IntellivueStringTest
 {

@@ -1,7 +1,7 @@
 ﻿using PatientMonitorDataLogger.PhilipsIntellivue.Helpers;
 using PatientMonitorDataLogger.PhilipsIntellivue.Models.Attributes;
 
-namespace PatientMonitorDataLoggerTest.Models.Attributes;
+namespace PatientMonitorDataLoggerTest.PhilipsIntellivue.Models.Attributes;
 
 public class EnumAttributeValueTest
 {

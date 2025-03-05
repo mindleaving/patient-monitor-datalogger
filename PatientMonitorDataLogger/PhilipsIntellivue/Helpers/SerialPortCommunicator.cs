@@ -33,7 +33,7 @@ public class SerialPortCommunicator : IDisposable
 
     private void QueueMessage(
         object? sender,
-        Rs232Frame frame)
+        PhilipsIntellivueFrame frame)
     {
         if (IsAssociationAbort(frame.UserData))
         {
@@ -155,14 +155,14 @@ public class SerialPortCommunicator : IDisposable
         outgoingMessages.Add(message);
     }
 
-    private static Rs232Frame BuildFrame(
+    private static PhilipsIntellivueFrame BuildFrame(
         ICommandMessage message)
     {
         var userDataBytes = message.Serialize();
-        var frameHeader = new Rs232FrameHeader(ProtocolId.DataExport, MessageType.AssociationControlOrDataExportCommand, (ushort)userDataBytes.Length);
+        var frameHeader = new PhilipsIntellivueFrameHeader(ProtocolId.DataExport, MessageType.AssociationControlOrDataExportCommand, (ushort)userDataBytes.Length);
         var frameHeaderBytes = frameHeader.Serialize();
         var checksum = CrcCcittFcsAlgorithm.CalculateFcs([ ..frameHeaderBytes, ..userDataBytes ]);
-        return new Rs232Frame(
+        return new PhilipsIntellivueFrame(
             frameHeader,
             message,
             checksum);

@@ -1,6 +1,6 @@
 ﻿using PatientMonitorDataLogger.PhilipsIntellivue.Helpers;
 
-namespace PatientMonitorDataLoggerTest;
+namespace PatientMonitorDataLoggerTest.PhilipsIntellivue;
 
 public class CrcFcsAlgorithmTest
 {

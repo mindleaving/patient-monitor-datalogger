@@ -4,9 +4,9 @@ using PatientMonitorDataLogger.PhilipsIntellivue;
 using PatientMonitorDataLogger.PhilipsIntellivue.Helpers;
 using PatientMonitorDataLogger.PhilipsIntellivue.Models;
 
-namespace PatientMonitorDataLoggerTest.Models;
+namespace PatientMonitorDataLoggerTest.PhilipsIntellivue.Models;
 
-public class Rs232FrameTest
+public class PhilipsIntellivueFrameTest
 {
     [Test]
     public void SerializationRoundtrip()
@@ -14,14 +14,14 @@ public class Rs232FrameTest
         var messageCreator = new CommandMessageCreator();
         var userData = messageCreator.CreateAssociationRequest(TimeSpan.FromSeconds(1), ExtendedPollProfileOptions.POLL_EXT_PERIOD_RTSA | ExtendedPollProfileOptions.POLL_EXT_PERIOD_NU_1SEC);
         var userDataBytes = userData.Serialize();
-        var header = new Rs232FrameHeader(ProtocolId.DataExport, MessageType.AssociationControlOrDataExportCommand, (ushort)userDataBytes.Length);
+        var header = new PhilipsIntellivueFrameHeader(ProtocolId.DataExport, MessageType.AssociationControlOrDataExportCommand, (ushort)userDataBytes.Length);
         var headerBytes = header.Serialize();
         var checksum = CrcCcittFcsAlgorithm.CalculateFcs([..headerBytes, ..userDataBytes]);
-        var frame = new Rs232Frame(header, userData, checksum);
+        var frame = new PhilipsIntellivueFrame(header, userData, checksum);
 
         var serialized = frame.Serialize();
         var unescapedData = Unescape(serialized);
-        var reconstructed = Rs232Frame.Parse(unescapedData);
+        var reconstructed = PhilipsIntellivueFrame.Parse(unescapedData);
 
         Assert.That(reconstructed.Header.UserDataLength, Is.EqualTo(frame.Header.UserDataLength));
         Assert.That(reconstructed.Checksum, Is.EqualTo(frame.Checksum));
@@ -47,7 +47,7 @@ public class Rs232FrameTest
         var messages = new System.Collections.Generic.List<ICommandMessage>();
         void OnFrameAvailable(
             object? sender,
-            Rs232Frame e)
+            PhilipsIntellivueFrame e)
         {
             messages.Add(e.UserData);
         }

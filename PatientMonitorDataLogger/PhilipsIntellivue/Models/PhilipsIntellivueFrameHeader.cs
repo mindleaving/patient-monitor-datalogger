@@ -1,10 +1,11 @@
 ﻿using PatientMonitorDataLogger.PhilipsIntellivue.Helpers;
+using PatientMonitorDataLogger.SharedModels;
 
 namespace PatientMonitorDataLogger.PhilipsIntellivue.Models;
 
-public class Rs232FrameHeader : ISerializable
+public class PhilipsIntellivueFrameHeader : ISerializable
 {
-    public Rs232FrameHeader(
+    public PhilipsIntellivueFrameHeader(
         ProtocolId protocolId,
         MessageType messageType,
         ushort userDataLength)
@@ -18,7 +19,7 @@ public class Rs232FrameHeader : ISerializable
     public MessageType MessageType { get; }
     public ushort UserDataLength { get; }
 
-    public static Rs232FrameHeader Parse(
+    public static PhilipsIntellivueFrameHeader Parse(
         byte[] buffer)
     {
         var protocolId = (ProtocolId)buffer[0];
