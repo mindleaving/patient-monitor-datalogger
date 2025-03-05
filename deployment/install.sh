@@ -18,15 +18,15 @@ cd /etc/nginx/sites-enabled
 sudo ln -s /etc/nginx/sites-available/patient-monitor-datalogger.conf
 sudo rm default
 cd ~
-sudo usermod -a -G dialout jan
-sudo usermod -a -G plugdev jan
+sudo usermod -a -G dialout datalogger
+sudo usermod -a -G plugdev datalogger
 
 sudo mkdir -p /data/patient-monitor-datalogger
-sudo chown jan:jan -R /data/patient-monitor-datalogger
+sudo chown datalogger:datalogger -R /data/patient-monitor-datalogger
 sudo chmod 777 -R /data/patient-monitor-datalogger
 sudo mkdir -p /var/www/PatientMonitorDataLogger.API
 sudo mkdir -p /var/www/PatientMonitorDataLogger.Frontend
-sudo chown jan:jan -R /var/www/*
+sudo chown datalogger:datalogger -R /var/www/*
 
 curl -sSL https://dot.net/v1/dotnet-install.sh | sudo bash /dev/stdin --channel LTS --install-dir /usr/local/share/dotnet
 sudo ln -s /usr/local/share/dotnet/dotnet /usr/bin/dotnet
