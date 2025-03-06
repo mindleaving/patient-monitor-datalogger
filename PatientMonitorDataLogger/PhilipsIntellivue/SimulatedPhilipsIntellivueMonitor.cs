@@ -1,13 +1,14 @@
 ﻿using System.Collections.Concurrent;
 using PatientMonitorDataLogger.PhilipsIntellivue.Helpers;
 using PatientMonitorDataLogger.PhilipsIntellivue.Models;
+using PatientMonitorDataLogger.Shared.Simulation;
 
 namespace PatientMonitorDataLogger.PhilipsIntellivue;
 
 public class SimulatedPhilipsIntellivueMonitor : IDisposable
 {
-    private readonly SimulatedSerialPort serialPort;
-    private readonly SerialPortCommunicator serialPortCommunicator;
+    private readonly SimulatedIoDevice serialPort;
+    private readonly PhilipsIntellivueCommunicator philipsIntellivueCommunicator;
     private readonly CommandMessageCreator messageCreator = new();
     private ushort nextInvokeId;
     private readonly RelativeToAbsoluteTimeTranslator timeTranslator = new(0, DateTime.UtcNow);
@@ -20,10 +21,10 @@ public class SimulatedPhilipsIntellivueMonitor : IDisposable
     private readonly MonitorDataGenerator monitorDataGenerator;
 
     public SimulatedPhilipsIntellivueMonitor(
-        SimulatedSerialPort serialPort)
+        SimulatedIoDevice serialPort)
     {
         this.serialPort = serialPort;
-        serialPortCommunicator = new SerialPortCommunicator(serialPort, TimeSpan.FromSeconds(10), nameof(SimulatedPhilipsIntellivueMonitor));
+        philipsIntellivueCommunicator = new PhilipsIntellivueCommunicator(serialPort, TimeSpan.FromSeconds(10), nameof(SimulatedPhilipsIntellivueMonitor));
         monitorDataGenerator = new MonitorDataGenerator();
         connectionTimeoutTimer = new Timer(
             AbortConnection,
@@ -32,15 +33,15 @@ public class SimulatedPhilipsIntellivueMonitor : IDisposable
             Timeout.Infinite);
     }
 
-    public bool IsListening => serialPortCommunicator.IsListening;
+    public bool IsListening => philipsIntellivueCommunicator.IsListening;
     public Association? CurrentAssociation { get; private set; }
 
     public void Start()
     {
         if(IsListening)
             return;
-        serialPortCommunicator.Start();
-        serialPortCommunicator.NewMessage += ProcessMessage;
+        philipsIntellivueCommunicator.Start();
+        philipsIntellivueCommunicator.NewMessage += ProcessMessage;
     }
 
     private void ProcessMessage(
@@ -61,13 +62,13 @@ public class SimulatedPhilipsIntellivueMonitor : IDisposable
                             if (CurrentAssociation != null)
                             {
                                 var refuseAssociationMessage = messageCreator.CreateAssociationRefusal();
-                                serialPortCommunicator.Enqueue(refuseAssociationMessage);
+                                philipsIntellivueCommunicator.Enqueue(refuseAssociationMessage);
                             }
                             else
                             {
                                 // TODO: Set minimum poll time
                                 var associationAcceptMessage = messageCreator.CreateAssociationAccept(associationCommandMessage);
-                                serialPortCommunicator.Enqueue(associationAcceptMessage);
+                                philipsIntellivueCommunicator.Enqueue(associationAcceptMessage);
                                 CurrentAssociation = new Association
                                 {
                                     PresentationContextId = Constants.DefaultPresentationContextId
@@ -75,7 +76,7 @@ public class SimulatedPhilipsIntellivueMonitor : IDisposable
 
                                 var eventTime = timeTranslator.GetCurrentRelativeTime();
                                 var mdsCreateEventMessage = messageCreator.CreateMdsCreateEvent(CurrentAssociation.PresentationContextId, nextInvokeId++, eventTime);
-                                serialPortCommunicator.Enqueue(mdsCreateEventMessage);
+                                philipsIntellivueCommunicator.Enqueue(mdsCreateEventMessage);
                             }
                             break;
                         case AssociationCommandType.RequestRelease:
@@ -126,7 +127,11 @@ public class SimulatedPhilipsIntellivueMonitor : IDisposable
                                     break;
                                 case EventReportResultCommand eventReportResultCommand:
                                     if(eventReportResultCommand.EventType == OIDType.NOM_NOTI_MDS_CREAT)
+                                    {
+#if DEBUG
                                         Log("Received MDS Create Event report");
+#endif
+                                    }
                                     break;
                                 case GetResultCommand getResultCommand:
                                     break;
@@ -158,7 +163,7 @@ public class SimulatedPhilipsIntellivueMonitor : IDisposable
         CurrentAssociation = null;
         ClearPeriodicPollReplies();
         var releaseResponseMessage = messageCreator.CreateAssociationReleaseResponse();
-        serialPortCommunicator.Enqueue(releaseResponseMessage);
+        philipsIntellivueCommunicator.Enqueue(releaseResponseMessage);
     }
 
     private void HandleExtendedPollRequest(
@@ -193,7 +198,7 @@ public class SimulatedPhilipsIntellivueMonitor : IDisposable
                     invokeId,
                     pollRequest,
                     minimumPollPeriod,
-                    serialPortCommunicator,
+                    philipsIntellivueCommunicator,
                     timeTranslator,
                     messageCreator,
                     monitorDataGenerator);
@@ -224,7 +229,7 @@ public class SimulatedPhilipsIntellivueMonitor : IDisposable
             pollRequest,
             timeTranslator.GetCurrentRelativeTime(),
             observations);
-        serialPortCommunicator.Enqueue(replyMessage);
+        philipsIntellivueCommunicator.Enqueue(replyMessage);
     }
 
     private void HandlePollRequest(
@@ -241,7 +246,7 @@ public class SimulatedPhilipsIntellivueMonitor : IDisposable
             pollMdiDataRequest,
             timeTranslator.GetCurrentRelativeTime(),
             attributes);
-        serialPortCommunicator.Enqueue(replyMessage);
+        philipsIntellivueCommunicator.Enqueue(replyMessage);
     }
 
     private void AbortConnection(
@@ -250,7 +255,7 @@ public class SimulatedPhilipsIntellivueMonitor : IDisposable
         if(CurrentAssociation == null)
             return;
         var abortMessage = messageCreator.CreateAssociationAbort();
-        serialPortCommunicator.Enqueue(abortMessage);
+        philipsIntellivueCommunicator.Enqueue(abortMessage);
         ClearPeriodicPollReplies();
         CurrentAssociation = null;
     }
@@ -270,14 +275,14 @@ public class SimulatedPhilipsIntellivueMonitor : IDisposable
     {
         ClearPeriodicPollReplies();
         AbortConnection(null);
-        serialPortCommunicator.Stop();
-        serialPortCommunicator.NewMessage -= ProcessMessage;
+        philipsIntellivueCommunicator.Stop();
+        philipsIntellivueCommunicator.NewMessage -= ProcessMessage;
     }
 
     public void Dispose()
     {
         Stop();
-        serialPortCommunicator.Dispose();
+        philipsIntellivueCommunicator.Dispose();
     }
 
 

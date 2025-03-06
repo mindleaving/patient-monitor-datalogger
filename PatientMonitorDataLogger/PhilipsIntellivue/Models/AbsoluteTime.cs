@@ -1,7 +1,7 @@
 ﻿using System.Globalization;
 using System.IO;
 using PatientMonitorDataLogger.PhilipsIntellivue.Helpers;
-using PatientMonitorDataLogger.SharedModels;
+using PatientMonitorDataLogger.Shared.Models;
 
 namespace PatientMonitorDataLogger.PhilipsIntellivue.Models;
 

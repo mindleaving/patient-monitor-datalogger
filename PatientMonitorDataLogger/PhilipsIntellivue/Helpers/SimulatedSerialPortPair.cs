@@ -1,4 +1,6 @@
-﻿namespace PatientMonitorDataLogger.PhilipsIntellivue.Helpers;
+﻿using PatientMonitorDataLogger.Shared.Simulation;
+
+namespace PatientMonitorDataLogger.PhilipsIntellivue.Helpers;
 
 public class SimulatedSerialPortPair : IDisposable
 {
@@ -6,8 +8,8 @@ public class SimulatedSerialPortPair : IDisposable
 
     public SimulatedSerialPortPair()
     {
-        Port1 = new SimulatedSerialPort();
-        Port2 = new SimulatedSerialPort();
+        Port1 = new SimulatedIoDevice();
+        Port2 = new SimulatedIoDevice();
         transferTimer = new Timer(
             Transfer,
             null,
@@ -15,8 +17,8 @@ public class SimulatedSerialPortPair : IDisposable
             TimeSpan.FromMilliseconds(100));
     }
 
-    public SimulatedSerialPort Port1 { get; }
-    public SimulatedSerialPort Port2 { get; }
+    public SimulatedIoDevice Port1 { get; }
+    public SimulatedIoDevice Port2 { get; }
 
     private void Transfer(
         object? state)
@@ -26,8 +28,8 @@ public class SimulatedSerialPortPair : IDisposable
     }
 
     private void TransferBetweenPorts(
-        SimulatedSerialPort sender,
-        SimulatedSerialPort receiver)
+        SimulatedIoDevice sender,
+        SimulatedIoDevice receiver)
     {
         var bytesAvailable = sender.OutgoingData.Count;
         if(bytesAvailable == 0)

@@ -44,4 +44,8 @@ See GitHub repository for code examples.</Description>
     </None>
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Shared\Simulation\" />
+  </ItemGroup>
+
 </Project>

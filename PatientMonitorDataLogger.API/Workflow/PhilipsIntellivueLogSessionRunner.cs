@@ -3,7 +3,7 @@ using PatientMonitorDataLogger.API.Models;
 using PatientMonitorDataLogger.API.Models.DataExport;
 using PatientMonitorDataLogger.PhilipsIntellivue;
 using PatientMonitorDataLogger.PhilipsIntellivue.Models;
-using PatientMonitorDataLogger.SharedModels;
+using PatientMonitorDataLogger.Shared.Models;
 
 namespace PatientMonitorDataLogger.API.Workflow;
 

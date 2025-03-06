@@ -1,19 +1,19 @@
 ﻿using PatientMonitorDataLogger.PhilipsIntellivue.Models;
+using PatientMonitorDataLogger.Shared.Models;
 
 namespace PatientMonitorDataLogger.PhilipsIntellivue.Helpers;
 
-
-public class PhilipsIntellivueSerialDataFrameReader : IDisposable
+public class PhilipsIntellivueFrameReader : IDisposable
 {
-    private readonly ISerialPort serialPort;
+    private readonly IODevice ioDevice;
     private readonly object startStopLock = new();
     private CancellationTokenSource? cancellationTokenSource;
     private Task? listeningTask;
 
-    public PhilipsIntellivueSerialDataFrameReader(
-        ISerialPort serialPort)
+    public PhilipsIntellivueFrameReader(
+        IODevice ioDevice)
     {
-        this.serialPort = serialPort;
+        this.ioDevice = ioDevice;
     }
 
     public event EventHandler<PhilipsIntellivueFrame>? FrameAvailable;
@@ -50,7 +50,7 @@ public class PhilipsIntellivueSerialDataFrameReader : IDisposable
         {
             while (!cancellationToken.IsCancellationRequested)
             {
-                var bytesRead = serialPort.Read(buffer);
+                var bytesRead = ioDevice.Read(buffer);
                 if (bytesRead == 0)
                 {
                     await Task.Delay(100, cancellationToken);

@@ -1,26 +1,28 @@
 ﻿using System.Collections.Concurrent;
 using PatientMonitorDataLogger.PhilipsIntellivue.Models;
+using PatientMonitorDataLogger.Shared.Helpers;
+using PatientMonitorDataLogger.Shared.Models;
 
 namespace PatientMonitorDataLogger.PhilipsIntellivue.Helpers;
 
-public class SerialPortCommunicator : IDisposable
+public class PhilipsIntellivueCommunicator : IDisposable
 {
-    private readonly ISerialPort serialPort;
+    private readonly IODevice ioDevice;
     private readonly string logName;
-    private readonly PhilipsIntellivueSerialDataFrameReader frameReader;
+    private readonly PhilipsIntellivueFrameReader frameReader;
     private readonly AwaitableTimeCappedCollection<ICommandMessage> messageCollection;
     private readonly object startStopLock = new();
     private BlockingCollection<ICommandMessage>? outgoingMessages = new();
     private Task? sendTask;
 
-    public SerialPortCommunicator(
-        ISerialPort serialPort,
+    public PhilipsIntellivueCommunicator(
+        IODevice ioDevice,
         TimeSpan messageRetentionPeriod,
         string logName)
     {
-        this.serialPort = serialPort;
+        this.ioDevice = ioDevice;
         this.logName = logName;
-        frameReader = new PhilipsIntellivueSerialDataFrameReader(serialPort);
+        frameReader = new PhilipsIntellivueFrameReader(ioDevice);
         messageCollection = new(messageRetentionPeriod);
         frameReader.FrameAvailable += QueueMessage;
         frameReader.SerialPortFaulted += OnSerialPortFaulted;
@@ -40,7 +42,9 @@ public class SerialPortCommunicator : IDisposable
             ConnectionStatusChanged?.Invoke(this, MonitorConnectionChangeEventType.Aborted);
             Stop();
         }
+#if DEBUG
         Log($"Received {frame.UserData}");
+#endif
         messageCollection.Add(frame.UserData);
         NewMessage?.Invoke(this, frame.UserData);
     }
@@ -95,8 +99,10 @@ public class SerialPortCommunicator : IDisposable
 
             try
             {
-                serialPort.Write(frameBytes);
+                ioDevice.Write(frameBytes);
+#if DEBUG
                 Log($"Sent {message}");
+#endif
             }
             catch
             {

@@ -10,7 +10,7 @@ public class PerioidPollReplier : IDisposable, IAsyncDisposable
     private DateTime? lastPollRequestTime;
     private readonly TimeSpan minimumPollPeriod;
     private readonly Association association;
-    private readonly SerialPortCommunicator serialPortCommunicator;
+    private readonly PhilipsIntellivueCommunicator philipsIntellivueCommunicator;
     private readonly RelativeToAbsoluteTimeTranslator timeTranslator;
     private readonly CommandMessageCreator messageCreator;
     private readonly MonitorDataGenerator monitorDataGenerator;
@@ -21,14 +21,14 @@ public class PerioidPollReplier : IDisposable, IAsyncDisposable
         ushort invokeId,
         ExtendedPollMdiDataRequest pollRequest,
         TimeSpan minimumPollPeriod,
-        SerialPortCommunicator serialPortCommunicator,
+        PhilipsIntellivueCommunicator philipsIntellivueCommunicator,
         RelativeToAbsoluteTimeTranslator timeTranslator,
         CommandMessageCreator messageCreator,
         MonitorDataGenerator monitorDataGenerator)
     {
         this.association = association;
         this.minimumPollPeriod = minimumPollPeriod;
-        this.serialPortCommunicator = serialPortCommunicator;
+        this.philipsIntellivueCommunicator = philipsIntellivueCommunicator;
         this.timeTranslator = timeTranslator;
         this.messageCreator = messageCreator;
         this.monitorDataGenerator = monitorDataGenerator;
@@ -93,7 +93,7 @@ public class PerioidPollReplier : IDisposable, IAsyncDisposable
             pollRequest,
             timeTranslator.GetCurrentRelativeTime(),
             observations);
-        serialPortCommunicator.Enqueue(replyMessage);
+        philipsIntellivueCommunicator.Enqueue(replyMessage);
     }
 
     private TimeSpan DetermineExtendedPollResultPeriod(

@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Concurrent;
 
-namespace PatientMonitorDataLogger.PhilipsIntellivue.Helpers;
+namespace PatientMonitorDataLogger.Shared.Helpers;
 
 public class AwaitableTimeCappedCollection<T> : ICollection<T>, IDisposable, IAsyncDisposable
 {
@@ -143,9 +143,4 @@ public class AwaitableTimeCappedCollection<T> : ICollection<T>, IDisposable, IAs
         await expirationTimer.DisposeAsync();
         await itemWaitRequestMatchingTimer.DisposeAsync();
     }
-}
-internal class ItemWithTime<T>(T item, DateTime receivedTimeStamp)
-{
-    public T Item { get; } = item;
-    public DateTime ReceivedTimeStamp { get; } = receivedTimeStamp;
 }

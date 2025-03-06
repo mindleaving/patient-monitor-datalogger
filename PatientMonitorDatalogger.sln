@@ -1,13 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.13.35818.85 d17.13
+VisualStudioVersion = 17.13.35818.85
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PatientMonitorDataLogger", "PatientMonitorDataLogger\PatientMonitorDataLogger.csproj", "{EFAF37E2-5EE2-8034-E9DC-37CD0061C5DB}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PatientMonitorDataLoggerTest", "PatientMonitorDataLoggerTest\PatientMonitorDataLoggerTest.csproj", "{1E3ECE90-2777-497C-5B6E-6C6292DA7671}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PatientMonitorDataLogger.API", "PatientMonitorDataLogger.API\PatientMonitorDataLogger.API.csproj", "{69CEE9F4-8606-4E40-9681-D9404E854AF2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ManualCommunicationConsole", "ManualCommunicationConsole\ManualCommunicationConsole.csproj", "{7CE73E1C-2D1F-4529-A086-8E81B58B6E8D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,6 +29,10 @@ Global
 		{69CEE9F4-8606-4E40-9681-D9404E854AF2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{69CEE9F4-8606-4E40-9681-D9404E854AF2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{69CEE9F4-8606-4E40-9681-D9404E854AF2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7CE73E1C-2D1F-4529-A086-8E81B58B6E8D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7CE73E1C-2D1F-4529-A086-8E81B58B6E8D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7CE73E1C-2D1F-4529-A086-8E81B58B6E8D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7CE73E1C-2D1F-4529-A086-8E81B58B6E8D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

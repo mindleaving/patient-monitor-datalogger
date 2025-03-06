@@ -1,4 +1,4 @@
-﻿namespace PatientMonitorDataLogger.PhilipsIntellivue.Helpers;
+﻿namespace PatientMonitorDataLogger.Shared.Helpers;
 
 public class WaitForRequest<T>
 {

@@ -2,7 +2,7 @@
 using TypescriptGenerator;
 using Newtonsoft.Json.Linq;
 using PatientMonitorDataLogger.API.Models;
-using PatientMonitorDataLogger.SharedModels;
+using PatientMonitorDataLogger.Shared.Models;
 
 namespace PatientMonitorDataLogger.API.Setups;
 

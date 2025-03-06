@@ -1,6 +1,4 @@
-﻿using System.Text;
-using System.Text.RegularExpressions;
-using PatientMonitorDataLogger.SharedModels;
+﻿using PatientMonitorDataLogger.Shared.Models;
 
 namespace PatientMonitorDataLogger.BBraun.Helpers;
 
@@ -12,22 +10,22 @@ public class BBraunBccFrameReader : IDisposable
     public const byte EndOfTextBlockCharacter = 0x17;
     public const byte EndOfTransmissionCharacter = 0x04;
 
-    private readonly Stream stream;
+    private readonly IODevice ioDevice;
     private readonly BBraunBccClientSettings settings;
     private readonly object startStopLock = new();
     private CancellationTokenSource? cancellationTokenSource;
     private Task? readTask;
 
     public BBraunBccFrameReader(
-        Stream stream,
+        IODevice ioDevice,
         BBraunBccClientSettings settings)
     {
-        this.stream = stream;
+        this.ioDevice = ioDevice;
         this.settings = settings;
     }
 
     public event EventHandler<BBraunBccFrame>? FrameAvailable;
-    public event EventHandler? SerialPortFaulted; 
+    public event EventHandler? IoDeviceFaulted; 
     public bool IsListening { get; private set; }
 
     public void Start()
@@ -61,7 +59,7 @@ public class BBraunBccFrameReader : IDisposable
         {
             while (!cancellationToken.IsCancellationRequested)
             {
-                var bytesRead = stream.Read(buffer);
+                var bytesRead = ioDevice.Read(buffer);
                 if (bytesRead == 0)
                 {
                     await Task.Delay(100, cancellationToken);
@@ -94,7 +92,7 @@ public class BBraunBccFrameReader : IDisposable
                         frameData.Add(b);
                         try
                         {
-                            var frame = BBraunBccFrame.Parse(frameData.ToArray());
+                            var frame = BBraunBccFrame.Parse(frameData.ToArray(), settings.Role);
                             FrameAvailable?.Invoke(this, frame);
                         }
                         catch (Exception e)
@@ -102,6 +100,10 @@ public class BBraunBccFrameReader : IDisposable
                             Console.WriteLine("Could not parse frame: " + e.Message);
                             Console.WriteLine($"Faulty data: {Convert.ToBase64String(frameData.ToArray())}");
                         }
+
+                        frameData.Clear();
+                        isFrameInProgress = false;
+                        continue;
                     }
 
                     if (useCharacterStuffing && !isDestuffedByte && (b == 'e' || b == 'E'))
@@ -116,7 +118,7 @@ public class BBraunBccFrameReader : IDisposable
         }
         catch
         {
-            SerialPortFaulted?.Invoke(this, EventArgs.Empty);
+            IoDeviceFaulted?.Invoke(this, EventArgs.Empty);
         }
         finally
         {
@@ -163,106 +165,5 @@ public class BBraunBccFrameReader : IDisposable
     public void Dispose()
     {
         Stop();
-    }
-}
-
-public class BBraunBccFrame : ISerializable
-{
-    public BBraunBccFrame(
-        int length,
-        string bedId,
-        IBBraunBccMessage userData,
-        int checksum)
-    {
-        Length = length;
-        BedId = bedId;
-        UserData = userData;
-        Checksum = checksum;
-    }
-
-    public int Length { get; }
-    public string BedId { get; }
-    public IBBraunBccMessage UserData { get; }
-    public int Checksum { get; set; }
-
-    public static BBraunBccFrame Parse(
-        byte[] buffer)
-    {
-        if(buffer[0] != BBraunBccFrameReader.StartOfHeaderCharacter)
-            throw new FormatException("Didn't find start of head character");
-        if (buffer[6] != BBraunBccFrameReader.StartOfTextCharacter)
-            throw new FormatException("Didn't find start of text character");
-        var lengthString = Encoding.ASCII.GetString(buffer[1..6]);
-        var length = int.Parse(lengthString);
-        if (buffer.Length != length)
-            throw new ArgumentException("Length of buffer and length in message header do not agree");
-        if (buffer[length - 1] != BBraunBccFrameReader.EndOfTransmissionCharacter)
-            throw new FormatException("Didn't find end of transmission character");
-        if (buffer[length - 7] != BBraunBccFrameReader.EndOfTextCharacter && buffer[length - 7] != BBraunBccFrameReader.EndOfTextBlockCharacter)
-            throw new FormatException("Didn't find end of text/text block character");
-        var checksumString = Encoding.ASCII.GetString(buffer[^6..^1]);
-        var checksum = int.Parse(checksumString);
-        if (!BccChecksumCalculator.IsChecksumCorrect(buffer[..^6], checksum))
-            throw new FormatException("Corrupt data. Checksum doesn't match");
-        var bedId = ExtractBedId(Encoding.ASCII.GetString(buffer[7..26]));
-        var userDataBytes = buffer[(7+bedId.Length+5)..^7];
-        var userData = ParseUserData(userDataBytes);
-        return new BBraunBccFrame(
-            length,
-            bedId,
-            userData,
-            checksum);
-    }
-
-    private static IBBraunBccMessage ParseUserData(
-        byte[] bytes)
-    {
-        return new GenericIbBraunBccMessage(Encoding.UTF8.GetString(bytes));
-    }
-
-    private static string ExtractBedId(
-        string str)
-    {
-        var bedIdMatch = Regex.Match(str, "^(?<bedID>[\x2F-\x39\x41-\x7A]{1,15})/1/1>");
-        if (!bedIdMatch.Success)
-            throw new FormatException("Couldn't find bed-ID");
-        return bedIdMatch.Groups["bedID"].Value;
-    }
-
-    /// <summary>
-    /// Serialize frame WITHOUT character stuffing
-    /// </summary>
-    public byte[] Serialize()
-    {
-        return [
-            BBraunBccFrameReader.StartOfHeaderCharacter,
-            ..Encoding.ASCII.GetBytes(Length.ToString("00000")),
-            BBraunBccFrameReader.StartOfTextCharacter,
-            ..Encoding.ASCII.GetBytes($"{BedId}/1/1>"),
-            ..UserData.Serialize(),
-            BBraunBccFrameReader.EndOfTextCharacter,
-            ..Encoding.ASCII.GetBytes(Checksum.ToString("00000")),
-            BBraunBccFrameReader.EndOfTransmissionCharacter,
-        ];
-    }
-}
-
-public interface IBBraunBccMessage : ISerializable
-{
-}
-
-public class GenericIbBraunBccMessage : IBBraunBccMessage
-{
-    public GenericIbBraunBccMessage(
-        string data)
-    {
-        Data = data;
-    }
-
-    public string Data { get; }
-
-    public byte[] Serialize()
-    {
-        return Encoding.UTF8.GetBytes(Data);
     }
 }

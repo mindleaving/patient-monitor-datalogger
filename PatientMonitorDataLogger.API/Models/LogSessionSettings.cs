@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using PatientMonitorDataLogger.SharedModels;
+using PatientMonitorDataLogger.Shared.Models;
 
 namespace PatientMonitorDataLogger.API.Models;
 

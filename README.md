@@ -137,24 +137,27 @@ Assemble the connector housing.
 
 Use an Ethernet cable to connect your Raspberry Pi to your local network. It may take several moments for the network to start up. Wait for the LEDs of the LAN port start blinking.
 
-**Step 2 - Transfer scripts**
-
-Locate the ```deployment``` folder of the repository and copy install script and content to your Raspberry Pi using SSH's ```scp```-command:
-
-```
-cd <path to this repository>/deployment
-scp -i ~/.ssh/datalogger01 install.sh datalogger@datalogger01:~
-scp -i ~/.ssh/datalogger01 config.zip datalogger@datalogger01:~
-scp -i ~/.ssh/datalogger01 PatientMonitorDataLogger.*.zip datalogger@datalogger01:~
-```
-
-**Step 3 - Setup system**
+**Step 2 - Download latest release**
 
 Log into your Raspberry Pi using SSH:
 
 ```
 ssh -i ~/.ssh/datalogger01 datalogger@datalogger01
 ```
+
+Download the latest relase of Patient Monitor Data Logger
+
+```
+wget https://github.com/mindleaving/patient-monitor-datalogger/releases/latest/patient-monitor-datalogger-deployment-pack.zip
+```
+
+and unpack it
+
+```
+unzip -q patient-monitor-datalogger-deployment-pack.zip
+```
+
+**Step 3 - Setup system**
 
 Now enable and run install.sh:
 

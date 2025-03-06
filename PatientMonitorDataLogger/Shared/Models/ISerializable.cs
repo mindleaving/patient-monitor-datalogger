@@ -1,4 +1,4 @@
-﻿namespace PatientMonitorDataLogger.SharedModels;
+﻿namespace PatientMonitorDataLogger.Shared.Models;
 
 public interface ISerializable
 {

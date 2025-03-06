@@ -3,6 +3,7 @@ using Newtonsoft.Json.Converters;
 using PatientMonitorDataLogger.PhilipsIntellivue;
 using PatientMonitorDataLogger.PhilipsIntellivue.Helpers;
 using PatientMonitorDataLogger.PhilipsIntellivue.Models;
+using PatientMonitorDataLogger.Shared.Simulation;
 
 namespace PatientMonitorDataLoggerTest.PhilipsIntellivue.Models;
 
@@ -40,9 +41,9 @@ public class PhilipsIntellivueFrameTest
         string inputFilePath)
     {
         var input = File.ReadAllBytes(inputFilePath);
-        var simulatedSerialPort = new SimulatedSerialPort();
+        var simulatedSerialPort = new SimulatedIoDevice();
         simulatedSerialPort.Receive(input);
-        var sut = new PhilipsIntellivueSerialDataFrameReader(simulatedSerialPort);
+        var sut = new PhilipsIntellivueFrameReader(simulatedSerialPort);
 
         var messages = new System.Collections.Generic.List<ICommandMessage>();
         void OnFrameAvailable(

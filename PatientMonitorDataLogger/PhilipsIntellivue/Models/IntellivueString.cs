@@ -1,6 +1,6 @@
 ﻿using System.Text;
 using PatientMonitorDataLogger.PhilipsIntellivue.Helpers;
-using PatientMonitorDataLogger.SharedModels;
+using PatientMonitorDataLogger.Shared.Models;
 
 namespace PatientMonitorDataLogger.PhilipsIntellivue.Models;
 

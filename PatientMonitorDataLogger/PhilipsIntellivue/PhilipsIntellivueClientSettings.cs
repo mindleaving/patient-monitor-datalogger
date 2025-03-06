@@ -1,5 +1,6 @@
 ﻿using PatientMonitorDataLogger.PhilipsIntellivue.Helpers;
 using PatientMonitorDataLogger.PhilipsIntellivue.Models;
+using PatientMonitorDataLogger.Shared.Simulation;
 
 namespace PatientMonitorDataLogger.PhilipsIntellivue;
 
@@ -9,7 +10,7 @@ public class PhilipsIntellivueClientSettings
         string serialPortName,
         int serialPortBaudRate,
         bool useSimulatedSerialPort,
-        SimulatedSerialPort? simulatedSerialPort,
+        SimulatedIoDevice? simulatedSerialPort,
         TimeSpan messageRetentionPeriod,
         PollMode pollMode)
     {
@@ -29,7 +30,7 @@ public class PhilipsIntellivueClientSettings
         => new(serialPortname, serialPortBaudRate, false, null, messageRetentionPeriod, pollMode);
 
     public static PhilipsIntellivueClientSettings CreateForSimulatedSerialPort(
-        SimulatedSerialPort simulatedSerialPort,
+        SimulatedIoDevice simulatedSerialPort,
         TimeSpan messageRetentionPeriod,
         PollMode pollMode)
         => new(
@@ -43,7 +44,7 @@ public class PhilipsIntellivueClientSettings
     public string SerialPortName { get; }
     public int SerialPortBaudRate { get; }
     public bool UseSimulatedSerialPort { get; }
-    public SimulatedSerialPort? SimulatedSerialPort { get; }
+    public SimulatedIoDevice? SimulatedSerialPort { get; }
     public TimeSpan MessageRetentionPeriod { get; }
     public PollMode PollMode { get; set; }
 }

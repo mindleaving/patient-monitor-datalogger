@@ -1,15 +1,13 @@
 ﻿using System.Collections.Concurrent;
-using System.Text;
+using PatientMonitorDataLogger.Shared.Models;
 
-namespace PatientMonitorDataLogger.PhilipsIntellivue.Helpers;
+namespace PatientMonitorDataLogger.Shared.Simulation;
 
-public class SimulatedSerialPort : ISerialPort
+public class SimulatedIoDevice : IODevice
 {
     private readonly ConcurrentQueue<byte> incomingData = new();
     public ConcurrentQueue<byte> OutgoingData { get; } = new();
     public int IncomingBytesCount => incomingData.Count;
-
-    public Encoding Encoding { get; set; } = Encoding.Unicode;
 
     public bool IsOpen { get; private set; }
     public void Open()
@@ -74,5 +72,10 @@ public class SimulatedSerialPort : ISerialPort
         {
             incomingData.Enqueue(b);
         }
+    }
+
+    public void Dispose()
+    {
+        // Nothing to dispose
     }
 }

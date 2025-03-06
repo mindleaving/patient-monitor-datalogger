@@ -1,9 +1,13 @@
 ﻿using System.Text;
+using PatientMonitorDataLogger.BBraun.Models;
 
 namespace PatientMonitorDataLogger.BBraun.Helpers;
 
 public class BBraunBccMessageCreator
 {
+    public const char AcknowledgeCharacter = '\x06';
+    public const char NotAcknowledgeCharacter = '\x15';
+
     private readonly BBraunBccClientSettings settings;
 
     public BBraunBccMessageCreator(
@@ -12,17 +16,21 @@ public class BBraunBccMessageCreator
         this.settings = settings;
     }
 
-    public byte[] CreateAcknowledgeMessage() => [0x06];
-    public byte[] CreateNotAcknowledgeMessage() => [0x15];
-    public byte[] CreateAdminAliveMessage() => CreateMessage("1", "ADMIN:ALIVE");
-    public byte[] CreateGetAllMessage(string bedId) => CreateMessage(bedId, "MEM:GET");
+    public byte[] CreateAcknowledgeMessage() => [(byte)AcknowledgeCharacter];
+    public byte[] CreateNotAcknowledgeMessage() => [(byte)NotAcknowledgeCharacter];
+    public byte[] CreateInitializeCommunicationRequest() => CreateMessage("1", new BBraunBccRequest("ADMIN", "ALIVE"));
+    public byte[] CreateVersionRequest(string bedId) => CreateMessage(bedId, new BBraunBccRequest("ADMIN", "VERSION"));
+    public byte[] CreateGetAllRequest(string bedId) => CreateMessage(bedId, new BBraunBccRequest("MEM", "GET"));
+    public byte[] CreateGetPumpRequest(string bedId, PumpIndex pumpIndex) => CreateMessage(bedId, new BBraunBccRequest("MEM", $"GETSLOT#{pumpIndex.Pillar}{pumpIndex.SlotCharacter}"));
+    public byte[] CreateResponseMessage(string bedId, List<Quadruple> quadruples) => CreateMessage(bedId, new BBraunBccResponse(quadruples));
 
     public byte[] CreateMessage(
         string bedId,
-        string message)
+        IBBraunBccMessage message)
     {
-        var length = 1 + 5 + 1 + bedId.Length + 5 + message.Length + 1 + 5 + 1; // <SOH> + LENGTH:00000 + <SOT> + BEDID + "1/1>" + message + ETX/ETB + CHECKSUM:00000 + EOT
-        var frame = new BBraunBccFrame(length, bedId, new GenericIbBraunBccMessage(message), 0);
+        var messageBytes = message.Serialize();
+        var length = 1 + 5 + 1 + bedId.Length + 5 + messageBytes.Length + 1 + 5 + 1; // <SOH> + LENGTH:00000 + <SOT> + BEDID + "1/1>" + message + ETX/ETB + CHECKSUM:00000 + EOT
+        var frame = new BBraunBccFrame(length, bedId, message, 0);
         var frameBytes = frame.Serialize();
         var checksum = BccChecksumCalculator.Calculate(frameBytes[..^6]);
         InsertChecksum(frameBytes, checksum);
