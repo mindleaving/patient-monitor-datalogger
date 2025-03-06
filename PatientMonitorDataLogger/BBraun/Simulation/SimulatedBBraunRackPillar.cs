@@ -1,8 +1,8 @@
 ﻿namespace PatientMonitorDataLogger.BBraun.Simulation;
 
-public class SimulatedBBraunRackTower
+public class SimulatedBBraunRackPillar
 {
-    public SimulatedBBraunRackTower(
+    public SimulatedBBraunRackPillar(
         int rackFrames)
     {
         var slotCount = rackFrames * 4;

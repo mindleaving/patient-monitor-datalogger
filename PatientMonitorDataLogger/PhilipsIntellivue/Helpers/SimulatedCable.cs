@@ -2,14 +2,14 @@
 
 namespace PatientMonitorDataLogger.PhilipsIntellivue.Helpers;
 
-public class SimulatedSerialPortPair : IDisposable
+public class SimulatedCable : IDisposable
 {
     private readonly Timer transferTimer;
 
-    public SimulatedSerialPortPair()
+    public SimulatedCable()
     {
-        Port1 = new SimulatedIoDevice();
-        Port2 = new SimulatedIoDevice();
+        End1 = new SimulatedIoDevice();
+        End2 = new SimulatedIoDevice();
         transferTimer = new Timer(
             Transfer,
             null,
@@ -17,14 +17,14 @@ public class SimulatedSerialPortPair : IDisposable
             TimeSpan.FromMilliseconds(100));
     }
 
-    public SimulatedIoDevice Port1 { get; }
-    public SimulatedIoDevice Port2 { get; }
+    public SimulatedIoDevice End1 { get; }
+    public SimulatedIoDevice End2 { get; }
 
     private void Transfer(
         object? state)
     {
-        TransferBetweenPorts(Port1, Port2);
-        TransferBetweenPorts(Port2, Port1);
+        TransferBetweenPorts(End1, End2);
+        TransferBetweenPorts(End2, End1);
     }
 
     private void TransferBetweenPorts(

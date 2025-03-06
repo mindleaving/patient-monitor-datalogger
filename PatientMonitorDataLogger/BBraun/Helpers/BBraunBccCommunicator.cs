@@ -90,7 +90,7 @@ public class BBraunBccCommunicator : IDisposable
             {
                 ioDevice.Write(message);
 #if DEBUG
-                Log($"Sent {StringMessageHelpers.ReplaceControlCharacters(message)}");
+                Log($"Sent {StringMessageHelpers.RawControlCharactersToHumanFriendly(message)}");
 #endif
             }
             catch

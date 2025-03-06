@@ -93,7 +93,7 @@ public class BBraunBccFrame : ISerializable
 
     public override string ToString()
     {
-        return StringMessageHelpers.ReplaceControlCharacters(Serialize())
+        return StringMessageHelpers.RawControlCharactersToHumanFriendly(Serialize())
             .Replace("<STX>", "<STX>" + Environment.NewLine)
             .Replace("1/1>", "1/1>" + Environment.NewLine)
             .Replace("<RS>", "<RS>" + Environment.NewLine);

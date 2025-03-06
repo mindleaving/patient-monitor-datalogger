@@ -10,8 +10,8 @@ public class BBraunBccFrameReaderTest
     [Test]
     public void CanReadUnstuffedAdminAliveMessage()
     {
-        var data = Encoding.UTF8.GetBytes(StringMessageHelpers.ReplaceControlCharacters("<SOH>00031<STX>1/1/1>ADMIN:ALIVE<ETX>00061<EOT>"));
-        var settings = new BBraunBccClientSettings(BccParticipantRole.Server, false, TimeSpan.FromSeconds(10));
+        var data = Encoding.UTF8.GetBytes(StringMessageHelpers.HumanFriendlyControlCharactersToRaw("<SOH>00031<STX>1/1/1>ADMIN:ALIVE<ETX>00061<EOT>"));
+        var settings = new BBraunBccClientSettings(BccParticipantRole.Server, false, TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(10));
         var simulatedIoDevice = new SimulatedIoDevice();
         simulatedIoDevice.Receive(data);
         using var sut = new BBraunBccFrameReader(simulatedIoDevice, settings);
@@ -27,9 +27,9 @@ public class BBraunBccFrameReaderTest
     [Test]
     public void CanReadStuffedAdminAliveMessage()
     {
-        var data = Encoding.UTF8.GetBytes(StringMessageHelpers.ReplaceControlCharacters("<SOH>00031<STX>1/1/1>ADMIN:ALIVE<ETX>00061<EOT>"));
+        var data = Encoding.UTF8.GetBytes(StringMessageHelpers.HumanFriendlyControlCharactersToRaw("<SOH>00031<STX>1/1/1>ADMIN:ALIVE<ETX>00061<EOT>"));
         var stuffedData = BccCharacterStuffer.StuffCharacters(data);
-        var settings = new BBraunBccClientSettings(BccParticipantRole.Server, true, TimeSpan.FromSeconds(10));
+        var settings = new BBraunBccClientSettings(BccParticipantRole.Server, true, TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(10));
         var simulatedIoDevice = new SimulatedIoDevice();
         simulatedIoDevice.Receive(stuffedData);
         using var sut = new BBraunBccFrameReader(simulatedIoDevice, settings);

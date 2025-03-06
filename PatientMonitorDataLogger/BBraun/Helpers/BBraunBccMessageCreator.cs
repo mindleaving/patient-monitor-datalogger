@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using PatientMonitorDataLogger.BBraun.Models;
+using PatientMonitorDataLogger.BBraun.Simulation;
 
 namespace PatientMonitorDataLogger.BBraun.Helpers;
 
@@ -23,6 +24,21 @@ public class BBraunBccMessageCreator
     public byte[] CreateGetAllRequest(string bedId) => CreateMessage(bedId, new BBraunBccRequest("MEM", "GET"));
     public byte[] CreateGetPumpRequest(string bedId, PumpIndex pumpIndex) => CreateMessage(bedId, new BBraunBccRequest("MEM", $"GETSLOT#{pumpIndex.Pillar}{pumpIndex.SlotCharacter}"));
     public byte[] CreateResponseMessage(string bedId, List<Quadruple> quadruples) => CreateMessage(bedId, new BBraunBccResponse(quadruples));
+
+    public byte[] CreateErrorResponse(
+        string bedId,
+        int secondsSinceStart,
+        PumpIndex pumpIndex,
+        BccErrorCodes errorCode)
+        => CreateResponseMessage(
+            bedId,
+            [
+                new(
+                    secondsSinceStart,
+                    pumpIndex,
+                    "GNERR",
+                    ((int)errorCode).ToString())
+            ]);
 
     public byte[] CreateMessage(
         string bedId,

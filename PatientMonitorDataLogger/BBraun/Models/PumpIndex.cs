@@ -30,7 +30,7 @@ public class PumpIndex : ISerializable
         if (!Regex.IsMatch(str, "^501[0-3][0-9A-O]$"))
             throw new FormatException("Invalid pump index");
         var pillar = int.Parse(str.Substring(3, 1));
-        var slot = char.IsNumber(str[4]) ? int.Parse(str.Substring(4, 1)) : 10 + (str[4] - 'A');
+        var slot = GetSlotIndexFromSlotCharacter(str[4]);
         return new(pillar, slot);
     }
 
@@ -42,5 +42,11 @@ public class PumpIndex : ISerializable
     public override string ToString()
     {
         return $"{Pillar}{SlotCharacter}";
+    }
+
+    public static int GetSlotIndexFromSlotCharacter(
+        char slotCharacter)
+    {
+        return char.IsNumber(slotCharacter) ? int.Parse(slotCharacter + "") : 10 + (slotCharacter - 'A');
     }
 }

@@ -43,11 +43,11 @@ philipsIntellivueCommunicator.Disconnect();
 Use with simulated monitor:
 
 ```csharp
-var simulatedSerialPortPair = new SimulatedSerialPortPair();
-var settings = PhilipsIntellivueClientSettings.CreateForSimulatedSerialPort(simulatedSerialPortPair.Port1, TimeSpan.FromSeconds(10), PollMode.Extended);
+var simulatedCable = new SimulatedCable();
+var settings = PhilipsIntellivueClientSettings.CreateForSimulatedSerialPort(simulatedCable.End1, TimeSpan.FromSeconds(10), PollMode.Extended);
 
 // Start simulated monitor
-simulatedMonitor = new SimulatedPhilipsIntellivueMonitor(simulatedSerialPortPair.Port2);
+simulatedMonitor = new SimulatedPhilipsIntellivueMonitor(simulatedCable.End2);
 simulatedMonitor.Start();
 
 philipsIntellivueCommunicator.NewMessage += (sender, message) => { /* Do something with the message, e.g. serialize to JSON and write to file */ };
@@ -67,7 +67,7 @@ while (Console.ReadKey(true).Key != ConsoleKey.Escape);
 // Disconnect
 philipsIntellivueCommunicator.Disconnect();
 simulatedMonitor!.Stop();
-simulatedSerialPortPair!.Dispose();
+simulatedCable!.Dispose();
 ```
 
 Refer to the Philips IntelliVue communication protocol manual for details on the message structure. Philips IntelliVue uses attributes to transport measurements. Those attributes can contain custom structures containing values, e.g. sample arrays (waves) or single float values (numerics). 
