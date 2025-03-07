@@ -1,15 +1,15 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useState } from "react";
 import { Row, Col, Button, Spinner, Badge } from "react-bootstrap";
 import { Models } from "../types/models";
 import { AccordionCard } from "./AccordionCard";
 import { deleteObject, sendPostRequest } from "../communication/ApiRequests";
-import { PatientMonitorType } from "../types/enums";
 import { DeleteButton } from "./DeleteButon";
 import { CopyToUsbModal } from "./CopyToUsbModal";
 import { confirmAlert } from "react-confirm-alert";
-import { MonitorSettingsDescription } from "./MonitorSettingsDescription";
+import { DeviceSettingsDescription } from "./DeviceSettingsDescription";
 import { DeviceDataSettingsDescription } from "./DeviceDataSettingsDescription";
 import { formatDate } from "../helpers/Formatters";
+import { DeviceDescription } from "./DeviceDescription";
 
 interface LogSessionListItemProps {
     logSession: Models.LogSession;
@@ -104,18 +104,22 @@ export const LogSessionListItem = (props: LogSessionListItemProps) => {
                     {logSession.status.isRunning ? 'Recording' : 'Stopped'}
                 </Badge>
             </Col>
-            {logSession.patientInfo
-            ? <Col>
-                <span className="text-nowrap">{logSession.patientInfo.firstName} {logSession.patientInfo.lastName}</span>
-            </Col> : null}
-            <Col>
+            <Col xs="auto">
                 <span className="text-nowrap">{logSession.settings.name} ID: {logSession.id.substring(0, 6)}</span>
             </Col>
+            <Col xs="auto">
+                <DeviceDescription deviceSettings={logSession.settings.deviceSettings} />
+            </Col>
+            {logSession.patientInfo
+            ? <Col xs="auto">
+                <span className="text-nowrap">{logSession.patientInfo.firstName} {logSession.patientInfo.lastName}</span>
+            </Col> : null}
+            <Col />
         </Row>}
     >
         <Row className="mb-2">
             <Col xs="auto">
-                <MonitorSettingsDescription deviceSettings={deviceSettings} />
+                <DeviceSettingsDescription deviceSettings={deviceSettings} />
             </Col>
             <Col xs="auto">
                 <DeviceDataSettingsDescription deviceDataSettings={deviceDataSettings} />

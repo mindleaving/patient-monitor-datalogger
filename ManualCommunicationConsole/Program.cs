@@ -1,9 +1,9 @@
 ﻿using PatientMonitorDataLogger.BBraun;
 using PatientMonitorDataLogger.BBraun.Helpers;
 
-var tcpClient = new PhysicalTcpClient("192.168.100.41", 4001);
+var settings = new BBraunBccClientSettings(BccParticipantRole.Client, "192.168.100.41", 4001, false, TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(10));
+var tcpClient = new PhysicalTcpClient(settings.SpaceStationIp, settings.SpaceStationPort);
 tcpClient.Open();
-var settings = new BBraunBccClientSettings(BccParticipantRole.Client, false, TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(10));
 var messageCreator = new BBraunBccMessageCreator(settings);
 //var message = messageCreator.CreateResponseMessage("ComSystem", [ new(207, new(0,0), "V3.30", null) ]); //messageCreator.CreateGetPumpRequest("ComSystem", new PumpIndex(1, 3));
 //var frame = BBraunBccFrame.Parse(message, BccParticipantRole.Client);

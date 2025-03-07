@@ -19,7 +19,7 @@ public class LogSession : IDisposable, IAsyncDisposable
             throw new ArgumentNullException(nameof(settings.DeviceSettings));
         if (settings.DataSettings == null)
             throw new ArgumentNullException(nameof(settings.DataSettings));
-        switch (settings.DeviceType)
+        switch (settings.DeviceSettings.DeviceType)
         {
             case MedicalDeviceType.PatientMonitor:
                 var patientMonitorSettings = (PatientMonitorSettings)settings.DeviceSettings;
@@ -40,7 +40,7 @@ public class LogSession : IDisposable, IAsyncDisposable
                 };
                 break;
             default:
-                throw new NotSupportedException($"Unsupported device type {settings.DeviceType}");
+                throw new NotSupportedException($"Unsupported device type {settings.DeviceSettings.DeviceType}");
         }
         sessionRunner.PatientInfoAvailable += UpdatePatientInfo;
         sessionRunner.StatusChanged += SessionRunner_StatusChanged;

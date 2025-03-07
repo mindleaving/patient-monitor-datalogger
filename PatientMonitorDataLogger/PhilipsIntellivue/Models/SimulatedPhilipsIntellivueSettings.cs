@@ -2,7 +2,7 @@
 
 namespace PatientMonitorDataLogger.PhilipsIntellivue.Models;
 
-public class SimulatedPhilipsIntellivuePatientMonitorSettings : PatientMonitorSettings
+public class SimulatedPhilipsIntellivueSettings : PatientMonitorSettings
 {
     public override PatientMonitorType MonitorType => PatientMonitorType.SimulatedPhilipsIntellivue;
 }

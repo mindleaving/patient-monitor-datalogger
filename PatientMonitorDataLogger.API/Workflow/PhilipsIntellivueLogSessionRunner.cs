@@ -24,7 +24,7 @@ public class PhilipsIntellivueLogSessionRunner : PatientMonitorLogSessionRunner
         DataWriterSettings writerSettings)
         : base(logSessionId, logSessionSettings, writerSettings)
     {
-        if (logSessionSettings.DeviceSettings is not (PhilipsIntellivuePatientMonitorSettings or SimulatedPhilipsIntellivuePatientMonitorSettings))
+        if (logSessionSettings.DeviceSettings is not (PhilipsIntellivueSettings or SimulatedPhilipsIntellivueSettings))
             throw new ArgumentException($"Incompatible monitor settings. Expected Philips Intellivue settings but got {logSessionSettings.DeviceSettings.GetType().Name}");
         monitorSettings = (PatientMonitorSettings)logSessionSettings.DeviceSettings;
         if (logSessionSettings.DataSettings is not PatientMonitorDataSettings patientMonitorDataSettings)
@@ -34,7 +34,7 @@ public class PhilipsIntellivueLogSessionRunner : PatientMonitorLogSessionRunner
 
     protected override void InitializeImpl()
     {
-        if (monitorSettings is not PhilipsIntellivuePatientMonitorSettings philipsIntellivuePatientMonitorSettings) 
+        if (monitorSettings is not PhilipsIntellivueSettings philipsIntellivuePatientMonitorSettings) 
             return;
         var monitorClientSettings = PhilipsIntellivueClientSettings.CreateForPhysicalSerialPort(
             philipsIntellivuePatientMonitorSettings.SerialPortName,

@@ -1,5 +1,7 @@
-﻿using PatientMonitorDataLogger.BBraun.Helpers;
+﻿using System.Data;
+using PatientMonitorDataLogger.BBraun.Helpers;
 using PatientMonitorDataLogger.BBraun.Models;
+using PatientMonitorDataLogger.PhilipsIntellivue.Models;
 using PatientMonitorDataLogger.Shared.Helpers;
 using PatientMonitorDataLogger.Shared.Models;
 
@@ -29,6 +31,7 @@ public class BBraunBccClient : IDisposable
     public bool IsConnected { get; private set; }
     public string BedId { get; private set; } = "1";
     public event EventHandler<BBraunBccFrame>? NewMessage;
+    public event EventHandler<ConnectionState>? ConnectionStatusChanged;
 
     public void Connect()
     {
@@ -54,9 +57,10 @@ public class BBraunBccClient : IDisposable
     {
         if(isInitialized)
             return;
-        ioDevice = new PhysicalTcpClient(settings.SpaceStationIp!, settings.SpaceStationPort!.Value);
+        ioDevice = new PhysicalTcpClient(settings.SpaceStationIp, settings.SpaceStationPort);
         protocolCommunicator = new BBraunBccCommunicator(ioDevice, settings, nameof(BBraunBccCommunicator));
         protocolCommunicator.NewMessage += OnNewMessage;
+        protocolCommunicator.ConnectionStatusChanged += OnConnectionStatusChanged;
         isInitialized = true;
     }
 
@@ -65,6 +69,13 @@ public class BBraunBccClient : IDisposable
         BBraunBccFrame e)
     {
         NewMessage?.Invoke(this, e);
+    }
+
+    private void OnConnectionStatusChanged(
+        object? sender,
+        ConnectionState connectionStatus)
+    {
+        ConnectionStatusChanged?.Invoke(this, connectionStatus);
     }
 
     private string WaitForBedId()
@@ -112,8 +123,8 @@ public class BBraunBccClient : IDisposable
                 return;
 
             IsConnected = false;
-            protocolCommunicator?.Stop();
             ioDevice?.Close();
+            protocolCommunicator?.Stop();
         }
     }
 

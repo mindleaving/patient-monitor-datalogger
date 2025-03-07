@@ -28,13 +28,11 @@ public class BBraunInfusionPumpsLogSessionRunner : LogSessionRunner
             logSessionSettings.CsvSeparator);
         var clientSettings = new BBraunBccClientSettings(
             BccParticipantRole.Client,
+            bbraunInfusionPumpSettings.Hostname,
+            bbraunInfusionPumpSettings.Port,
             bbraunInfusionPumpSettings.UseCharacterStuffing,
             TimeSpan.FromSeconds(10),
-            bbraunInfusionPumpSettings.PollPeriod)
-        {
-            SpaceStationIp = bbraunInfusionPumpSettings.Hostname,
-            SpaceStationPort = bbraunInfusionPumpSettings.Port
-        };
+            bbraunInfusionPumpSettings.PollPeriod);
         bccClient = new BBraunBccClient(clientSettings);
         bccClient.NewMessage += OnNewMessage;
     }

@@ -1,4 +1,5 @@
-﻿using System.IO.Ports;
+﻿using System.Data;
+using System.IO.Ports;
 using PatientMonitorDataLogger.PhilipsIntellivue.Helpers;
 using PatientMonitorDataLogger.PhilipsIntellivue.Models;
 using PatientMonitorDataLogger.Shared.Helpers;
@@ -42,7 +43,7 @@ public class PhilipsIntellivueClient : IDisposable, IAsyncDisposable
     public bool IsConnected { get; private set; }
     public bool IsListening => protocolCommunicator?.IsListening ?? false;
     public event EventHandler<ICommandMessage>? NewMessage;
-    public event EventHandler<MonitorConnectionChangeEventType>? ConnectionStatusChanged; 
+    public event EventHandler<ConnectionState>? ConnectionStatusChanged; 
 
     public void Connect(
         TimeSpan minimumPollPeriod,
@@ -89,7 +90,7 @@ public class PhilipsIntellivueClient : IDisposable, IAsyncDisposable
             }
             IsConnected = true;
             Log("Connected");
-            ConnectionStatusChanged?.Invoke(this, MonitorConnectionChangeEventType.Connected);
+            ConnectionStatusChanged?.Invoke(this, ConnectionState.Open);
         }
     }
 
@@ -120,9 +121,9 @@ public class PhilipsIntellivueClient : IDisposable, IAsyncDisposable
 
     private void OnConnectionStatusChanged(
         object? sender,
-        MonitorConnectionChangeEventType connectionChangeEventType)
+        ConnectionState connectionStatus)
     {
-        ConnectionStatusChanged?.Invoke(sender, connectionChangeEventType);
+        ConnectionStatusChanged?.Invoke(sender, connectionStatus);
     }
 
     /// <summary>
@@ -332,7 +333,7 @@ public class PhilipsIntellivueClient : IDisposable, IAsyncDisposable
             IsConnected = false;
             try
             {
-                ConnectionStatusChanged?.Invoke(this, MonitorConnectionChangeEventType.Disconnected);
+                ConnectionStatusChanged?.Invoke(this, ConnectionState.Closed);
             }
             catch
             {

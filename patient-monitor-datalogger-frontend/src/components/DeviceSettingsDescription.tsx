@@ -1,11 +1,11 @@
 import { InfusionPumpType, MedicalDeviceType, PatientMonitorType } from "../types/enums";
 import { Models } from "../types/models";
 
-interface MonitorSettingsDescriptionProps {
+interface DeviceSettingsDescriptionProps {
     deviceSettings: Models.IMedicalDeviceSettings;
 }
 
-export const MonitorSettingsDescription = (props: MonitorSettingsDescriptionProps) => {
+export const DeviceSettingsDescription = (props: DeviceSettingsDescriptionProps) => {
 
     const { deviceSettings } = props;
 

@@ -16,8 +16,8 @@ public static class TypescriptGeneratorRunner
         var repositoryPath = Constants.GetRepositoryPath();
         TypescriptGenerator.TypescriptGenerator.Builder
             .IncludeAllInNamespace(Assembly.GetAssembly(typeof(PatientMonitorDataSettings)), "PatientMonitorDataLogger.Shared.Models")
-            .IncludeAllInNamespace(Assembly.GetAssembly(typeof(PhilipsIntellivuePatientMonitorSettings)), "PatientMonitorDataLogger.PhilipsIntellivue.Models")
-            .IncludeAllInNamespace(Assembly.GetAssembly(typeof(GEDashPatientMonitorSettings)), "PatientMonitorDataLogger.GEDash.Models")
+            .IncludeAllInNamespace(Assembly.GetAssembly(typeof(PhilipsIntellivueSettings)), "PatientMonitorDataLogger.PhilipsIntellivue.Models")
+            .IncludeAllInNamespace(Assembly.GetAssembly(typeof(GEDashSettings)), "PatientMonitorDataLogger.GEDash.Models")
             .IncludeAllInNamespace(Assembly.GetAssembly(typeof(BBraunInfusionPumpSettings)), "PatientMonitorDataLogger.BBraun.Models")
             .IncludeAllInNamespace(Assembly.GetAssembly(typeof(LogSession)), "PatientMonitorDataLogger.API.Models")
             .ExcludeAllInNamespace(Assembly.GetAssembly(typeof(PatientMonitorDataSettings)), "PatientMonitorDataLogger.Shared.Models.Converters")

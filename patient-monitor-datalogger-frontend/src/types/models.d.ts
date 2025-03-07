@@ -1,17 +1,17 @@
 import * as Enums from './enums';
 
 export namespace Models {
-    interface IInfusionPumpSettings extends Models.IMedicalDeviceSettings {
-        infusionPumpType: Enums.InfusionPumpType;
-    }
     interface IMedicalDeviceDataSettings {
         deviceType: Enums.MedicalDeviceType;
     }
     interface IMedicalDeviceSettings {
         deviceType: Enums.MedicalDeviceType;
     }
-    interface InfusionPumpSettings extends Models.IInfusionPumpSettings {
+    interface InfusionPumpDataSettings extends Models.IMedicalDeviceDataSettings {
         
+    }
+    interface InfusionPumpSettings extends Models.IMedicalDeviceSettings {
+        infusionPumpType: Enums.InfusionPumpType;
     }
     interface IODevice extends System.IDisposable {
         
@@ -248,7 +248,7 @@ export namespace Models {
         messageType: Enums.MessageType;
         userDataLength: number;
     }
-    interface PhilipsIntellivuePatientMonitorSettings extends Models.PatientMonitorSettings {
+    interface PhilipsIntellivueSettings extends Models.PatientMonitorSettings {
         serialPortName: string;
         serialPortBaudRate: number;
     }
@@ -351,7 +351,7 @@ export namespace Models {
         managedObject: Models.ManagedObjectId;
         attributeList: Models.List<Models.AttributeValueAssertion>;
     }
-    interface SimulatedPhilipsIntellivuePatientMonitorSettings extends Models.PatientMonitorSettings {
+    interface SimulatedPhilipsIntellivueSettings extends Models.PatientMonitorSettings {
         
     }
     interface SingleContextPoll extends Models.ISerializable {
@@ -391,13 +391,13 @@ export namespace Models {
     interface PatientDemographics {
         
     }
-    interface GEDashPatientMonitorSettings extends Models.PatientMonitorSettings {
+    interface GEDashSettings extends Models.PatientMonitorSettings {
         serialPortName: string;
         serialPortBaudRate: number;
     }
     interface BBraunInfusionPumpSettings extends Models.InfusionPumpSettings {
         hostname: string;
-        port?: number | null;
+        port: number;
         useCharacterStuffing: boolean;
         pollPeriod: string;
     }
@@ -492,7 +492,6 @@ export namespace Models {
     }
     interface LogSessionSettings {
         name: string;
-        deviceType: Enums.MedicalDeviceType;
         deviceSettings: Models.IMedicalDeviceSettings;
         dataSettings: Models.IMedicalDeviceDataSettings;
         csvSeparator: string;

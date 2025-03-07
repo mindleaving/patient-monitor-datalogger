@@ -1,9 +1,18 @@
-import { PatientMonitorType, WaveType } from "../types/enums";
+import { InfusionPumpType, MedicalDeviceType, PatientMonitorType, WaveType } from "../types/enums";
+
+export const deviceTypeNames: { [key:string]: string } = {
+    [MedicalDeviceType.PatientMonitor]: "Patient Monitor",
+    [MedicalDeviceType.InfusionPumps]: "Infusion pumps"
+};
 
 export const monitorNames: { [key:string]: string } = {
     [PatientMonitorType.PhilipsIntellivue]: "Philips Intellivue",
     [PatientMonitorType.SimulatedPhilipsIntellivue]: "Simulated Philips Intellivue",
     [PatientMonitorType.GEDash]: "GE Dash",
+};
+
+export const infusionPumpSystemNames: { [key:string]: string } = {
+    [InfusionPumpType.BBraunSpace]: "B. Braun Space Infusion System"
 };
 
 export const waveTypeNames: { [waveType:string]: string } = {

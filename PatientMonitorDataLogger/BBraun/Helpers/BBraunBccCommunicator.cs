@@ -1,5 +1,5 @@
-﻿using PatientMonitorDataLogger.PhilipsIntellivue.Models;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
+using System.Data;
 using PatientMonitorDataLogger.Shared.Helpers;
 using PatientMonitorDataLogger.Shared.Models;
 
@@ -29,13 +29,13 @@ public class BBraunBccCommunicator : IDisposable
         messageCreator = new BBraunBccMessageCreator(settings);
         messageCollection = new(settings.MessageRetentionPeriod);
         frameReader.FrameAvailable += QueueMessage;
-        frameReader.IoDeviceFaulted += OnSerialPortFaulted;
+        frameReader.IoDeviceFaulted += OnIoDeviceFaulted;
     }
 
     public bool IsListening => frameReader.IsListening;
     public bool IsSending { get; private set; }
     public event EventHandler<BBraunBccFrame>? NewMessage;
-    public event EventHandler<MonitorConnectionChangeEventType>? ConnectionStatusChanged;
+    public event EventHandler<ConnectionState>? ConnectionStatusChanged;
 
     private void QueueMessage(
         object? sender,
@@ -50,11 +50,11 @@ public class BBraunBccCommunicator : IDisposable
             Enqueue(messageCreator.CreateAcknowledgeMessage());
     }
 
-    private void OnSerialPortFaulted(
+    private void OnIoDeviceFaulted(
         object? sender,
         EventArgs e)
     {
-        ConnectionStatusChanged?.Invoke(this, MonitorConnectionChangeEventType.Faulted);
+        ConnectionStatusChanged?.Invoke(this, ConnectionState.Broken);
         Stop();
     }
 
@@ -78,7 +78,7 @@ public class BBraunBccCommunicator : IDisposable
                     TaskScheduler.Default);
                 IsSending = true;
             }
-            ConnectionStatusChanged?.Invoke(this, MonitorConnectionChangeEventType.Connected);
+            ConnectionStatusChanged?.Invoke(this, ConnectionState.Open);
         }
     }
 
@@ -95,7 +95,7 @@ public class BBraunBccCommunicator : IDisposable
             }
             catch
             {
-                OnSerialPortFaulted(this, EventArgs.Empty);
+                OnIoDeviceFaulted(this, EventArgs.Empty);
                 IsSending = false;
                 throw;
             }
@@ -130,7 +130,7 @@ public class BBraunBccCommunicator : IDisposable
                 }
             }
             messageCollection.Clear();
-            ConnectionStatusChanged?.Invoke(this, MonitorConnectionChangeEventType.Disconnected);
+            ConnectionStatusChanged?.Invoke(this, ConnectionState.Closed);
         }
     }
 

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.Data;
 using PatientMonitorDataLogger.PhilipsIntellivue.Models;
 using PatientMonitorDataLogger.Shared.Helpers;
 using PatientMonitorDataLogger.Shared.Models;
@@ -31,7 +32,7 @@ public class PhilipsIntellivueCommunicator : IDisposable
     public bool IsListening => frameReader.IsListening;
     public bool IsSending { get; private set; }
     public event EventHandler<ICommandMessage>? NewMessage;
-    public event EventHandler<MonitorConnectionChangeEventType>? ConnectionStatusChanged;
+    public event EventHandler<ConnectionState>? ConnectionStatusChanged;
 
     private void QueueMessage(
         object? sender,
@@ -39,7 +40,7 @@ public class PhilipsIntellivueCommunicator : IDisposable
     {
         if (IsAssociationAbort(frame.UserData))
         {
-            ConnectionStatusChanged?.Invoke(this, MonitorConnectionChangeEventType.Aborted);
+            ConnectionStatusChanged?.Invoke(this, ConnectionState.Closed);
             Stop();
         }
 #if DEBUG
@@ -53,7 +54,7 @@ public class PhilipsIntellivueCommunicator : IDisposable
         object? sender,
         EventArgs e)
     {
-        ConnectionStatusChanged?.Invoke(this, MonitorConnectionChangeEventType.Faulted);
+        ConnectionStatusChanged?.Invoke(this, ConnectionState.Broken);
         Stop();
     }
 
@@ -77,7 +78,7 @@ public class PhilipsIntellivueCommunicator : IDisposable
                     TaskScheduler.Default);
                 IsSending = true;
             }
-            ConnectionStatusChanged?.Invoke(this, MonitorConnectionChangeEventType.Connected);
+            ConnectionStatusChanged?.Invoke(this, ConnectionState.Open);
         }
     }
 
@@ -141,7 +142,7 @@ public class PhilipsIntellivueCommunicator : IDisposable
                 }
             }
             messageCollection.Clear();
-            ConnectionStatusChanged?.Invoke(this, MonitorConnectionChangeEventType.Disconnected);
+            ConnectionStatusChanged?.Invoke(this, ConnectionState.Closed);
         }
     }
 

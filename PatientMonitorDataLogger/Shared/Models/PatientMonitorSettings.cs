@@ -1,9 +1,5 @@
-﻿using Newtonsoft.Json;
-using PatientMonitorDataLogger.Shared.Models.Converters;
+﻿namespace PatientMonitorDataLogger.Shared.Models;
 
-namespace PatientMonitorDataLogger.Shared.Models;
-
-[JsonConverter(typeof(PatientMonitorSettingsJsonConverter))]
 public abstract class PatientMonitorSettings : IPatientMonitorSettings
 {
     public MedicalDeviceType DeviceType => MedicalDeviceType.PatientMonitor;

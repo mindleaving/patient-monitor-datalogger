@@ -11,7 +11,6 @@ export enum MonitorDataType {
     Wave = "Wave"
 }
 export enum PatientMonitorType {
-    Unknown = "Unknown",
     PhilipsIntellivue = "PhilipsIntellivue",
     GEDash = "GEDash",
     SimulatedPhilipsIntellivue = "SimulatedPhilipsIntellivue"

@@ -34,7 +34,7 @@ public class LogSessionSupervisor : IDisposable, IAsyncDisposable
     private void MonitorLogSessions(
         object? state)
     {
-        foreach (var logSession in logSessions.Values)
+        foreach (var logSession in logSessions.Values.ToList())
         {
             if (logSessionsScheduledForRestart.TryRemove(logSession.Id, out _))
             {

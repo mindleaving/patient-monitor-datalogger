@@ -1,7 +1,7 @@
-﻿using Newtonsoft.Json;
+﻿using System.Data;
+using Newtonsoft.Json;
 using PatientMonitorDataLogger.API.Models;
 using PatientMonitorDataLogger.API.Models.DataExport;
-using PatientMonitorDataLogger.PhilipsIntellivue.Models;
 
 namespace PatientMonitorDataLogger.API.Workflow;
 
@@ -83,7 +83,7 @@ public abstract class LogSessionRunner : ILogSessionRunner
 
     protected void OnConnectionStatusChanged(
         object? sender,
-        MonitorConnectionChangeEventType connectionChangeEventType)
+        ConnectionState connectionStatus)
     {
         StatusChanged?.Invoke(sender, Status);
     }

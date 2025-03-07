@@ -10,7 +10,7 @@ public class BBraunBccMessageCreatorTest
     public void AdminAliveMessageCorrect()
     {
         var expected = Encoding.UTF8.GetBytes(StringMessageHelpers.HumanFriendlyControlCharactersToRaw("<SOH>00031<STX>1/1/1>ADMIN:ALIVE<ETX>00061<EOT>"));
-        var settings = new BBraunBccClientSettings(BccParticipantRole.Client, false, TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(10));
+        var settings = new BBraunBccClientSettings(BccParticipantRole.Client, "192.168.100.41", 4001, false, TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(10));
         var sut = new BBraunBccMessageCreator(settings);
 
         var actual = sut.CreateInitializeCommunicationRequest();
