@@ -16,7 +16,7 @@ export const DeviceSettingsDescription = (props: DeviceSettingsDescriptionProps)
             switch(patientMonitorSettings.monitorType) {
                 case PatientMonitorType.PhilipsIntellivue:
                 { 
-                    const philipsIntellivueSettings = patientMonitorSettings as Models.PhilipsIntellivuePatientMonitorSettings;
+                    const philipsIntellivueSettings = patientMonitorSettings as Models.PhilipsIntellivueSettings;
                     return (<span>
                         Philips Intellivue: Serial port {philipsIntellivueSettings.serialPortName} @ {philipsIntellivueSettings.serialPortBaudRate} bit/s
                     </span>);
@@ -29,7 +29,7 @@ export const DeviceSettingsDescription = (props: DeviceSettingsDescriptionProps)
                 }
                 case PatientMonitorType.GEDash:
                 {
-                    const geDashSettings = patientMonitorSettings as Models.GEDashPatientMonitorSettings;
+                    const geDashSettings = patientMonitorSettings as Models.GEDashSettings;
                     return (<span>
                         GE Dash: Serial port {geDashSettings.serialPortName} @ {geDashSettings.serialPortBaudRate} bit/s
                     </span>);

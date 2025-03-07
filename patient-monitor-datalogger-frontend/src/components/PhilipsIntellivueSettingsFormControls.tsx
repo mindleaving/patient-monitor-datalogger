@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { loadObject } from "../communication/ApiRequests";
 
 interface PhilipsIntellivueSettingsFormControlsProps {
-    value: Models.PhilipsIntellivuePatientMonitorSettings;
+    value: Models.PhilipsIntellivueSettings;
     onChange: (update: Update<Models.IMedicalDeviceSettings>) => void;
 }
 
@@ -22,8 +22,8 @@ export const PhilipsIntellivueSettingsFormControls = (props: PhilipsIntellivueSe
         );
     }, []);
 
-    const updateProperty = useCallback((update: Update<Models.PhilipsIntellivuePatientMonitorSettings>) => {
-        onChange(state => update(state as Models.PhilipsIntellivuePatientMonitorSettings));
+    const updateProperty = useCallback((update: Update<Models.PhilipsIntellivueSettings>) => {
+        onChange(state => update(state as Models.PhilipsIntellivueSettings));
     }, [ onChange ]);
 
     useEffect(() => {

@@ -17,12 +17,12 @@ const getSerialBaudRate = (deviceSettings: Models.IMedicalDeviceSettings) => {
     switch(patientMonitorSettings.monitorType) {
         case PatientMonitorType.PhilipsIntellivue:
         {
-            const philipsIntellivueSettings = patientMonitorSettings as Models.PhilipsIntellivuePatientMonitorSettings;
+            const philipsIntellivueSettings = patientMonitorSettings as Models.PhilipsIntellivueSettings;
             return philipsIntellivueSettings.serialPortBaudRate;
         }
         case PatientMonitorType.GEDash:
         {
-            const geDashSettings = patientMonitorSettings as Models.GEDashPatientMonitorSettings;
+            const geDashSettings = patientMonitorSettings as Models.GEDashSettings;
             return geDashSettings.serialPortBaudRate;
         }
         default:

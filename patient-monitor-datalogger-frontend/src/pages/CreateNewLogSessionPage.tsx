@@ -24,7 +24,7 @@ export const CreateNewLogSessionPage = (props: CreateNewLogSessionPageProps) => 
         monitorType: PatientMonitorType.PhilipsIntellivue,
         serialPortName: undefined as any,
         serialPortBaudRate: 19200
-    } as Models.PhilipsIntellivuePatientMonitorSettings);
+    } as Models.PhilipsIntellivueSettings);
     const [ dataSettings, setDataSettings ] = useState<Models.IMedicalDeviceDataSettings>({ 
         deviceType: MedicalDeviceType.PatientMonitor,
         includePatientInfo: true,
