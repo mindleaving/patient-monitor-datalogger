@@ -1,6 +1,6 @@
 ﻿namespace PatientMonitorDataLogger.API.Models;
 
-public class MonitorDataWriterSettings
+public class DataWriterSettings
 {
     public const string AppSettingsSectionName = "Output";
 

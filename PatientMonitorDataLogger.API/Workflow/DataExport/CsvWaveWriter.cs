@@ -18,14 +18,12 @@ public class CsvWaveWriter : AsyncFileWriter<WaveData>, IWaveWriter
         this.separator = separator;
     }
 
-    public void Write(
+    public override void Write(
         WaveData data)
     {
         if (data.MeasurementType != MeasurementType)
             throw new InvalidOperationException("Cannot write wave data for different measurement type than this data writer was intended for");
-        if(dataQueue.IsAddingCompleted)
-            return;
-        dataQueue.Add(data);
+        base.Write(data);
     }
 
     protected override IEnumerable<string> Serialize(

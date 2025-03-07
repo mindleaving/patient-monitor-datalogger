@@ -11,7 +11,7 @@ public class WorkflowSetup : ISetup
         IServiceCollection services,
         IConfiguration configuration)
     {
-        services.Configure<MonitorDataWriterSettings>(configuration.GetSection(MonitorDataWriterSettings.AppSettingsSectionName));
+        services.Configure<DataWriterSettings>(configuration.GetSection(DataWriterSettings.AppSettingsSectionName));
 
         SetupLogSessionSupervisor(services);
         SetupLogSessions(services);
@@ -28,7 +28,7 @@ public class WorkflowSetup : ISetup
                 var measurementDataDistributor = provider.GetRequiredService<MeasurementDataDistributor>();
                 var logSessionSupervisor = provider.GetRequiredService<LogSessionSupervisor>();
                 var logSessions = new LogSessions(measurementDataDistributor, logSessionSupervisor);
-                var writerSettings = provider.GetRequiredService<IOptions<MonitorDataWriterSettings>>().Value;
+                var writerSettings = provider.GetRequiredService<IOptions<DataWriterSettings>>().Value;
                 logSessions.LoadFromDisk(writerSettings);
                 return logSessions;
             });

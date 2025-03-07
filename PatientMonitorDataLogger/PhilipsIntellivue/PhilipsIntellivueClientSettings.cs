@@ -1,5 +1,4 @@
-﻿using PatientMonitorDataLogger.PhilipsIntellivue.Helpers;
-using PatientMonitorDataLogger.PhilipsIntellivue.Models;
+﻿using PatientMonitorDataLogger.PhilipsIntellivue.Models;
 using PatientMonitorDataLogger.Shared.Simulation;
 
 namespace PatientMonitorDataLogger.PhilipsIntellivue;

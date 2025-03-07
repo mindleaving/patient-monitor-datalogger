@@ -3,21 +3,31 @@ using TypescriptGenerator;
 using Newtonsoft.Json.Linq;
 using PatientMonitorDataLogger.API.Models;
 using PatientMonitorDataLogger.Shared.Models;
+using PatientMonitorDataLogger.BBraun.Models;
+using PatientMonitorDataLogger.GEDash.Models;
+using PatientMonitorDataLogger.PhilipsIntellivue.Models;
 
 namespace PatientMonitorDataLogger.API.Setups;
 
-public class TypescriptGeneratorRunner
+public static class TypescriptGeneratorRunner
 {
     public static void Run()
     {
         var repositoryPath = Constants.GetRepositoryPath();
         TypescriptGenerator.TypescriptGenerator.Builder
-            .IncludeAllInNamespace(Assembly.GetAssembly(typeof(MonitorDataSettings)), "PatientMonitorDataLogger.SharedModels")
+            .IncludeAllInNamespace(Assembly.GetAssembly(typeof(PatientMonitorDataSettings)), "PatientMonitorDataLogger.Shared.Models")
+            .IncludeAllInNamespace(Assembly.GetAssembly(typeof(PhilipsIntellivuePatientMonitorSettings)), "PatientMonitorDataLogger.PhilipsIntellivue.Models")
+            .IncludeAllInNamespace(Assembly.GetAssembly(typeof(GEDashPatientMonitorSettings)), "PatientMonitorDataLogger.GEDash.Models")
+            .IncludeAllInNamespace(Assembly.GetAssembly(typeof(BBraunInfusionPumpSettings)), "PatientMonitorDataLogger.BBraun.Models")
             .IncludeAllInNamespace(Assembly.GetAssembly(typeof(LogSession)), "PatientMonitorDataLogger.API.Models")
+            .ExcludeAllInNamespace(Assembly.GetAssembly(typeof(PatientMonitorDataSettings)), "PatientMonitorDataLogger.Shared.Models.Converters")
             .ExcludeAllInNamespace(Assembly.GetAssembly(typeof(LogSession)), "PatientMonitorDataLogger.API.Models.Converters")
             .ReactDefaults()
             .SetDefaultFilenameForEnums("enums.ts")
-            .ConfigureNamespace("PatientMonitorDataLogger.SharedModels", options => options.Translation = "Models")
+            .ConfigureNamespace("PatientMonitorDataLogger.Shared.Models", options => options.Translation = "Models")
+            .ConfigureNamespace("PatientMonitorDataLogger.PhilipsIntellivue.Models", options => options.Translation = "Models")
+            .ConfigureNamespace("PatientMonitorDataLogger.GEDash.Models", options => options.Translation = "Models")
+            .ConfigureNamespace("PatientMonitorDataLogger.BBraun.Models", options => options.Translation = "Models")
             .ConfigureNamespace("PatientMonitorDataLogger.API.Models", options => options.Translation = "Models")
             .CustomizeType(x => x == typeof(Guid), _ => "string")
             .CustomizeType(x => x == typeof(JObject), _ => "{}")

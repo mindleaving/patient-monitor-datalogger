@@ -39,7 +39,7 @@ public class SimulatedBBraunRack : IDisposable
         if(frame.UserData is not BBraunBccRequest request)
             return;
 
-        var secondsSinceStart = (int)(DateTime.UtcNow - startTime).TotalSeconds;
+        var secondsSinceStart = (uint)(DateTime.UtcNow - startTime).TotalSeconds;
         if (request.Area == "ADMIN" && request.Command == "ALIVE")
         {
             protocolCommunicator.Enqueue(messageCreator.CreateResponseMessage(BedId, [ new(secondsSinceStart, new(0,0), "GNACK", "0") ]));
@@ -93,7 +93,7 @@ public class SimulatedBBraunRack : IDisposable
         SimulatedBBraunPump? pump,
         PumpIndex pumpIndex,
         SimulatedBBraunRackSlot slot,
-        int secondsSinceStart)
+        uint secondsSinceStart)
     {
         if (pump == null)
         {

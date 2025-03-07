@@ -2,6 +2,8 @@
 
 public class InfusionPumpParameters
 {
+    public PumpIndex PumpIndex { get; set; }
+
     public string? Name { get; set; }
     public string? Model { get; set; }
     public double? RateInMilliliterPerHour { get; set; }

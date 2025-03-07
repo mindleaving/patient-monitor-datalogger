@@ -1,10 +1,8 @@
-﻿using Newtonsoft.Json;
-using PatientMonitorDataLogger.API.Models.Converters;
+﻿using PatientMonitorDataLogger.Shared.Models;
 
 namespace PatientMonitorDataLogger.API.Models;
 
-[JsonConverter(typeof(PatientMonitorInfoJsonConverter))]
-public interface IPatientMonitorInfo
+public interface IPatientMonitorInfo : IMedicalDeviceInfo
 {
-    PatientMonitorType Type { get; }
+    PatientMonitorType MonitorType { get; }
 }

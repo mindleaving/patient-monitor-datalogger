@@ -1,37 +1,58 @@
-import { PatientMonitorType } from "../types/enums";
+import { InfusionPumpType, MedicalDeviceType, PatientMonitorType } from "../types/enums";
 import { Models } from "../types/models";
 
 interface MonitorSettingsDescriptionProps {
-    monitorSettings: Models.PatientMonitorSettings;
+    deviceSettings: Models.IMedicalDeviceSettings;
 }
 
 export const MonitorSettingsDescription = (props: MonitorSettingsDescriptionProps) => {
 
-    const { monitorSettings } = props;
+    const { deviceSettings } = props;
 
-    switch(monitorSettings.type) {
-        case PatientMonitorType.PhilipsIntellivue:
-        { 
-            const philipsIntellivueSettings = monitorSettings as Models.PhilipsIntellivuePatientMonitorSettings;
-            return (<span>
-                Philips Intellivue: Serial port {philipsIntellivueSettings.serialPortName} @ {philipsIntellivueSettings.serialPortBaudRate} bit/s
-            </span>);
-        }
-        case PatientMonitorType.SimulatedPhilipsIntellivue:
+    switch(deviceSettings.deviceType) {
+        case MedicalDeviceType.PatientMonitor:
         {
-            return (<span>
-                Simulated Philips Intellivue Monitor
-            </span>);
+            const patientMonitorSettings = deviceSettings as Models.PatientMonitorSettings;
+            switch(patientMonitorSettings.monitorType) {
+                case PatientMonitorType.PhilipsIntellivue:
+                { 
+                    const philipsIntellivueSettings = patientMonitorSettings as Models.PhilipsIntellivuePatientMonitorSettings;
+                    return (<span>
+                        Philips Intellivue: Serial port {philipsIntellivueSettings.serialPortName} @ {philipsIntellivueSettings.serialPortBaudRate} bit/s
+                    </span>);
+                }
+                case PatientMonitorType.SimulatedPhilipsIntellivue:
+                {
+                    return (<span>
+                        Simulated Philips Intellivue Monitor
+                    </span>);
+                }
+                case PatientMonitorType.GEDash:
+                {
+                    const geDashSettings = patientMonitorSettings as Models.GEDashPatientMonitorSettings;
+                    return (<span>
+                        GE Dash: Serial port {geDashSettings.serialPortName} @ {geDashSettings.serialPortBaudRate} bit/s
+                    </span>);
+                }
+                default:
+                    return null;
+            }
         }
-        case PatientMonitorType.GEDash:
+        case MedicalDeviceType.InfusionPumps:
         {
-            const geDashSettings = monitorSettings as Models.GEDashPatientMonitorSettings;
-            return (<span>
-                GE Dash: Serial port {geDashSettings.serialPortName} @ {geDashSettings.serialPortBaudRate} bit/s
-            </span>);
+            const infusionPumpSettings = deviceSettings as Models.InfusionPumpSettings;
+            switch(infusionPumpSettings.infusionPumpType) {
+                case InfusionPumpType.BBraunSpace:
+                {
+                    const bbraunInfusionPumpSettings = infusionPumpSettings as Models.BBraunInfusionPumpSettings;
+                    return (<span>
+                        B. Braun Space Station: IP {bbraunInfusionPumpSettings.hostname}:{bbraunInfusionPumpSettings.port}
+                    </span>);
+                }
+            }
+            break;
         }
-        default:
-            return null;
     }
+    
 
 }

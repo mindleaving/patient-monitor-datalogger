@@ -1,7 +1,9 @@
 ﻿namespace PatientMonitorDataLogger.Shared.Models;
 
-public class MonitorDataSettings
+public class PatientMonitorDataSettings : IMedicalDeviceDataSettings
 {
+    public MedicalDeviceType DeviceType => MedicalDeviceType.PatientMonitor;
+
     public bool IncludeAlerts { get; set; }
     public bool IncludeNumerics { get; set; }
     public bool IncludeWaves { get; set; }

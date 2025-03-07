@@ -210,7 +210,7 @@ public class PhilipsIntellivueClient : IDisposable, IAsyncDisposable
     }
 
     public void StartPolling(
-        MonitorDataSettings monitorDataSettings)
+        PatientMonitorDataSettings monitorDataSettings)
     {
         if(monitorDataSettings.IncludeAlerts)
             alertPollTimer.Change(TimeSpan.Zero, TimeSpan.FromSeconds(settings.PollMode == PollMode.Extended ? 30 : 10));

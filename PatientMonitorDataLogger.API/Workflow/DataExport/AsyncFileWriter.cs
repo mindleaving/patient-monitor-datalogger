@@ -41,6 +41,14 @@ public abstract class AsyncFileWriter<T> : IDisposable, IAsyncDisposable
         }
     }
 
+    public virtual void Write(
+        T item)
+    {
+        if(dataQueue.IsAddingCompleted)
+            return;
+        dataQueue.Add(item);
+    }
+
     private void WriteToFile()
     {
         foreach (var data in dataQueue.GetConsumingEnumerable())

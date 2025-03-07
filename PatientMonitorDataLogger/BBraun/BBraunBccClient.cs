@@ -1,4 +1,5 @@
 ﻿using PatientMonitorDataLogger.BBraun.Helpers;
+using PatientMonitorDataLogger.BBraun.Models;
 using PatientMonitorDataLogger.Shared.Helpers;
 using PatientMonitorDataLogger.Shared.Models;
 
@@ -27,6 +28,7 @@ public class BBraunBccClient : IDisposable
 
     public bool IsConnected { get; private set; }
     public string BedId { get; private set; } = "1";
+    public event EventHandler<BBraunBccFrame>? NewMessage;
 
     public void Connect()
     {
@@ -54,7 +56,15 @@ public class BBraunBccClient : IDisposable
             return;
         ioDevice = new PhysicalTcpClient(settings.SpaceStationIp!, settings.SpaceStationPort!.Value);
         protocolCommunicator = new BBraunBccCommunicator(ioDevice, settings, nameof(BBraunBccCommunicator));
+        protocolCommunicator.NewMessage += OnNewMessage;
         isInitialized = true;
+    }
+
+    private void OnNewMessage(
+        object? sender,
+        BBraunBccFrame e)
+    {
+        NewMessage?.Invoke(this, e);
     }
 
     private string WaitForBedId()
@@ -110,6 +120,7 @@ public class BBraunBccClient : IDisposable
     public void Dispose()
     {
         Disconnect();
+        protocolCommunicator.NewMessage -= OnNewMessage;
         protocolCommunicator?.Dispose();
         ioDevice?.Dispose();
     }

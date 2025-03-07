@@ -4,7 +4,7 @@ using PatientMonitorDataLogger.Shared.Models;
 
 namespace PatientMonitorDataLogger.BBraun.Models;
 
-public class PumpIndex : ISerializable
+public class PumpIndex : ISerializable, IEquatable<PumpIndex>
 {
     public PumpIndex(
         int pillar,
@@ -48,5 +48,41 @@ public class PumpIndex : ISerializable
         char slotCharacter)
     {
         return char.IsNumber(slotCharacter) ? int.Parse(slotCharacter + "") : 10 + (slotCharacter - 'A');
+    }
+
+    public bool Equals(
+        PumpIndex? other)
+    {
+        if (other is null) return false;
+        if (ReferenceEquals(this, other)) return true;
+        return Pillar == other.Pillar && Slot == other.Slot;
+    }
+
+    public override bool Equals(
+        object? obj)
+    {
+        if (obj is null) return false;
+        if (ReferenceEquals(this, obj)) return true;
+        if (obj.GetType() != GetType()) return false;
+        return Equals((PumpIndex)obj);
+    }
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(Pillar, Slot);
+    }
+
+    public static bool operator ==(
+        PumpIndex? left,
+        PumpIndex? right)
+    {
+        return Equals(left, right);
+    }
+
+    public static bool operator !=(
+        PumpIndex? left,
+        PumpIndex? right)
+    {
+        return !Equals(left, right);
     }
 }

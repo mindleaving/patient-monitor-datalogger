@@ -9,7 +9,6 @@ public class PhilipsIntellivueNumericsAndWavesExtractor
     private RelativeTimeTranslation? relativeTimeTranslation;
 
     public IEnumerable<IMonitorData> Extract(
-        Guid logSessionId,
         ICommandMessage message)
     {
         if(message is not DataExportCommandMessage dataExportMessage)
@@ -23,7 +22,7 @@ public class PhilipsIntellivueNumericsAndWavesExtractor
         if(actionResult.Data is not PollMdiDataReply pollResult)
             yield break;
         var timestamp = GetAbsoluteTime(pollResult.RelativeTimeStamp);
-        var numericsData = new NumericsData(logSessionId, timestamp, new Dictionary<string, NumericsValue>());
+        var numericsData = new NumericsData(timestamp, new Dictionary<string, NumericsValue>());
         foreach (var singleContextPoll in pollResult.PollContexts.Values)
         {
             var contextId = singleContextPoll.ContextId;
@@ -45,7 +44,6 @@ public class PhilipsIntellivueNumericsAndWavesExtractor
                             var sampleRate = sampleArray.Values.Values.Length * 4; // 4 messages per second
                             var translatedWaveSampleValues = TranslateWaveValues(sampleArray.Values.Values);
                             var waveData = new WaveData(
-                                logSessionId,
                                 measurementType,
                                 timestamp,
                                 sampleRate,
@@ -120,7 +118,7 @@ public class PhilipsIntellivueNumericsAndWavesExtractor
     private DateTime GetAbsoluteTime(
         RelativeTime relativeTime)
     {
-        relativeTimeTranslation ??= new RelativeTimeTranslation(DateTime.UtcNow, relativeTime.Ticks);
+        relativeTimeTranslation ??= RelativeTimeTranslation.PhilipsIntellivue(DateTime.UtcNow, relativeTime.Ticks);
         return relativeTimeTranslation.GetAbsoluteTime(relativeTime);
     }
 }

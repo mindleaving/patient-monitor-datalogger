@@ -1,4 +1,4 @@
-﻿namespace PatientMonitorDataLogger.API.Models;
+﻿namespace PatientMonitorDataLogger.Shared.Models;
 
 public enum PatientMonitorType
 {

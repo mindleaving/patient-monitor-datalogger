@@ -27,7 +27,7 @@ public class BBraunBccMessageCreator
 
     public byte[] CreateErrorResponse(
         string bedId,
-        int secondsSinceStart,
+        uint secondsSinceStart,
         PumpIndex pumpIndex,
         BccErrorCodes errorCode)
         => CreateResponseMessage(

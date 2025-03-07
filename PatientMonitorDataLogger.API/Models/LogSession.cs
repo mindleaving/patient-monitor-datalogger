@@ -1,5 +1,6 @@
 ﻿using PatientMonitorDataLogger.API.Models.DataExport;
 using PatientMonitorDataLogger.API.Workflow;
+using PatientMonitorDataLogger.Shared.Models;
 
 namespace PatientMonitorDataLogger.API.Models;
 
@@ -10,28 +11,48 @@ public class LogSession : IDisposable, IAsyncDisposable
     public LogSession(
         Guid id,
         LogSessionSettings settings,
-        MonitorDataWriterSettings writerSettings)
+        DataWriterSettings writerSettings)
     {
         Id = id;
         Settings = settings;
-        sessionRunner = settings.MonitorSettings.Type switch
+        if (settings.DeviceSettings == null)
+            throw new ArgumentNullException(nameof(settings.DeviceSettings));
+        if (settings.DataSettings == null)
+            throw new ArgumentNullException(nameof(settings.DataSettings));
+        switch (settings.DeviceType)
         {
-            PatientMonitorType.PhilipsIntellivue => new PhilipsIntellivueLogSessionRunner(id, settings, writerSettings),
-            PatientMonitorType.SimulatedPhilipsIntellivue => new SimulatedPhilipsIntellivueLogSessionRunner(id, settings, writerSettings),
-            PatientMonitorType.GEDash => new GeDashLogSessionRunner(id, settings, writerSettings),
-            _ => throw new NotSupportedException()
-        };
+            case MedicalDeviceType.PatientMonitor:
+                var patientMonitorSettings = (PatientMonitorSettings)settings.DeviceSettings;
+                sessionRunner = patientMonitorSettings.MonitorType switch
+                {
+                    PatientMonitorType.PhilipsIntellivue => new PhilipsIntellivueLogSessionRunner(id, settings, writerSettings),
+                    PatientMonitorType.SimulatedPhilipsIntellivue => new SimulatedPhilipsIntellivueLogSessionRunner(id, settings, writerSettings),
+                    PatientMonitorType.GEDash => new GeDashLogSessionRunner(id, settings, writerSettings),
+                    _ => throw new ArgumentOutOfRangeException(nameof(patientMonitorSettings.MonitorType))
+                };
+                break;
+            case MedicalDeviceType.InfusionPumps:
+                var infusionPumpSettings = (InfusionPumpSettings)settings.DeviceSettings;
+                sessionRunner = infusionPumpSettings.InfusionPumpType switch
+                {
+                    InfusionPumpType.BBraunSpace => new BBraunInfusionPumpsLogSessionRunner(id, settings, writerSettings),
+                    _ => throw new ArgumentOutOfRangeException(nameof(infusionPumpSettings.InfusionPumpType))
+                };
+                break;
+            default:
+                throw new NotSupportedException($"Unsupported device type {settings.DeviceType}");
+        }
         sessionRunner.PatientInfoAvailable += UpdatePatientInfo;
         sessionRunner.StatusChanged += SessionRunner_StatusChanged;
-        sessionRunner.NewNumericsData += UpdateLatestMeasurements;
+        sessionRunner.NewObservations += UpdateLatestMeasurements;
     }
 
     public Guid Id { get; }
     public LogSessionSettings Settings { get; }
     public PatientInfo? PatientInfo { get; set; }
     public event EventHandler<PatientInfo>? PatientInfoAvailable;
-    public Dictionary<string, NumericsValue> LatestMeasurements { get; } = new();
-    public event EventHandler<NumericsData>? NewNumericsData;
+    public Dictionary<string, Observation> LatestObservations { get; } = new();
+    public event EventHandler<LogSessionObservations>? NewObservations;
 
     public bool ShouldBeRunning { get; set; }
     public LogStatus Status => sessionRunner.Status;
@@ -55,7 +76,7 @@ public class LogSession : IDisposable, IAsyncDisposable
         Stop();
         sessionRunner.PatientInfoAvailable -= UpdatePatientInfo;
         sessionRunner.StatusChanged -= SessionRunner_StatusChanged;
-        sessionRunner.NewNumericsData -= UpdateLatestMeasurements;
+        sessionRunner.NewObservations -= UpdateLatestMeasurements;
         sessionRunner.Dispose();
     }
 
@@ -100,12 +121,12 @@ public class LogSession : IDisposable, IAsyncDisposable
 
     private void UpdateLatestMeasurements(
         object? sender,
-        NumericsData numericsData)
+        LogSessionObservations observations)
     {
-        foreach (var measurementType in numericsData.Values.Keys)
+        foreach (var observation in observations.Observations)
         {
-            LatestMeasurements[measurementType] = numericsData.Values[measurementType];
+            LatestObservations[observation.ParameterName] = observation;
         }
-        NewNumericsData?.Invoke(this, numericsData);
+        NewObservations?.Invoke(this, observations);
     }
 }

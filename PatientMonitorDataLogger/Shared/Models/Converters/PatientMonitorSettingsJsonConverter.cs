@@ -1,7 +1,9 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using PatientMonitorDataLogger.GEDash.Models;
+using PatientMonitorDataLogger.PhilipsIntellivue.Models;
 
-namespace PatientMonitorDataLogger.API.Models.Converters;
+namespace PatientMonitorDataLogger.Shared.Models.Converters;
 
 public class PatientMonitorSettingsJsonConverter : JsonConverter<PatientMonitorSettings>
 {
@@ -23,8 +25,8 @@ public class PatientMonitorSettingsJsonConverter : JsonConverter<PatientMonitorS
         JsonSerializer serializer)
     {
         var jObject = JObject.Load(reader);
-        if (!jObject.TryGetValue(nameof(PatientMonitorSettings.Type), StringComparison.InvariantCultureIgnoreCase, out var typeString))
-            throw new FormatException($"Missing or unexpected {nameof(PatientMonitorSettings.Type)} field");
+        if (!jObject.TryGetValue(nameof(PatientMonitorSettings.MonitorType), StringComparison.InvariantCultureIgnoreCase, out var typeString))
+            throw new FormatException($"Missing or unexpected {nameof(PatientMonitorSettings.MonitorType)} field");
         if (!Enum.TryParse<PatientMonitorType>(typeString.Value<string>(), ignoreCase: true, out var monitorType))
             throw new FormatException($"Unknown monitor type {typeString}");
         PatientMonitorSettings monitorSettings = monitorType switch

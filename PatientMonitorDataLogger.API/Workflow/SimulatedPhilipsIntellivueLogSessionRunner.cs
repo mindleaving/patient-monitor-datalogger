@@ -12,7 +12,7 @@ public class SimulatedPhilipsIntellivueLogSessionRunner : PhilipsIntellivueLogSe
     public SimulatedPhilipsIntellivueLogSessionRunner(
         Guid logSessionId,
         LogSessionSettings logSessionSettings,
-        MonitorDataWriterSettings writerSettings)
+        DataWriterSettings writerSettings)
         : base(logSessionId, logSessionSettings, writerSettings)
     {
     }

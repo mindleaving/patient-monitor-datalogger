@@ -8,7 +8,7 @@ public class Quadruple : ISerializable
     public const char Separator = ',';
 
     public Quadruple(
-        int relativeTimeInSeconds,
+        uint relativeTimeInSeconds,
         PumpIndex address,
         string parameter,
         string? value)
@@ -19,7 +19,7 @@ public class Quadruple : ISerializable
         Value = value;
     }
 
-    public int RelativeTimeInSeconds { get; }
+    public uint RelativeTimeInSeconds { get; }
     public PumpIndex Address { get; }
     public string Parameter { get; }
     public string? Value { get; }
@@ -31,7 +31,7 @@ public class Quadruple : ISerializable
         var splitted = record.Split(Separator);
         if (splitted.Length < 3 || splitted.Length > 4)
             throw new FormatException($"Response quadruple contained an unexpected number of parts ({splitted.Length})");
-        var relativeTimeInSeconds = int.Parse(splitted[0]);
+        var relativeTimeInSeconds = uint.Parse(splitted[0]);
         var pumpAddress = PumpIndex.Parse(splitted[1]);
         var parameter = splitted[2];
         var value = splitted.Length >= 4 ? splitted[3] : null;

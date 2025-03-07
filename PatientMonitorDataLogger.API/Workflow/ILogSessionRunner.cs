@@ -10,7 +10,7 @@ public interface ILogSessionRunner : IDisposable, IAsyncDisposable
     bool IsRunning { get; }
     LogStatus Status { get; }
     event EventHandler<LogStatus>? StatusChanged;
-    event EventHandler<NumericsData>? NewNumericsData;
+    event EventHandler<LogSessionObservations>? NewObservations;
     event EventHandler<PatientInfo>? PatientInfoAvailable;
 
     void Initialize();

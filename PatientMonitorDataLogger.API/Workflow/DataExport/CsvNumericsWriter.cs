@@ -16,14 +16,6 @@ public class CsvNumericsWriter : AsyncFileWriter<NumericsData>, INumericsWriter
         this.separator = separator;
     }
 
-    public void Write(
-        NumericsData data)
-    {
-        if(dataQueue.IsAddingCompleted)
-            return;
-        dataQueue.Add(data);
-    }
-
     protected override IEnumerable<string> Serialize(
         NumericsData data)
     {

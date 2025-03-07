@@ -2,12 +2,12 @@
 
 namespace PatientMonitorDataLogger.API.Workflow;
 
-public class GeDashLogSessionRunner : LogSessionRunner
+public class GeDashLogSessionRunner : PatientMonitorLogSessionRunner
 {
     public GeDashLogSessionRunner(
         Guid logSessionId,
         LogSessionSettings settings,
-        MonitorDataWriterSettings writerSettings)
+        DataWriterSettings writerSettings)
         : base(logSessionId, settings, writerSettings)
     {
     }

@@ -1,10 +1,11 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using PatientMonitorDataLogger.Shared.Models;
 
-namespace PatientMonitorDataLogger.API.Models;
+namespace PatientMonitorDataLogger.PhilipsIntellivue.Models;
 
 public class PhilipsIntellivuePatientMonitorSettings : PatientMonitorSettings
 {
-    public override PatientMonitorType Type => PatientMonitorType.PhilipsIntellivue;
+    public override PatientMonitorType MonitorType => PatientMonitorType.PhilipsIntellivue;
 
     [Required]
     [RegularExpression("^(COM[0-9]+|/dev/tty[a-zA-Z0-9]+)$")]

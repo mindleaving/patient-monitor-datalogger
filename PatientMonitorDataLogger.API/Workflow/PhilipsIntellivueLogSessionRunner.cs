@@ -7,29 +7,34 @@ using PatientMonitorDataLogger.Shared.Models;
 
 namespace PatientMonitorDataLogger.API.Workflow;
 
-public class PhilipsIntellivueLogSessionRunner : LogSessionRunner
+public class PhilipsIntellivueLogSessionRunner : PatientMonitorLogSessionRunner
 {
+    protected readonly PatientMonitorSettings monitorSettings;
+    protected readonly PatientMonitorDataSettings dataSettings;
     protected PhilipsIntellivueClient? monitorClient;
     private readonly IPatientMonitorInfo monitorInfo = new PhilipsIntellivuePatientMonitorInfo();
     private readonly PhilipsIntellivueNumericsAndWavesExtractor numericsAndWavesExtractor = new();
     private readonly PhilipsIntellivuePatientInfoExtractor patientInfoExtractor = new();
-    private DateTime? connectTime;
     private readonly System.Collections.Generic.List<string> numericsTypes = new();
     private readonly System.Collections.Generic.List<string> waveTypes = new();
     
     public PhilipsIntellivueLogSessionRunner(
         Guid logSessionId,
         LogSessionSettings logSessionSettings,
-        MonitorDataWriterSettings writerSettings)
+        DataWriterSettings writerSettings)
         : base(logSessionId, logSessionSettings, writerSettings)
     {
-        if (logSessionSettings.MonitorSettings is not (PhilipsIntellivuePatientMonitorSettings or SimulatedPhilipsIntellivuePatientMonitorSettings))
-            throw new ArgumentException($"Incompatible monitor settings. Expected Philips Intellivue settings but got {logSessionSettings.MonitorSettings.Type}");
+        if (logSessionSettings.DeviceSettings is not (PhilipsIntellivuePatientMonitorSettings or SimulatedPhilipsIntellivuePatientMonitorSettings))
+            throw new ArgumentException($"Incompatible monitor settings. Expected Philips Intellivue settings but got {logSessionSettings.DeviceSettings.GetType().Name}");
+        monitorSettings = (PatientMonitorSettings)logSessionSettings.DeviceSettings;
+        if (logSessionSettings.DataSettings is not PatientMonitorDataSettings patientMonitorDataSettings)
+            throw new ArgumentException($"Expected patient monitor data settings, but got {logSessionSettings.DataSettings.GetType().Name}");
+        dataSettings = patientMonitorDataSettings;
     }
 
     protected override void InitializeImpl()
     {
-        if (logSessionSettings.MonitorSettings is not PhilipsIntellivuePatientMonitorSettings philipsIntellivuePatientMonitorSettings) 
+        if (monitorSettings is not PhilipsIntellivuePatientMonitorSettings philipsIntellivuePatientMonitorSettings) 
             return;
         var monitorClientSettings = PhilipsIntellivueClientSettings.CreateForPhysicalSerialPort(
             philipsIntellivuePatientMonitorSettings.SerialPortName,
@@ -45,9 +50,8 @@ public class PhilipsIntellivueLogSessionRunner : LogSessionRunner
             LogSessionId,
             monitorClient != null && monitorClient.IsConnected && monitorClient.IsListening,
             monitorInfo,
-            connectTime,
-            numericsTypes,
-            waveTypes);
+            startTime,
+            numericsTypes.Concat(waveTypes).ToList());
     
 
     protected override void StartImpl()
@@ -57,24 +61,23 @@ public class PhilipsIntellivueLogSessionRunner : LogSessionRunner
         monitorClient.NewMessage += HandleMonitorMessage;
         monitorClient.ConnectionStatusChanged += OnConnectionStatusChanged;
         var pollOptions = ExtendedPollProfileOptions.None;
-        if (logSessionSettings.MonitorDataSettings.IncludeNumerics)
+        if (dataSettings.IncludeNumerics)
             pollOptions |= ExtendedPollProfileOptions.POLL_EXT_PERIOD_NU_1SEC;
-        if (logSessionSettings.MonitorDataSettings.IncludeWaves)
+        if (dataSettings.IncludeWaves)
             pollOptions |= ExtendedPollProfileOptions.POLL_EXT_PERIOD_RTSA;
         monitorClient.Connect(TimeSpan.FromSeconds(1), pollOptions);
-        monitorClient.StartPolling(logSessionSettings.MonitorDataSettings);
-        if (logSessionSettings.MonitorDataSettings.IncludeWaves && logSessionSettings.MonitorDataSettings.SelectedWaveTypes.Any())
+        monitorClient.StartPolling(dataSettings);
+        if (dataSettings.IncludeWaves && dataSettings.SelectedWaveTypes.Any())
         {
-            var wavePriorityList = BuildWavePriorityListFromSettings(logSessionSettings.MonitorDataSettings);
+            var wavePriorityList = BuildWavePriorityListFromSettings(dataSettings);
             monitorClient.SetWavePriorityList(wavePriorityList);
         }
-        if(logSessionSettings.MonitorDataSettings.IncludePatientInfo)
+        if(dataSettings.IncludePatientInfo)
             monitorClient.SendPatientDemographicsRequest();
-        connectTime = DateTime.UtcNow;
     }
 
     private static ICollection<Labels> BuildWavePriorityListFromSettings(
-        MonitorDataSettings monitorDataSettings)
+        PatientMonitorDataSettings monitorDataSettings)
     {
         if (monitorDataSettings.SelectedWaveTypes.Count == 0)
         {
@@ -150,7 +153,7 @@ public class PhilipsIntellivueLogSessionRunner : LogSessionRunner
         WriteRawMessage(message);
         if (patientInfoExtractor.TryExtract(LogSessionId, message, out var patientInfo))
             OnPatientInfoAvailable(this, patientInfo!);
-        foreach (var monitorData in numericsAndWavesExtractor.Extract(LogSessionId, message))
+        foreach (var monitorData in numericsAndWavesExtractor.Extract(message))
         {
             switch (monitorData)
             {
@@ -159,7 +162,13 @@ public class PhilipsIntellivueLogSessionRunner : LogSessionRunner
                     if (newNumericsMeasurementTypes.Count > 0)
                         numericsTypes.AddRange(newNumericsMeasurementTypes);
                     numericsWriter.Write(numericsData);
-                    OnNewNumericsData(this, numericsData);
+                    var logSessionObservations = new LogSessionObservations(
+                        LogSessionId, 
+                        numericsData.Timestamp, 
+                        numericsData.Values
+                            .Select(kvp => new Observation(kvp.Value.Timestamp, kvp.Key, kvp.Value.Value.ToString("F1"), kvp.Value.Unit))
+                            .ToList());
+                    OnNewObservations(this, logSessionObservations);
                     break;
                 case WaveData waveData:
                     if (!waveTypes.Contains(waveData.MeasurementType))
@@ -197,8 +206,6 @@ public class PhilipsIntellivueLogSessionRunner : LogSessionRunner
         {
             // Ignore
         }
-        
-        connectTime = null;
     }
 
     public override void Dispose()

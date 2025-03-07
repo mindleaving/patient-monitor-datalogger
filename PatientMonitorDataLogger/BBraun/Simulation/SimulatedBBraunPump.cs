@@ -6,7 +6,7 @@ public class SimulatedBBraunPump
 {
     public List<Quadruple> GetParameters(
         PumpIndex pumpIndex,
-        int secondsSinceStart)
+        uint secondsSinceStart)
     {
         return [
             new(secondsSinceStart, pumpIndex, "GNMODEL", Name)
