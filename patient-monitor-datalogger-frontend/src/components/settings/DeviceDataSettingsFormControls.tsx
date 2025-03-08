@@ -1,6 +1,6 @@
 import { useEffect } from "react";
-import { MedicalDeviceType, WaveType } from "../types/enums";
-import { Models } from "../types/models";
+import { MedicalDeviceType, WaveType } from "../../types/enums";
+import { Models } from "../../types/models";
 import { PatientMonitorDataSettingsFormControls } from "./PatientMonitorDataSettingsFormControls";
 
 interface DeviceDataSettingsFormControlsProps {

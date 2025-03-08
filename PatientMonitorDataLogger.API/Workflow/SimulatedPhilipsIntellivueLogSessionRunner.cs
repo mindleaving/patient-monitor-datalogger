@@ -7,7 +7,7 @@ namespace PatientMonitorDataLogger.API.Workflow;
 
 public class SimulatedPhilipsIntellivueLogSessionRunner : PhilipsIntellivueLogSessionRunner
 {
-    private SimulatedCable? cable;
+    private readonly SimulatedCable cable = new();
 
     public SimulatedPhilipsIntellivueLogSessionRunner(
         Guid logSessionId,
@@ -21,7 +21,6 @@ public class SimulatedPhilipsIntellivueLogSessionRunner : PhilipsIntellivueLogSe
 
     protected override void InitializeImpl()
     {
-        cable = new SimulatedCable();
         var monitorClientSettings = PhilipsIntellivueClientSettings.CreateForSimulatedSerialPort(cable.End1, TimeSpan.FromSeconds(10), PollMode.Extended);
         monitorClient = new PhilipsIntellivueClient(monitorClientSettings);
         SimulatedMonitor = new SimulatedPhilipsIntellivueMonitor(cable.End2);
@@ -47,13 +46,6 @@ public class SimulatedPhilipsIntellivueLogSessionRunner : PhilipsIntellivueLogSe
     {
         base.Dispose();
         SimulatedMonitor?.Dispose();
-        cable?.Dispose();
-    }
-
-    public override async ValueTask DisposeAsync()
-    {
-        await base.DisposeAsync();
-        SimulatedMonitor?.Dispose();
-        cable?.Dispose();
+        cable.Dispose();
     }
 }

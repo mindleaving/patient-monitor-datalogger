@@ -1,4 +1,4 @@
-import { Models } from "../types/models";
+import { Models } from "../../types/models";
 
 interface SimulatedPhilipsIntellivueSettingsFormControlsProps {
     value: Models.SimulatedPhilipsIntellivueSettings;

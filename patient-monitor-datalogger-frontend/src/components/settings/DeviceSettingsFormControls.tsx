@@ -1,8 +1,8 @@
 import { ReactNode, useCallback } from "react";
-import { InfusionPumpType, MedicalDeviceType, PatientMonitorType } from "../types/enums";
-import { Models } from "../types/models";
+import { InfusionPumpType, MedicalDeviceType, PatientMonitorType } from "../../types/enums";
+import { Models } from "../../types/models";
 import { PatientMonitorSettingsFormControls } from "./PatientMonitorSettingsFormControls";
-import { deviceTypeNames } from "../helpers/Formatters";
+import { deviceTypeNames } from "../../helpers/Formatters";
 import { FormGroup, FormLabel, FormControl } from "react-bootstrap";
 import { InfusionPumpSettingsFormControls } from "./InfusionPumpSettingsFormControls";
 

@@ -21,7 +21,7 @@ internal class RelativeTimeTranslation
     public static RelativeTimeTranslation BBraunBccProtocol(
         DateTime absoluteTime,
         ulong relativeTimeTicks)
-        => new(absoluteTime, relativeTimeTicks, 1_0000_000);
+        => new(absoluteTime, relativeTimeTicks, 1_000_000);
 
     public DateTime AbsoluteTime { get; }
     public ulong RelativeTimeTicks { get; }

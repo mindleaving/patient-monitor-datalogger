@@ -1,8 +1,8 @@
 import { useState, useMemo, useCallback } from "react";
 import { FormGroup, FormLabel, FormCheck, Row, Col, Button, Alert } from "react-bootstrap";
-import { waveTypeNames } from "../helpers/Formatters";
-import { MedicalDeviceType, PatientMonitorType, WaveType } from "../types/enums";
-import { Models } from "../types/models";
+import { waveTypeNames } from "../../helpers/Formatters";
+import { MedicalDeviceType, PatientMonitorType, WaveType } from "../../types/enums";
+import { Models } from "../../types/models";
 
 interface PatientMonitorDataSettingsFormControlsProps {
     deviceSettings: Models.PatientMonitorSettings;

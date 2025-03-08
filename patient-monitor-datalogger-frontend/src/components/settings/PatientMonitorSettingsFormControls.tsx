@@ -1,11 +1,11 @@
 import { ReactNode, useCallback } from "react";
-import { MedicalDeviceType, PatientMonitorType } from "../types/enums";
-import { Models } from "../types/models";
+import { MedicalDeviceType, PatientMonitorType } from "../../types/enums";
+import { Models } from "../../types/models";
 import { GEDashSettingsFormControls } from "./GEDashSettingsFormControls";
 import { PhilipsIntellivueSettingsFormControls } from "./PhilipsIntellivueSettingsFormControls";
 import { SimulatedPhilipsIntellivueSettingsFormControls } from "./SimulatedPhilipsIntellivueSettingsFormControls";
 import { FormControl, FormGroup, FormLabel } from "react-bootstrap";
-import { monitorNames } from "../helpers/Formatters";
+import { monitorNames } from "../../helpers/Formatters";
 
 interface PatientMonitorSettingsFormControlsProps {
     value: Models.PatientMonitorSettings;

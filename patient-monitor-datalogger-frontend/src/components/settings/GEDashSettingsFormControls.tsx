@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { FormGroup, FormLabel, FormControl } from "react-bootstrap";
-import { loadObject } from "../communication/ApiRequests";
-import { Models } from "../types/models";
+import { loadObject } from "../../communication/ApiRequests";
+import { Models } from "../../types/models";
 
 interface GEDashSettingsFormControlsProps {
     value: Models.GEDashSettings;

@@ -3,7 +3,7 @@ using PatientMonitorDataLogger.API.Models;
 
 namespace PatientMonitorDataLogger.API.Workflow;
 
-public class LogSessionSupervisor : IDisposable, IAsyncDisposable
+public class LogSessionSupervisor : IDisposable
 {
     private readonly Dictionary<Guid, LogSession> logSessions = new();
     private readonly object startStopLock = new();
@@ -97,11 +97,6 @@ public class LogSessionSupervisor : IDisposable, IAsyncDisposable
     }
 
     public void Dispose()
-    {
-        Stop();
-    }
-
-    public async ValueTask DisposeAsync()
     {
         Stop();
     }

@@ -1,6 +1,5 @@
 ﻿using System.Text;
 using PatientMonitorDataLogger.BBraun.Models;
-using PatientMonitorDataLogger.BBraun.Simulation;
 
 namespace PatientMonitorDataLogger.BBraun.Helpers;
 

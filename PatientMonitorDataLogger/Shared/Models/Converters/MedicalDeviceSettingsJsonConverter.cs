@@ -58,6 +58,7 @@ public class MedicalDeviceSettingsJsonConverter : JsonConverter<IMedicalDeviceSe
                 deviceSettings = infusionPumpType switch
                 {
                     InfusionPumpType.BBraunSpace => new BBraunInfusionPumpSettings(),
+                    InfusionPumpType.SimulatedBBraunSpace => new SimulatedBBraunInfusionPumpSettings(),
                     _ => throw new ArgumentOutOfRangeException(nameof(infusionPumpType))
                 };
                 break;

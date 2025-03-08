@@ -4,7 +4,7 @@ using PatientMonitorDataLogger.Shared.Models;
 
 namespace PatientMonitorDataLogger.API.Models;
 
-public class LogSession : IDisposable, IAsyncDisposable
+public class LogSession : IDisposable
 {
     private readonly ILogSessionRunner sessionRunner;
 
@@ -36,6 +36,7 @@ public class LogSession : IDisposable, IAsyncDisposable
                 sessionRunner = infusionPumpSettings.InfusionPumpType switch
                 {
                     InfusionPumpType.BBraunSpace => new BBraunInfusionPumpsLogSessionRunner(id, settings, writerSettings),
+                    InfusionPumpType.SimulatedBBraunSpace => new SimulatedBBraunInfusionPumpsLogSessionRunner(id, settings, writerSettings),
                     _ => throw new ArgumentOutOfRangeException(nameof(infusionPumpSettings.InfusionPumpType))
                 };
                 break;
@@ -78,11 +79,6 @@ public class LogSession : IDisposable, IAsyncDisposable
         sessionRunner.StatusChanged -= SessionRunner_StatusChanged;
         sessionRunner.NewObservations -= UpdateLatestMeasurements;
         sessionRunner.Dispose();
-    }
-
-    public async ValueTask DisposeAsync()
-    {
-        Dispose();
     }
 
     private void UpdatePatientInfo(

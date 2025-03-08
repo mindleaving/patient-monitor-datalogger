@@ -1,5 +1,5 @@
 import { FormCheck, FormControl, FormGroup, FormLabel, InputGroup } from "react-bootstrap";
-import { Models } from "../types/models";
+import { Models } from "../../types/models";
 import { useCallback, useEffect, useState } from "react";
 
 interface BBraunInfusionPumpSettingsFormControlsProps {
@@ -60,7 +60,7 @@ export const BBraunInfusionPumpSettingsFormControls = (props: BBraunInfusionPump
             />
         </FormGroup>
         <FormGroup>
-        <FormLabel>Poll Period</FormLabel>
+            <FormLabel>Poll Period</FormLabel>
             <InputGroup>
                 <FormControl
                     type="number"

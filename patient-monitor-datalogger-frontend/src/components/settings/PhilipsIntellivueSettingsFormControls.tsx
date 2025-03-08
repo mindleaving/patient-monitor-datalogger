@@ -1,7 +1,7 @@
 import { FormGroup, FormLabel, FormControl } from "react-bootstrap";
-import { Models } from "../types/models";
+import { Models } from "../../types/models";
 import { useCallback, useEffect, useState } from "react";
-import { loadObject } from "../communication/ApiRequests";
+import { loadObject } from "../../communication/ApiRequests";
 
 interface PhilipsIntellivueSettingsFormControlsProps {
     value: Models.PhilipsIntellivueSettings;

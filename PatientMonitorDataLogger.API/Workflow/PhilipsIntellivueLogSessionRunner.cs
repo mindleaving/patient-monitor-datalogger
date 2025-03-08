@@ -34,14 +34,20 @@ public class PhilipsIntellivueLogSessionRunner : PatientMonitorLogSessionRunner
 
     protected override void InitializeImpl()
     {
-        if (monitorSettings is not PhilipsIntellivueSettings philipsIntellivuePatientMonitorSettings) 
-            return;
-        var monitorClientSettings = PhilipsIntellivueClientSettings.CreateForPhysicalSerialPort(
-            philipsIntellivuePatientMonitorSettings.SerialPortName,
-            philipsIntellivuePatientMonitorSettings.SerialPortBaudRate,
-            TimeSpan.FromSeconds(10), 
-            PollMode.Extended);
-        monitorClient = new PhilipsIntellivueClient(monitorClientSettings);
+        if (monitorSettings is PhilipsIntellivueSettings philipsIntellivuePatientMonitorSettings)
+        {
+            var monitorClientSettings = PhilipsIntellivueClientSettings.CreateForPhysicalSerialPort(
+                philipsIntellivuePatientMonitorSettings.SerialPortName,
+                philipsIntellivuePatientMonitorSettings.SerialPortBaudRate,
+                TimeSpan.FromSeconds(10), 
+                PollMode.Extended);
+            monitorClient = new PhilipsIntellivueClient(monitorClientSettings);
+        }
+
+        if (monitorClient == null)
+            throw new Exception("Monitor client was not initialized");
+        monitorClient!.NewMessage += HandleMonitorMessage;
+        monitorClient.ConnectionStatusChanged += OnConnectionStatusChanged;
     }
 
     
@@ -58,8 +64,7 @@ public class PhilipsIntellivueLogSessionRunner : PatientMonitorLogSessionRunner
     {
         if (monitorClient == null)
             throw new InvalidOperationException("Monitor client is not initialized");
-        monitorClient.NewMessage += HandleMonitorMessage;
-        monitorClient.ConnectionStatusChanged += OnConnectionStatusChanged;
+        
         var pollOptions = ExtendedPollProfileOptions.None;
         if (dataSettings.IncludeNumerics)
             pollOptions |= ExtendedPollProfileOptions.POLL_EXT_PERIOD_NU_1SEC;
@@ -196,11 +201,6 @@ public class PhilipsIntellivueLogSessionRunner : PatientMonitorLogSessionRunner
         {
             monitorClient?.StopPolling();
             monitorClient?.Disconnect();
-            if(monitorClient != null)
-            {
-                monitorClient.NewMessage -= HandleMonitorMessage;
-                monitorClient.ConnectionStatusChanged -= OnConnectionStatusChanged;
-            }
         }
         catch
         {
@@ -211,14 +211,12 @@ public class PhilipsIntellivueLogSessionRunner : PatientMonitorLogSessionRunner
     public override void Dispose()
     {
         Stop();
+        if(monitorClient != null)
+        {
+            monitorClient.NewMessage -= HandleMonitorMessage;
+            monitorClient.ConnectionStatusChanged -= OnConnectionStatusChanged;
+        }
         monitorClient?.Dispose();
-    }
-
-    public override async ValueTask DisposeAsync()
-    {
-        Stop();
-        if (monitorClient != null) 
-            await monitorClient.DisposeAsync();
     }
 
 }

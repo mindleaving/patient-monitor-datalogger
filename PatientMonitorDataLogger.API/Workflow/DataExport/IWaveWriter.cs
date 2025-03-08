@@ -2,7 +2,7 @@
 
 namespace PatientMonitorDataLogger.API.Workflow.DataExport;
 
-public interface IWaveWriter : IDisposable, IAsyncDisposable
+public interface IWaveWriter : IDisposable
 {
     void Start();
     void Stop();

@@ -3,7 +3,7 @@ using System.Text;
 
 namespace PatientMonitorDataLogger.API.Workflow.DataExport;
 
-public abstract class AsyncFileWriter<T> : IDisposable, IAsyncDisposable
+public abstract class AsyncFileWriter<T> : IDisposable
 {
     private readonly string outputFilePath;
     private StreamWriter? streamWriter;
@@ -90,11 +90,6 @@ public abstract class AsyncFileWriter<T> : IDisposable, IAsyncDisposable
         T data);
 
     public void Dispose()
-    {
-        Stop();
-    }
-
-    public async ValueTask DisposeAsync()
     {
         Stop();
     }

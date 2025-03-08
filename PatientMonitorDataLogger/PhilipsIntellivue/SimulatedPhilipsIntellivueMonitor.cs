@@ -25,6 +25,7 @@ public class SimulatedPhilipsIntellivueMonitor : IDisposable
     {
         this.serialPort = serialPort;
         philipsIntellivueCommunicator = new PhilipsIntellivueCommunicator(serialPort, TimeSpan.FromSeconds(10), nameof(SimulatedPhilipsIntellivueMonitor));
+        philipsIntellivueCommunicator.NewMessage += ProcessMessage;
         monitorDataGenerator = new MonitorDataGenerator();
         connectionTimeoutTimer = new Timer(
             AbortConnection,
@@ -41,7 +42,6 @@ public class SimulatedPhilipsIntellivueMonitor : IDisposable
         if(IsListening)
             return;
         philipsIntellivueCommunicator.Start();
-        philipsIntellivueCommunicator.NewMessage += ProcessMessage;
     }
 
     private void ProcessMessage(
@@ -276,12 +276,12 @@ public class SimulatedPhilipsIntellivueMonitor : IDisposable
         ClearPeriodicPollReplies();
         AbortConnection(null);
         philipsIntellivueCommunicator.Stop();
-        philipsIntellivueCommunicator.NewMessage -= ProcessMessage;
     }
 
     public void Dispose()
     {
         Stop();
+        philipsIntellivueCommunicator.NewMessage -= ProcessMessage;
         philipsIntellivueCommunicator.Dispose();
     }
 
@@ -335,9 +335,4 @@ public class SimulatedPhilipsIntellivueMonitor : IDisposable
             return !Equals(left, right);
         }
     }
-}
-
-public class Association
-{
-    public ushort PresentationContextId { get; set; }
 }

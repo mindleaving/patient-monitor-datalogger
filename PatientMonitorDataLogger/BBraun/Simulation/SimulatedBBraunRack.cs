@@ -32,6 +32,16 @@ public class SimulatedBBraunRack : IDisposable
     public string BedId { get; }
     public List<SimulatedBBraunRackPillar> Pillars { get; }
 
+    public void Start()
+    {
+        protocolCommunicator.Start();
+    }
+
+    public void Stop()
+    {
+        protocolCommunicator.Stop();
+    }
+
     private void HandleMessage(
         object? sender,
         BBraunBccFrame frame)

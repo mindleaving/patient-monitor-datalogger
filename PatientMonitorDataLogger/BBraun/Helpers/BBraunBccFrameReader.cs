@@ -1,4 +1,5 @@
-﻿using PatientMonitorDataLogger.Shared.Models;
+﻿using PatientMonitorDataLogger.BBraun.Models;
+using PatientMonitorDataLogger.Shared.Models;
 
 namespace PatientMonitorDataLogger.BBraun.Helpers;
 

@@ -2,5 +2,6 @@
 
 public enum InfusionPumpType
 {
-    BBraunSpace
+    BBraunSpace,
+    SimulatedBBraunSpace
 }

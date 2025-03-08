@@ -1,5 +1,6 @@
 export enum InfusionPumpType {
-    BBraunSpace = "BBraunSpace"
+    BBraunSpace = "BBraunSpace",
+    SimulatedBBraunSpace = "SimulatedBBraunSpace"
 }
 export enum MedicalDeviceType {
     PatientMonitor = "PatientMonitor",

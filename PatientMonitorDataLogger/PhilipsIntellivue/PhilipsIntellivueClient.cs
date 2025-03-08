@@ -7,7 +7,7 @@ using PatientMonitorDataLogger.Shared.Models;
 
 namespace PatientMonitorDataLogger.PhilipsIntellivue;
 
-public class PhilipsIntellivueClient : IDisposable, IAsyncDisposable
+public class PhilipsIntellivueClient : IDisposable
 {
     private readonly PhilipsIntellivueClientSettings settings;
     private IODevice? ioDevice;
@@ -385,11 +385,6 @@ public class PhilipsIntellivueClient : IDisposable, IAsyncDisposable
             protocolCommunicator.NewMessage -= ReportNewMessage;
             protocolCommunicator.ConnectionStatusChanged -= OnConnectionStatusChanged;
         }
-    }
-
-    public async ValueTask DisposeAsync()
-    {
-        Dispose();
     }
 
     public void Log(string message) => Console.WriteLine($"{nameof(PhilipsIntellivueClient)} - {DateTime.UtcNow:yyyy-MM-dd HH:mm:ss.fff} - {message}");

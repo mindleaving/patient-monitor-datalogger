@@ -3,7 +3,7 @@ using System.Collections.Concurrent;
 
 namespace PatientMonitorDataLogger.Shared.Helpers;
 
-public class AwaitableTimeCappedCollection<T> : ICollection<T>, IDisposable, IAsyncDisposable
+public class AwaitableTimeCappedCollection<T> : ICollection<T>, IDisposable
 {
     private readonly TimeSpan expirationTime;
     private readonly ConcurrentDictionary<Guid,WaitForRequest<T>> waitRequests = new();
@@ -136,11 +136,5 @@ public class AwaitableTimeCappedCollection<T> : ICollection<T>, IDisposable, IAs
     {
         expirationTimer.Dispose();
         itemWaitRequestMatchingTimer.Dispose();
-    }
-
-    public async ValueTask DisposeAsync()
-    {
-        await expirationTimer.DisposeAsync();
-        await itemWaitRequestMatchingTimer.DisposeAsync();
     }
 }

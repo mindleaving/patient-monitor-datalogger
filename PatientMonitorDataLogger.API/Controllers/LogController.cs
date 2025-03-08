@@ -104,7 +104,7 @@ public class LogController : ApiController
         if (logSessions.TryRemove(id, out var logSession))
         {
             logSession!.Stop();
-            await logSession.DisposeAsync();
+            logSession.Dispose();
         }
         return Ok();
     }

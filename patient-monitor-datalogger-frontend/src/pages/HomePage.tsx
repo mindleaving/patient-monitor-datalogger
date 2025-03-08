@@ -41,7 +41,7 @@ export const HomePage = (props: HomePageProps) => {
     const updateObservations = (newData: Models.DataExport.LogSessionObservations) => {
         setObservations(state => ({
             ...state,
-            [newData.logSessionId]: newData.observations
+            [newData.logSessionId]: newData.observations.concat(state[newData.logSessionId] ?? []).slice(0, 5)
         }));
     }
 

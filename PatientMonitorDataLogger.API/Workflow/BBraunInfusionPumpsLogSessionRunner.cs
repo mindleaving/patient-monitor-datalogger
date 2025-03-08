@@ -9,7 +9,7 @@ namespace PatientMonitorDataLogger.API.Workflow;
 
 public class BBraunInfusionPumpsLogSessionRunner : LogSessionRunner
 {
-    private readonly BBraunBccClient bccClient;
+    protected BBraunBccClient? bccClient;
     private readonly List<string> recordedParameters = new();
     private readonly IInfusionPumpStateWriter infusionPumpStateWriter;
     private RelativeTimeTranslation? relativeTimeTranslation;
@@ -20,38 +20,45 @@ public class BBraunInfusionPumpsLogSessionRunner : LogSessionRunner
         DataWriterSettings writerSettings)
         : base(logSessionId, logSessionSettings, writerSettings)
     {
-        if (logSessionSettings.DeviceSettings is not BBraunInfusionPumpSettings bbraunInfusionPumpSettings)
+        if (logSessionSettings.DeviceSettings is not (BBraunInfusionPumpSettings or SimulatedBBraunInfusionPumpSettings))
             throw new ArgumentException($"Expected B. Braun infusion pump settings, but got {logSessionSettings.DeviceSettings.GetType().Name}");
 
         infusionPumpStateWriter = new CsvInfusionPumpStateWriter(
-            Path.Combine(writerSettings.OutputDirectory, $"infusion-pump-parameters_{DateTime.UtcNow:yyyy-MM-dd_HHmmss}.csv"),
+            Path.Combine(logSessionOutputDirectory, $"infusion-pump-parameters_{DateTime.UtcNow:yyyy-MM-dd_HHmmss}.csv"),
             logSessionSettings.CsvSeparator);
-        var clientSettings = new BBraunBccClientSettings(
-            BccParticipantRole.Client,
-            bbraunInfusionPumpSettings.Hostname,
-            bbraunInfusionPumpSettings.Port,
-            bbraunInfusionPumpSettings.UseCharacterStuffing,
-            TimeSpan.FromSeconds(10),
-            bbraunInfusionPumpSettings.PollPeriod);
-        bccClient = new BBraunBccClient(clientSettings);
-        bccClient.NewMessage += OnNewMessage;
     }
 
     protected override void InitializeImpl()
     {
-        // Nothing to initialize
+        if (logSessionSettings.DeviceSettings is BBraunInfusionPumpSettings physicalDeviceSettings)
+        {
+            var clientSettings = BBraunBccClientSettings.CreateForPhysicalConnection(
+                BccParticipantRole.Client,
+                physicalDeviceSettings.Hostname,
+                physicalDeviceSettings.Port,
+                physicalDeviceSettings.UseCharacterStuffing,
+                TimeSpan.FromSeconds(10),
+                physicalDeviceSettings.PollPeriod);
+            bccClient = new BBraunBccClient(clientSettings);
+        }
+        if (bccClient == null)
+            throw new Exception("BCC client was not initialized");
+        bccClient.NewMessage += OnNewMessage;
+        bccClient.ConnectionStatusChanged += OnConnectionStatusChanged;
     }
 
     public override LogStatus Status
         => new(
             LogSessionId,
             IsRunning,
-            new BBraunInfusionPumpInfo(bccClient.BedId),
+            new BBraunInfusionPumpInfo(bccClient?.BedId ?? "1"),
             startTime,
             recordedParameters);
 
     protected override void StartImpl()
     {
+        if (bccClient == null)
+            throw new InvalidOperationException("BCC client is not initialized");
         bccClient.Connect();
         bccClient.StartPolling();
         infusionPumpStateWriter.Start();
@@ -59,6 +66,8 @@ public class BBraunInfusionPumpsLogSessionRunner : LogSessionRunner
 
     protected override void StopImpl()
     {
+        if (bccClient == null)
+            throw new InvalidOperationException("BCC client is not initialized");
         bccClient.StopPolling();
         bccClient.Disconnect();
         infusionPumpStateWriter.Stop();
@@ -66,15 +75,13 @@ public class BBraunInfusionPumpsLogSessionRunner : LogSessionRunner
 
     public override void Dispose()
     {
-        bccClient.Dispose();
-        bccClient.NewMessage -= OnNewMessage;
+        bccClient?.Dispose();
+        if(bccClient != null)
+        {
+            bccClient.NewMessage -= OnNewMessage;
+            bccClient.ConnectionStatusChanged -= OnConnectionStatusChanged;
+        }
         infusionPumpStateWriter.Dispose();
-    }
-
-    public override ValueTask DisposeAsync()
-    {
-        Dispose();
-        return ValueTask.CompletedTask;
     }
 
     private void OnNewMessage(
@@ -93,6 +100,7 @@ public class BBraunInfusionPumpsLogSessionRunner : LogSessionRunner
             .Where(quadruple => quadruple.Value != null && quadruple.Value != "_NV" && quadruple.Value != "_NA")
             .GroupBy(quadruple => quadruple.Address)
             .OrderBy(g => g.Key);
+        var observations = new List<Observation>();
         foreach (var pump in pumps)
         {
             var pumpParameters = pump
@@ -100,6 +108,15 @@ public class BBraunInfusionPumpsLogSessionRunner : LogSessionRunner
                 .ToList();
             var infusionPumpState = new InfusionPumpState(timestamp, pump.Key, pumpParameters);
             infusionPumpStateWriter.Write(infusionPumpState);
+            var pumpObservations = pumpParameters.Select(
+                pumpParameter => new Observation(
+                    timestamp,
+                    $"PUMP{pump.Key}_{pumpParameter.Name}",
+                    pumpParameter.Value,
+                    null));
+            observations.AddRange(pumpObservations);
         }
+        if(observations.Count > 0)
+            OnNewObservations(this, new LogSessionObservations(LogSessionId, timestamp, observations));
     }
 }

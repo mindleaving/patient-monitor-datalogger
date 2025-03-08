@@ -8,7 +8,6 @@ public class PhilipsIntellivueClientSettings
     private PhilipsIntellivueClientSettings(
         string serialPortName,
         int serialPortBaudRate,
-        bool useSimulatedSerialPort,
         SimulatedIoDevice? simulatedSerialPort,
         TimeSpan messageRetentionPeriod,
         PollMode pollMode)
@@ -16,7 +15,6 @@ public class PhilipsIntellivueClientSettings
         SerialPortName = serialPortName;
         SerialPortBaudRate = serialPortBaudRate;
         MessageRetentionPeriod = messageRetentionPeriod;
-        UseSimulatedSerialPort = useSimulatedSerialPort;
         SimulatedSerialPort = simulatedSerialPort;
         PollMode = pollMode;
     }
@@ -26,7 +24,7 @@ public class PhilipsIntellivueClientSettings
         int serialPortBaudRate,
         TimeSpan messageRetentionPeriod,
         PollMode pollMode)
-        => new(serialPortname, serialPortBaudRate, false, null, messageRetentionPeriod, pollMode);
+        => new(serialPortname, serialPortBaudRate, null, messageRetentionPeriod, pollMode);
 
     public static PhilipsIntellivueClientSettings CreateForSimulatedSerialPort(
         SimulatedIoDevice simulatedSerialPort,
@@ -35,15 +33,14 @@ public class PhilipsIntellivueClientSettings
         => new(
             "COM0",
             115200,
-            true,
             simulatedSerialPort,
             messageRetentionPeriod,
             pollMode);
 
     public string SerialPortName { get; }
     public int SerialPortBaudRate { get; }
-    public bool UseSimulatedSerialPort { get; }
+    public bool UseSimulatedSerialPort => SimulatedSerialPort != null;
     public SimulatedIoDevice? SimulatedSerialPort { get; }
     public TimeSpan MessageRetentionPeriod { get; }
-    public PollMode PollMode { get; set; }
+    public PollMode PollMode { get; }
 }

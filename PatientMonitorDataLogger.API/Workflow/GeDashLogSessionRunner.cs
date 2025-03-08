@@ -33,10 +33,4 @@ public class GeDashLogSessionRunner : PatientMonitorLogSessionRunner
     {
         Stop();
     }
-
-    public override ValueTask DisposeAsync()
-    {
-        Stop();
-        return ValueTask.CompletedTask;
-    }
 }

@@ -1,9 +1,10 @@
 import { FormControl, FormGroup, FormLabel } from "react-bootstrap";
-import { Models } from "../types/models";
-import { InfusionPumpType, MedicalDeviceType } from "../types/enums";
-import { infusionPumpSystemNames } from "../helpers/Formatters";
+import { Models } from "../../types/models";
+import { InfusionPumpType, MedicalDeviceType } from "../../types/enums";
+import { infusionPumpSystemNames } from "../../helpers/Formatters";
 import { ReactNode, useCallback } from "react";
 import { BBraunInfusionPumpSettingsFormControls } from "./BBraunInfusionPumpSettingsFormControls";
+import { SimulatedBBraunInfusionPumpSettingsFormControls } from "./SimulatedBBraunInfusionPumpSettingsFormControls";
 
 interface InfusionPumpSettingsFormControlsProps {
     value: Models.InfusionPumpSettings;
@@ -20,6 +21,14 @@ export const InfusionPumpSettingsFormControls = (props: InfusionPumpSettingsForm
         {
             infusionPumpSystemSpecificFormControls = (<BBraunInfusionPumpSettingsFormControls
                 value={value as Models.BBraunInfusionPumpSettings}
+                onChange={onChange}
+            />);
+            break;
+        }
+        case InfusionPumpType.SimulatedBBraunSpace:
+        {
+            infusionPumpSystemSpecificFormControls = (<SimulatedBBraunInfusionPumpSettingsFormControls
+                value={value as Models.SimulatedBBraunInfusionPumpSettings}
                 onChange={onChange}
             />);
             break;
@@ -42,6 +51,17 @@ export const InfusionPumpSettingsFormControls = (props: InfusionPumpSettingsForm
                     pollPeriod: '00:00:10'
                 } as Models.BBraunInfusionPumpSettings));
                 break;
+            }
+            case InfusionPumpType.SimulatedBBraunSpace:
+            {
+                onChange(_ => ({
+                    deviceType: MedicalDeviceType.InfusionPumps,
+                    infusionPumpType: InfusionPumpType.SimulatedBBraunSpace,
+                    bedId: '1',
+                    pillarCount: 1,
+                    pumpCount: 2,
+                    pollPeriod: '00:00:10',
+                } as Models.SimulatedBBraunInfusionPumpSettings))
             }
         }
     }, [ onChange, value ]);

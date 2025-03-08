@@ -3,7 +3,7 @@ using PatientMonitorDataLogger.PhilipsIntellivue.Models;
 
 namespace PatientMonitorDataLogger.PhilipsIntellivue;
 
-public class PerioidPollReplier : IDisposable, IAsyncDisposable
+public class PerioidPollReplier : IDisposable
 {
     private readonly Timer pollReplyTimer;
     private ExtendPollSettings extendedPollSettings;
@@ -120,11 +120,6 @@ public class PerioidPollReplier : IDisposable, IAsyncDisposable
     public void Dispose()
     {
         pollReplyTimer.Dispose();
-    }
-
-    public async ValueTask DisposeAsync()
-    {
-        await pollReplyTimer.DisposeAsync();
     }
 
     private class ExtendPollSettings

@@ -12,7 +12,8 @@ export const monitorNames: { [key:string]: string } = {
 };
 
 export const infusionPumpSystemNames: { [key:string]: string } = {
-    [InfusionPumpType.BBraunSpace]: "B. Braun Space Infusion System"
+    [InfusionPumpType.BBraunSpace]: "B. Braun Space Infusion System",
+    [InfusionPumpType.SimulatedBBraunSpace]: "Simulated B. Braun Space Infusion System"
 };
 
 export const waveTypeNames: { [waveType:string]: string } = {

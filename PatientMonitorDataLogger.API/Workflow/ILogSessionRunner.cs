@@ -3,7 +3,7 @@ using PatientMonitorDataLogger.API.Models.DataExport;
 
 namespace PatientMonitorDataLogger.API.Workflow;
 
-public interface ILogSessionRunner : IDisposable, IAsyncDisposable
+public interface ILogSessionRunner : IDisposable
 {
     Guid LogSessionId { get; }
     bool IsInitialized { get; }

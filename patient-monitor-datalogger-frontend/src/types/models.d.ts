@@ -59,6 +59,9 @@ export namespace Models {
     interface ASNLength {
         length: number;
     }
+    interface Association {
+        presentationContextId: number;
+    }
     interface AssociationCommandMessage extends Models.ICommandMessage {
         sessionHeader: Models.SessionHeader;
         sessionData: Models.SessionData;
@@ -461,6 +464,12 @@ export namespace Models {
         serialNumber: number;
         softwareVersion: string;
     }
+    interface SimulatedBBraunInfusionPumpSettings extends Models.InfusionPumpSettings {
+        bedId: string;
+        pillarCount: number;
+        pumpCount: number;
+        pollPeriod: string;
+    }
     interface DataWriterSettings {
         outputDirectory: string;
     }
@@ -482,7 +491,7 @@ export namespace Models {
     interface IPatientMonitorInfo extends Models.IMedicalDeviceInfo {
         monitorType: Enums.PatientMonitorType;
     }
-    interface LogSession extends System.IDisposable, System.IAsyncDisposable {
+    interface LogSession extends System.IDisposable {
         id: string;
         settings: Models.LogSessionSettings;
         patientInfo: Models.PatientInfo;
@@ -743,9 +752,6 @@ export namespace System {
         
     }
     interface IEquatable<T> {
-        
-    }
-    interface IAsyncDisposable {
         
     }
     interface ValueType {

@@ -57,7 +57,9 @@ public class BBraunBccClient : IDisposable
     {
         if(isInitialized)
             return;
-        ioDevice = new PhysicalTcpClient(settings.SpaceStationIp, settings.SpaceStationPort);
+        ioDevice = settings.UseSimulatedIoDevice
+            ? settings.SimulatedIoDevice!
+            : new PhysicalTcpClient(settings.SpaceStationIp, settings.SpaceStationPort);
         protocolCommunicator = new BBraunBccCommunicator(ioDevice, settings, nameof(BBraunBccCommunicator));
         protocolCommunicator.NewMessage += OnNewMessage;
         protocolCommunicator.ConnectionStatusChanged += OnConnectionStatusChanged;

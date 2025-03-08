@@ -7,8 +7,8 @@ import { Center } from "../components/Center";
 import { AsyncButton } from "../components/AsyncButton";
 import { useNavigate } from "react-router";
 import { showSuccessAlert } from "../helpers/AlertHelpers";
-import { DeviceSettingsFormControls } from "../components/DeviceSettingsFormControls";
-import { DeviceDataSettingsFormControls } from "../components/DeviceDataSettingsFormControls";
+import { DeviceSettingsFormControls } from "../components/settings/DeviceSettingsFormControls";
+import { DeviceDataSettingsFormControls } from "../components/settings/DeviceDataSettingsFormControls";
 
 interface CreateNewLogSessionPageProps {
     onLogSessionCreated: (logSession: Models.LogSession) => void;

@@ -118,5 +118,4 @@ public abstract class LogSessionRunner : ILogSessionRunner
     }
 
     public abstract void Dispose();
-    public abstract ValueTask DisposeAsync();
 }
