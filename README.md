@@ -1,8 +1,9 @@
-# Patient Monitor Data Logger
+# Medical Device Data Logger
 Datalogger for medical devices written in .NET/C# with web-frontend in React.js. 
 
 Currently supported: 
-- Philips Intellivue over MIB/RS232-interface. 
+- Philips Intellivue over MIB/RS232-interface.
+- B. Braun Space Infusion Pump System over TCP/IP
 
 Built to run on Raspberry Pi.
 
@@ -165,6 +166,8 @@ Now enable and run install.sh:
 chmod +x install.sh
 ./install.sh
 ```
+
+During install, a dialogue will open showing network interfaces. I recommend that you set a static IP address. Make sure to select an IP that is compatible with your network setup, especially if you plan on logging data from a device other TCP/IP. If you select an incompatible IP address, you may not be able to reach the data logger over SSH anymore. Use the touch screen to open network settings and continue network setup from there. Then log back in using SSH and start ./install.sh again.
 
 **Step 4 - Open web interface**
 

@@ -12,6 +12,7 @@ public abstract class LogSessionRunner : ILogSessionRunner
     protected readonly string logSessionOutputDirectory;
     private readonly object startStopLock = new();
     protected DateTime? startTime;
+    private readonly string logSessionActiveIndicatorFilePath;
 
     protected LogSessionRunner(
         Guid logSessionId,
@@ -22,6 +23,7 @@ public abstract class LogSessionRunner : ILogSessionRunner
         this.writerSettings = writerSettings;
         LogSessionId = logSessionId;
         logSessionOutputDirectory = Path.Combine(writerSettings.OutputDirectory, logSessionId.ToString());
+        logSessionActiveIndicatorFilePath = GetLogSessionActiveIndicatorFilePath(logSessionId, writerSettings);
     }
 
     protected abstract void InitializeImpl();
@@ -61,6 +63,14 @@ public abstract class LogSessionRunner : ILogSessionRunner
             StartImpl();
             startTime = DateTime.UtcNow;
             IsRunning = true;
+            try
+            {
+                File.WriteAllText(logSessionActiveIndicatorFilePath, LogSessionId.ToString());
+            }
+            catch
+            {
+                // Ignore
+            }
         }
     }
     protected abstract void StartImpl();
@@ -75,6 +85,14 @@ public abstract class LogSessionRunner : ILogSessionRunner
                 return;
 
             IsRunning = false;
+            try
+            {
+                File.Delete(logSessionActiveIndicatorFilePath);
+            }
+            catch
+            {
+                // Ignore
+            }
             startTime = null;
             StopImpl();
         }
@@ -118,4 +136,9 @@ public abstract class LogSessionRunner : ILogSessionRunner
     }
 
     public abstract void Dispose();
+
+    public static string GetLogSessionActiveIndicatorFilePath(
+        Guid logSessionId,
+        DataWriterSettings writerSettings)
+        => Path.Combine(writerSettings.OutputDirectory, logSessionId.ToString(), "RUNNING");
 }

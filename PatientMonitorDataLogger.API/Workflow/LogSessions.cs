@@ -63,6 +63,17 @@ public class LogSessions
                 }
             }
             AddAndSetupLogSession(logSession);
+            if(File.Exists(LogSessionRunner.GetLogSessionActiveIndicatorFilePath(logSessionId, writerSettings)))
+            {
+                try
+                {
+                    logSession.Start();
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine($"Could not start log session {logSessionId}: " + e.Message);
+                }
+            }
         }
     }
 

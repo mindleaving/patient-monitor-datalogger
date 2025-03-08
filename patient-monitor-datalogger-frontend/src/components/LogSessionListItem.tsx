@@ -179,8 +179,8 @@ export const LogSessionListItem = (props: LogSessionListItemProps) => {
         </Row>
         {observations
         ? <Row>
-            {observations.slice(0, 5).map(observation => {
-                return (<Col key={observation.parameterName}>
+            {observations.slice(0, 5).map((observation,observationIndex) => {
+                return (<Col key={observationIndex}>
                     <div>{observation.parameterName}</div>
                     <div className="text-center align-items-end">
                         <span className="display-5">{observation.value}</span>
