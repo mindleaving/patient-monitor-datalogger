@@ -5,7 +5,7 @@ using PatientMonitorDataLogger.API.Models.DataExport;
 
 namespace PatientMonitorDataLogger.API.Workflow;
 
-public class LogSessions
+public class LogSessions : IHostedService
 {
     private readonly MeasurementDataDistributor measurementDataDistributor;
     private readonly LogSessionSupervisor logSessionSupervisor;
@@ -139,5 +139,19 @@ public class LogSessions
         LogStatus logStatus)
     {
         await measurementDataDistributor.Distribute(logStatus);
+    }
+
+    public Task StartAsync(
+        CancellationToken cancellationToken)
+    {
+        // Nothing to do
+        return Task.CompletedTask;
+    }
+
+    public Task StopAsync(
+        CancellationToken cancellationToken)
+    {
+        // Nothing to do
+        return Task.CompletedTask;
     }
 }

@@ -65,6 +65,7 @@ public class PhilipsIntellivueLogSessionRunner : PatientMonitorLogSessionRunner
         if (monitorClient == null)
             throw new InvalidOperationException("Monitor client is not initialized");
         
+        base.StartImpl();
         var pollOptions = ExtendedPollProfileOptions.None;
         if (dataSettings.IncludeNumerics)
             pollOptions |= ExtendedPollProfileOptions.POLL_EXT_PERIOD_NU_1SEC;
@@ -206,6 +207,7 @@ public class PhilipsIntellivueLogSessionRunner : PatientMonitorLogSessionRunner
         {
             // Ignore
         }
+        base.StopImpl();
     }
 
     public override void Dispose()

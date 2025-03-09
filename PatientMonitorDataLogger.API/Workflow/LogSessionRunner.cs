@@ -1,7 +1,9 @@
 ﻿using System.Data;
+using System.Reflection;
 using Newtonsoft.Json;
 using PatientMonitorDataLogger.API.Models;
 using PatientMonitorDataLogger.API.Models.DataExport;
+using PatientMonitorDataLogger.PhilipsIntellivue;
 
 namespace PatientMonitorDataLogger.API.Workflow;
 
@@ -63,16 +65,37 @@ public abstract class LogSessionRunner : ILogSessionRunner
             StartImpl();
             startTime = DateTime.UtcNow;
             IsRunning = true;
-            try
-            {
-                File.WriteAllText(logSessionActiveIndicatorFilePath, LogSessionId.ToString());
-            }
-            catch
-            {
-                // Ignore
-            }
+            WriteLogSessionActiveIndicatorFile();
+            WriteVersionFile();
         }
     }
+
+    private void WriteLogSessionActiveIndicatorFile()
+    {
+        try
+        {
+            File.WriteAllText(logSessionActiveIndicatorFilePath, LogSessionId.ToString());
+        }
+        catch
+        {
+            // Ignore
+        }
+    }
+
+    private void WriteVersionFile()
+    {
+        try
+        {
+            File.WriteAllText(
+                Path.Combine(logSessionOutputDirectory, $"version_{DateTime.UtcNow:yyyy-MM-dd_HHmmss}.txt"), 
+                Assembly.GetAssembly(typeof(PhilipsIntellivueClient))!.GetName().Version!.ToString());
+        }
+        catch
+        {
+            // Ignore
+        }
+    }
+
     protected abstract void StartImpl();
 
     public void Stop()

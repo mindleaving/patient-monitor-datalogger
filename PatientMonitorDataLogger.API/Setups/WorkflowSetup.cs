@@ -32,6 +32,7 @@ public class WorkflowSetup : ISetup
                 logSessions.LoadFromDisk(writerSettings);
                 return logSessions;
             });
+        services.AddHostedService(provider => provider.GetRequiredService<LogSessions>()); // Ensures that LogSessions is started, independent of any controller requesting it as dependency. Otherwise it will only start at first request.
     }
 
     private void SetupLogSessionSupervisor(
