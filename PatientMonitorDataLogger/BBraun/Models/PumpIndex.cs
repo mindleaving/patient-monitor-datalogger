@@ -4,7 +4,7 @@ using PatientMonitorDataLogger.Shared.Models;
 
 namespace PatientMonitorDataLogger.BBraun.Models;
 
-public class PumpIndex : ISerializable, IEquatable<PumpIndex>
+public class PumpIndex : ISerializable, IEquatable<PumpIndex>, IComparable<PumpIndex>
 {
     public PumpIndex(
         int pillar,
@@ -70,6 +70,15 @@ public class PumpIndex : ISerializable, IEquatable<PumpIndex>
     public override int GetHashCode()
     {
         return HashCode.Combine(Pillar, Slot);
+    }
+
+    public int CompareTo(PumpIndex? other)
+    {
+        if(other == null)
+            return 1;
+        if(Pillar != other.Pillar)
+            return Pillar.CompareTo(other.Pillar);
+        return Slot.CompareTo(other.Slot); 
     }
 
     public static bool operator ==(

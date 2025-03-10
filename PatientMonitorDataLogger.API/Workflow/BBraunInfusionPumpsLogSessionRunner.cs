@@ -114,7 +114,7 @@ public class BBraunInfusionPumpsLogSessionRunner : LogSessionRunner
                     $"PUMP{pump.Key}_{pumpParameter.Name}",
                     pumpParameter.Value,
                     null));
-            observations.AddRange(pumpObservations);
+            observations.AddRange(pumpObservations.Where(x => x.ParameterName.EndsWith("_INRT")));
         }
         if(observations.Count > 0)
             OnNewObservations(this, new LogSessionObservations(LogSessionId, timestamp, observations));

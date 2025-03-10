@@ -98,7 +98,8 @@ public class BBraunBccFrameReader : IDisposable
                         }
                         catch (Exception e)
                         {
-                            Console.WriteLine("Could not parse frame: " + e.Message);
+                            Console.WriteLine("Could not parse frame:");
+                            Console.WriteLine(e);
                             Console.WriteLine($"Faulty data: {Convert.ToBase64String(frameData.ToArray())}");
                         }
 

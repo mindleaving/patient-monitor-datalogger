@@ -446,7 +446,7 @@ export namespace Models {
         isDataLockOn?: boolean | null;
         powerSource?: Enums.BccDevicePowerSource | null;
     }
-    interface PumpIndex extends Models.ISerializable, System.IEquatable<Models.PumpIndex> {
+    interface PumpIndex extends Models.ISerializable, System.IEquatable<Models.PumpIndex>, System.IComparable<Models.PumpIndex> {
         pillar: number;
         slot: number;
         slotCharacter: string;
@@ -754,6 +754,9 @@ export namespace System {
     interface IEquatable<T> {
         
     }
+    interface IComparable<T> {
+        
+    }
     interface ValueType {
         
     }
@@ -891,9 +894,6 @@ export namespace System {
         mDStreamVersion: number;
     }
     interface IComparable {
-        
-    }
-    interface IComparable<T> {
         
     }
     interface Attribute {

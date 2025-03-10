@@ -5,7 +5,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
     <Title>Patient Monitor Data Logger</Title>
     <Authors>Jan Scholtyssek</Authors>
     <Description>Clients for connecting to patient monitors and (in the future) other medical devices.
