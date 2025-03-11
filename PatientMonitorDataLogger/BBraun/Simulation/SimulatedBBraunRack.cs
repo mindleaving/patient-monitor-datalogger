@@ -1,13 +1,11 @@
 ﻿using System.Text.RegularExpressions;
 using PatientMonitorDataLogger.BBraun.Helpers;
 using PatientMonitorDataLogger.BBraun.Models;
-using PatientMonitorDataLogger.Shared.Models;
 
 namespace PatientMonitorDataLogger.BBraun.Simulation;
 
 public class SimulatedBBraunRack : IDisposable
 {
-    private readonly IODevice ioDevice;
     private readonly BBraunBccCommunicator protocolCommunicator;
     private readonly BBraunBccMessageCreator messageCreator;
     private readonly DateTime startTime = DateTime.UtcNow;
@@ -15,16 +13,16 @@ public class SimulatedBBraunRack : IDisposable
     public SimulatedBBraunRack(
         string bedId,
         List<SimulatedBBraunRackPillar> pillars,
-        IODevice ioDevice,
         BBraunBccClientSettings settings)
     {
         if (settings.Role != BccParticipantRole.Server)
             throw new ArgumentException($"Setting specifies role '{settings.Role}', but this should be a server");
+        if (!settings.UseSimulatedIoDevice)
+            throw new ArgumentException($"Settings indicate a physical connection, but {nameof(SimulatedBBraunRack)} only works with simulated IO devices");
 
         BedId = bedId;
         Pillars = pillars;
-        this.ioDevice = ioDevice;
-        protocolCommunicator = new BBraunBccCommunicator(ioDevice, settings, nameof(SimulatedBBraunRack));
+        protocolCommunicator = new BBraunBccCommunicator(settings.SimulatedIoDevice!, settings, nameof(SimulatedBBraunRack));
         protocolCommunicator.NewMessage += HandleMessage;
         messageCreator = new BBraunBccMessageCreator(settings);
     }

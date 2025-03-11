@@ -15,6 +15,7 @@ protocolCommunicator.NewMessage += OnNewFrameReceived;
 
 protocolCommunicator.Start();
 protocolCommunicator.Enqueue(messageCreator.CreateInitializeCommunicationRequest());
+Console.WriteLine("Press ENTER to query pump parameters");
 while (true)
 {
     var command = Console.ReadLine();

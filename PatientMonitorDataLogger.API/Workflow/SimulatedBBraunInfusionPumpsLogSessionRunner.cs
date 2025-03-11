@@ -74,7 +74,6 @@ public class SimulatedBBraunInfusionPumpsLogSessionRunner : BBraunInfusionPumpsL
         SimulatedInfusionPumpRack = new SimulatedBBraunRack(
             deviceSettings.BedId,
             pillars,
-            simulatedCable.End2,
             rackSettings);
 
         base.InitializeImpl();

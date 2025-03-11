@@ -1,7 +1,5 @@
 ﻿using System.Data;
 using PatientMonitorDataLogger.BBraun.Helpers;
-using PatientMonitorDataLogger.BBraun.Models;
-using PatientMonitorDataLogger.PhilipsIntellivue.Models;
 using PatientMonitorDataLogger.Shared.Helpers;
 using PatientMonitorDataLogger.Shared.Models;
 
@@ -124,6 +122,7 @@ public class BBraunBccClient : IDisposable
             if(!IsConnected)
                 return;
 
+            StopPolling();
             IsConnected = false;
             ioDevice?.Close();
             protocolCommunicator?.Stop();
@@ -133,7 +132,11 @@ public class BBraunBccClient : IDisposable
     public void Dispose()
     {
         Disconnect();
-        protocolCommunicator.NewMessage -= OnNewMessage;
+        if(protocolCommunicator != null)
+        {
+            protocolCommunicator.NewMessage -= OnNewMessage;
+            protocolCommunicator.ConnectionStatusChanged -= OnConnectionStatusChanged;
+        }
         protocolCommunicator?.Dispose();
         ioDevice?.Dispose();
     }
