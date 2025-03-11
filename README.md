@@ -173,7 +173,7 @@ During install, a dialogue will open showing network interfaces. I recommend tha
 
 Open a browser (I use Chromium) and navigate to http://localhost/. 
 
-To start the web interface on startup and make most of the limited screen space open Chromium's menu, navigte to "More tools" > "Developer Tools" and select "Install site as App". Activate "Desktop Shortcut".
+To start the web interface on startup and make most of the limited screen space open Chromium's menu, navigte to "Cast, save and share" and select "Install page as app" and click "Install".
 
 Close Chromium and use the Desktop Shortcut to start the web interface again. Click on the "..." in the task window header > Select "App Info" > "Settings". Activate "Start app when you sign in".
 
