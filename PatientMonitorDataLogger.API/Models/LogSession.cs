@@ -6,6 +6,7 @@ namespace PatientMonitorDataLogger.API.Models;
 
 public class LogSession : IDisposable
 {
+    private readonly DataWriterSettings writerSettings;
     private readonly ILogSessionRunner sessionRunner;
 
     public LogSession(
@@ -13,6 +14,7 @@ public class LogSession : IDisposable
         LogSessionSettings settings,
         DataWriterSettings writerSettings)
     {
+        this.writerSettings = writerSettings;
         Id = id;
         Settings = settings;
         if (settings.DeviceSettings == null)
@@ -124,5 +126,10 @@ public class LogSession : IDisposable
             LatestObservations[observation.ParameterName] = observation;
         }
         NewObservations?.Invoke(this, observations);
+    }
+
+    public void DeletePermanently()
+    {
+        Directory.Delete(Path.Combine(writerSettings.OutputDirectory, Id.ToString()), recursive: true);
     }
 }

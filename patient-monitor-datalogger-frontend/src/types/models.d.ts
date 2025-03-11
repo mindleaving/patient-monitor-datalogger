@@ -16,9 +16,6 @@ export namespace Models {
     interface IODevice extends System.IDisposable {
         
     }
-    interface IPatientMonitorSettings extends Models.IMedicalDeviceSettings {
-        monitorType: Enums.PatientMonitorType;
-    }
     interface ISerializable {
         
     }
@@ -30,8 +27,8 @@ export namespace Models {
         selectedNumericsTypes: string[];
         selectedWaveTypes: Enums.WaveType[];
     }
-    interface PatientMonitorSettings extends Models.IPatientMonitorSettings {
-        
+    interface PatientMonitorSettings extends Models.IMedicalDeviceSettings {
+        monitorType: Enums.PatientMonitorType;
     }
     interface AbsoluteTime extends Models.ISerializable {
         century: System.Byte;
