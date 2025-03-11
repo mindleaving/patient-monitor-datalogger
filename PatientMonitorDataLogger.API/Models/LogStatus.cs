@@ -5,23 +5,20 @@ public class LogStatus : ILogSessionData
     public LogStatus(
         Guid logSessionId,
         bool isRunning,
-        IPatientMonitorInfo monitor,
+        IMedicalDeviceInfo deviceInfo,
         DateTime? startTime,
-        List<string> recordedNumerics,
-        List<string> recordedWaves)
+        List<string> recordedParameters)
     {
         LogSessionId = logSessionId;
         IsRunning = isRunning;
-        Monitor = monitor;
+        DeviceInfo = deviceInfo;
         StartTime = startTime;
-        RecordedNumerics = recordedNumerics;
-        RecordedWaves = recordedWaves;
+        RecordedParameters = recordedParameters;
     }
 
     public Guid LogSessionId { get; }
     public bool IsRunning { get; }
-    public IPatientMonitorInfo Monitor { get; }
+    public IMedicalDeviceInfo DeviceInfo { get; }
     public DateTime? StartTime { get; }
-    public List<string> RecordedNumerics { get; }
-    public List<string> RecordedWaves { get; }
+    public List<string> RecordedParameters { get; }
 }

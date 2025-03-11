@@ -4,8 +4,10 @@ sudo apt update
 sudo apt upgrade -y
 
 unzip -q config.zip -d config
+rm config.zip
 sudo cp -R config/* /
 rm -rf config
+chmod +x deploy_patient-monitor-datalogger.sh
 
 sudo nmtui
 sudo apt install -y ufw nginx unzip rsyslog
@@ -32,6 +34,8 @@ curl -sSL https://dot.net/v1/dotnet-install.sh | sudo bash /dev/stdin --channel 
 sudo ln -s /usr/local/share/dotnet/dotnet /usr/bin/dotnet
 sudo systemctl enable patient-monitor-datalogger-api.service
 
+./deploy_patient-monitor-datalogger.sh
+sudo nginx -s reload
+
 cd ~
 rm install.sh
-rm config.zip

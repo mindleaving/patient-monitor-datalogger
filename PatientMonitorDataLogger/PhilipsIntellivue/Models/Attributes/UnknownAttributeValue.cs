@@ -1,4 +1,6 @@
-﻿namespace PatientMonitorDataLogger.PhilipsIntellivue.Models.Attributes;
+﻿using PatientMonitorDataLogger.Shared.Models;
+
+namespace PatientMonitorDataLogger.PhilipsIntellivue.Models.Attributes;
 
 public class UnknownAttributeValue : ISerializable
 {

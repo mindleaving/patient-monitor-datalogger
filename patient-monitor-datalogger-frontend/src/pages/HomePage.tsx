@@ -18,7 +18,7 @@ export const HomePage = (props: HomePageProps) => {
     const { logSessions, setLogSessions } = props;
 
     const [ isLoadingLogSessions, setIsLoadingLogSessions ] = useState<boolean>(true);
-    const [ numericsData, setNumericsData ] = useState<{ [logSessionId: string]: { [measurementType: string]: Models.DataExport.NumericsValue } }>({});
+    const [ observations, setObservations ] = useState<{ [logSessionId: string]: Models.DataExport.Observation[] }>({});
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -38,10 +38,10 @@ export const HomePage = (props: HomePageProps) => {
         setLogSessions(state => state.map(logSession => logSession.id === logSessionId ? update(logSession) : logSession));
     }
 
-    const updateNumericsData = (newData: Models.DataExport.NumericsData) => {
-        setNumericsData(state => ({
+    const updateObservations = (newData: Models.DataExport.LogSessionObservations) => {
+        setObservations(state => ({
             ...state,
-            [newData.logSessionId]: Object.assign(state[newData.logSessionId] ?? {}, newData.values)
+            [newData.logSessionId]: newData.observations.concat(state[newData.logSessionId] ?? []).slice(0, 5)
         }));
     }
 
@@ -66,7 +66,7 @@ export const HomePage = (props: HomePageProps) => {
             </Col>
             <Col xs="auto">
                 <NumericsSignalRConnectionIndicator 
-                    onNewNumericsDataAvailable={updateNumericsData}
+                    onNewObservationsAvailable={updateObservations}
                     onPatientInfoAvailable={updatePatientInfo}
                     onLogStatusChanged={updateLogStatus}
                 />
@@ -89,7 +89,7 @@ export const HomePage = (props: HomePageProps) => {
                         <LogSessionListItem
                             key={logSession.id}
                             logSession={logSession}
-                            numericsData={numericsData[logSession.id]}
+                            observations={observations[logSession.id]}
                             onChange={update => updateLogSession(logSession.id, update)}
                             onDeleted={() => setLogSessions(state => state.filter(x => x.id !== logSession.id))}
                         />

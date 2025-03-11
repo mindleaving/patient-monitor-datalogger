@@ -16,7 +16,7 @@ public static class Constants
     {
         {"stationary-win8", @"F:\Projects\patient-monitor-datalogger"},
         {"ubuntu-stationary", @"/mnt/data/Projects/patient-monitor-datalogger"},
-        {"ubuntu-laptop", @"/home/jan/Projects/patient-monitor-datalogger"},
+        {"jan-laptop", @"/home/jan/git/patient-monitor-datalogger"},
     };
     public static string GetRepositoryPath()
     {

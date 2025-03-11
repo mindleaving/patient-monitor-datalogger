@@ -2,7 +2,7 @@
 
 namespace PatientMonitorDataLogger.PhilipsIntellivue.Helpers;
 
-public class TransparencyByteUnescapedStream : IDisposable, IAsyncDisposable
+public class TransparencyByteUnescapedStream : IDisposable
 {
     public const byte FrameStartCharacter = 0xC0;
     public const byte FrameEndCharacter = 0xC1;
@@ -161,10 +161,5 @@ public class TransparencyByteUnescapedStream : IDisposable, IAsyncDisposable
     public void Dispose()
     {
         baseStream.Dispose();
-    }
-
-    public async ValueTask DisposeAsync()
-    {
-        await baseStream.DisposeAsync();
     }
 }

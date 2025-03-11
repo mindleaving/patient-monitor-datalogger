@@ -1,31 +1,31 @@
-﻿using Newtonsoft.Json;
+﻿using System.Data;
+using System.Reflection;
+using Newtonsoft.Json;
 using PatientMonitorDataLogger.API.Models;
 using PatientMonitorDataLogger.API.Models.DataExport;
-using PatientMonitorDataLogger.API.Workflow.DataExport;
-using PatientMonitorDataLogger.PhilipsIntellivue.Models;
+using PatientMonitorDataLogger.PhilipsIntellivue;
 
 namespace PatientMonitorDataLogger.API.Workflow;
 
 public abstract class LogSessionRunner : ILogSessionRunner
 {
     protected readonly LogSessionSettings logSessionSettings;
-    protected readonly MonitorDataWriterSettings writerSettings;
+    protected readonly DataWriterSettings writerSettings;
     protected readonly string logSessionOutputDirectory;
-    protected readonly INumericsWriter numericsWriter;
-    protected readonly Dictionary<string, IWaveWriter> waveWriters = new();
     private readonly object startStopLock = new();
+    protected DateTime? startTime;
+    private readonly string logSessionActiveIndicatorFilePath;
 
     protected LogSessionRunner(
         Guid logSessionId,
         LogSessionSettings logSessionSettings,
-        MonitorDataWriterSettings writerSettings)
+        DataWriterSettings writerSettings)
     {
-        LogSessionId = logSessionId;
         this.logSessionSettings = logSessionSettings;
         this.writerSettings = writerSettings;
+        LogSessionId = logSessionId;
         logSessionOutputDirectory = Path.Combine(writerSettings.OutputDirectory, logSessionId.ToString());
-        var numericsOutputFilePath = Path.Combine(logSessionOutputDirectory, $"numerics_{DateTime.UtcNow:yyyy-MM-dd_HHmmss}.csv");
-        numericsWriter = new CsvNumericsWriter(numericsOutputFilePath, logSessionSettings.CsvSeparator);
+        logSessionActiveIndicatorFilePath = GetLogSessionActiveIndicatorFilePath(logSessionId, writerSettings);
     }
 
     protected abstract void InitializeImpl();
@@ -35,7 +35,7 @@ public abstract class LogSessionRunner : ILogSessionRunner
     public bool IsRunning { get; private set; }
     public abstract LogStatus Status { get; }
     public event EventHandler<LogStatus>? StatusChanged;
-    public event EventHandler<NumericsData>? NewNumericsData;
+    public event EventHandler<LogSessionObservations>? NewObservations;
     public event EventHandler<PatientInfo>? PatientInfoAvailable;
 
     public void Initialize()
@@ -62,15 +62,40 @@ public abstract class LogSessionRunner : ILogSessionRunner
         {
             if(IsRunning)
                 return;
-            numericsWriter.Start();
-            foreach (var waveWriter in waveWriters.Values)
-            {
-                waveWriter.Start();
-            }
             StartImpl();
+            startTime = DateTime.UtcNow;
             IsRunning = true;
+            WriteLogSessionActiveIndicatorFile();
+            WriteVersionFile();
         }
     }
+
+    private void WriteLogSessionActiveIndicatorFile()
+    {
+        try
+        {
+            File.WriteAllText(logSessionActiveIndicatorFilePath, LogSessionId.ToString());
+        }
+        catch
+        {
+            // Ignore
+        }
+    }
+
+    private void WriteVersionFile()
+    {
+        try
+        {
+            File.WriteAllText(
+                Path.Combine(logSessionOutputDirectory, $"version_{DateTime.UtcNow:yyyy-MM-dd_HHmmss}.txt"), 
+                Assembly.GetAssembly(typeof(PhilipsIntellivueClient))!.GetName().Version!.ToString());
+        }
+        catch
+        {
+            // Ignore
+        }
+    }
+
     protected abstract void StartImpl();
 
     public void Stop()
@@ -83,11 +108,15 @@ public abstract class LogSessionRunner : ILogSessionRunner
                 return;
 
             IsRunning = false;
-            numericsWriter.Stop();
-            foreach(var waveWriter in waveWriters.Values)
+            try
             {
-                waveWriter.Stop();
+                File.Delete(logSessionActiveIndicatorFilePath);
             }
+            catch
+            {
+                // Ignore
+            }
+            startTime = null;
             StopImpl();
         }
     }
@@ -95,7 +124,7 @@ public abstract class LogSessionRunner : ILogSessionRunner
 
     protected void OnConnectionStatusChanged(
         object? sender,
-        MonitorConnectionChangeEventType connectionChangeEventType)
+        ConnectionState connectionStatus)
     {
         StatusChanged?.Invoke(sender, Status);
     }
@@ -107,11 +136,11 @@ public abstract class LogSessionRunner : ILogSessionRunner
         PatientInfoAvailable?.Invoke(sender, patientInfo);
     }
 
-    protected void OnNewNumericsData(
+    protected void OnNewObservations(
         object? sender,
-        NumericsData numericsData)
+        LogSessionObservations observations)
     {
-        NewNumericsData?.Invoke(sender, numericsData);
+        NewObservations?.Invoke(sender, observations);
     }
 
     public void WritePatientInfo(
@@ -129,23 +158,10 @@ public abstract class LogSessionRunner : ILogSessionRunner
             JsonConvert.SerializeObject(logSessionSettings, Formatting.Indented, Constants.JsonSerializerSettings));
     }
 
-    protected IWaveWriter CreateWaveWriter(
-        string measurementType)
-    {
-        var waveOutputFilePath = Path.Combine(logSessionOutputDirectory, $"{measurementType}_{DateTime.UtcNow:yyyy-MM-dd_HHmmss}.csv");
-        IWaveWriter waveWriter = new CsvWaveWriter(measurementType, waveOutputFilePath, logSessionSettings.CsvSeparator);
-        if (!waveWriters.TryAdd(measurementType, waveWriter))
-        {
-            waveWriter.Dispose(); // Dispose the wave writer we just created, and use the existing.
-            waveWriter = waveWriters[measurementType];
-        }
-        else
-        {
-            waveWriter.Start();
-        }
-        return waveWriter;
-    }
-
     public abstract void Dispose();
-    public abstract ValueTask DisposeAsync();
+
+    public static string GetLogSessionActiveIndicatorFilePath(
+        Guid logSessionId,
+        DataWriterSettings writerSettings)
+        => Path.Combine(writerSettings.OutputDirectory, logSessionId.ToString(), "RUNNING");
 }

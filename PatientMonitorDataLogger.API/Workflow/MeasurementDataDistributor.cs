@@ -16,9 +16,9 @@ public class MeasurementDataDistributor
     }
 
     public async Task Distribute(
-        NumericsData data)
+        LogSessionObservations observations)
     {
-        await dataHub.Clients.All.ReceiveNumerics(data);
+        await dataHub.Clients.All.ReceiveObservations(observations);
     }
 
     public async Task Distribute(

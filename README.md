@@ -1,8 +1,9 @@
-# Patient Monitor Data Logger
+# Medical Device Data Logger
 Datalogger for medical devices written in .NET/C# with web-frontend in React.js. 
 
 Currently supported: 
-- Philips Intellivue over MIB/RS232-interface. 
+- Philips Intellivue over MIB/RS232-interface.
+- B. Braun Space Infusion Pump System over TCP/IP
 
 Built to run on Raspberry Pi.
 
@@ -137,24 +138,27 @@ Assemble the connector housing.
 
 Use an Ethernet cable to connect your Raspberry Pi to your local network. It may take several moments for the network to start up. Wait for the LEDs of the LAN port start blinking.
 
-**Step 2 - Transfer scripts**
-
-Locate the ```deployment``` folder of the repository and copy install script and content to your Raspberry Pi using SSH's ```scp```-command:
-
-```
-cd <path to this repository>/deployment
-scp -i ~/.ssh/datalogger01 install.sh datalogger@datalogger01:~
-scp -i ~/.ssh/datalogger01 config.zip datalogger@datalogger01:~
-scp -i ~/.ssh/datalogger01 PatientMonitorDataLogger.*.zip datalogger@datalogger01:~
-```
-
-**Step 3 - Setup system**
+**Step 2 - Download latest release**
 
 Log into your Raspberry Pi using SSH:
 
 ```
 ssh -i ~/.ssh/datalogger01 datalogger@datalogger01
 ```
+
+Download the latest relase of Patient Monitor Data Logger
+
+```
+wget https://github.com/mindleaving/patient-monitor-datalogger/releases/latest/patient-monitor-datalogger-deployment-pack.zip
+```
+
+and unpack it
+
+```
+unzip -q patient-monitor-datalogger-deployment-pack.zip
+```
+
+**Step 3 - Setup system**
 
 Now enable and run install.sh:
 
@@ -163,11 +167,13 @@ chmod +x install.sh
 ./install.sh
 ```
 
+During install, a dialogue will open showing network interfaces. I recommend that you set a static IP address. Make sure to select an IP that is compatible with your network setup, especially if you plan on logging data from a device other TCP/IP. If you select an incompatible IP address, you may not be able to reach the data logger over SSH anymore. Use the touch screen to open network settings and continue network setup from there. Then log back in using SSH and start ./install.sh again.
+
 **Step 4 - Open web interface**
 
 Open a browser (I use Chromium) and navigate to http://localhost/. 
 
-To start the web interface on startup and make most of the limited screen space open Chromium's menu, navigte to "More tools" > "Developer Tools" and select "Install site as App". Activate "Desktop Shortcut".
+To start the web interface on startup and make most of the limited screen space open Chromium's menu, navigte to "Cast, save and share" and select "Install page as app" and click "Install".
 
 Close Chromium and use the Desktop Shortcut to start the web interface again. Click on the "..." in the task window header > Select "App Info" > "Settings". Activate "Start app when you sign in".
 

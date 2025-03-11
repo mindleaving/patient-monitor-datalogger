@@ -5,7 +5,7 @@ using PatientMonitorDataLogger.API.Models.DataExport;
 
 namespace PatientMonitorDataLogger.API.Workflow;
 
-public class LogSessions
+public class LogSessions : IHostedService
 {
     private readonly MeasurementDataDistributor measurementDataDistributor;
     private readonly LogSessionSupervisor logSessionSupervisor;
@@ -22,7 +22,7 @@ public class LogSessions
     public List<LogSession> All => sessions.Values.ToList();
 
     public void LoadFromDisk(
-        MonitorDataWriterSettings writerSettings)
+        DataWriterSettings writerSettings)
     {
         if(!Directory.Exists(writerSettings.OutputDirectory))
             return;
@@ -39,14 +39,14 @@ public class LogSessions
             {
                 var json = File.ReadAllText(settingsFilePath);
                 settings = JsonConvert.DeserializeObject<LogSessionSettings>(json)!;
-                if(settings.MonitorDataSettings == null)
-                    continue;
             }
             catch
             {
                 continue;
             }
 
+            if(settings.DeviceSettings == null || settings.DataSettings == null)
+                continue;
             var logSession = new LogSession(logSessionId, settings, writerSettings);
             var patientInfoFilePath = Path.Combine(logSessionDirectory, Constants.PatientInfoFileName);
             if (File.Exists(patientInfoFilePath))
@@ -63,12 +63,23 @@ public class LogSessions
                 }
             }
             AddAndSetupLogSession(logSession);
+            if(File.Exists(LogSessionRunner.GetLogSessionActiveIndicatorFilePath(logSessionId, writerSettings)))
+            {
+                try
+                {
+                    logSession.Start();
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine($"Could not start log session {logSessionId}: " + e.Message);
+                }
+            }
         }
     }
 
     public async Task<LogSession> CreateNew(
         LogSessionSettings settings,
-        MonitorDataWriterSettings writerSettings)
+        DataWriterSettings writerSettings)
     {
         var sessionId = Guid.NewGuid();
         var logSession = new LogSession(sessionId, settings, writerSettings);
@@ -80,7 +91,7 @@ public class LogSessions
         LogSession logSession)
     {
         sessions.TryAdd(logSession.Id, logSession);
-        logSession.NewNumericsData += DistributeNumericsData;
+        logSession.NewObservations += DistributeObservations;
         logSession.PatientInfoAvailable += DistributePatientInfo;
         logSession.StatusChanged += DistributeStatusChange;
         logSessionSupervisor.Register(logSession);
@@ -99,7 +110,7 @@ public class LogSessions
     {
         if (sessions.TryRemove(sessionId, out logSession))
         {
-            logSession.NewNumericsData -= DistributeNumericsData;
+            logSession.NewObservations -= DistributeObservations;
             logSession.PatientInfoAvailable -= DistributePatientInfo;
             logSession.StatusChanged -= DistributeStatusChange;
             logSessionSupervisor.Unregister(logSession);
@@ -109,11 +120,11 @@ public class LogSessions
         return false;
     }
 
-    private async void DistributeNumericsData(
+    private async void DistributeObservations(
         object? sender,
-        NumericsData numericsData)
+        LogSessionObservations observations)
     {
-        await measurementDataDistributor.Distribute(numericsData);
+        await measurementDataDistributor.Distribute(observations);
     }
 
     private async void DistributePatientInfo(
@@ -128,5 +139,19 @@ public class LogSessions
         LogStatus logStatus)
     {
         await measurementDataDistributor.Distribute(logStatus);
+    }
+
+    public Task StartAsync(
+        CancellationToken cancellationToken)
+    {
+        // Nothing to do
+        return Task.CompletedTask;
+    }
+
+    public Task StopAsync(
+        CancellationToken cancellationToken)
+    {
+        // Nothing to do
+        return Task.CompletedTask;
     }
 }

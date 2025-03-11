@@ -1,8 +1,9 @@
 ﻿using System.IO.Ports;
+using PatientMonitorDataLogger.Shared.Models;
 
 namespace PatientMonitorDataLogger.PhilipsIntellivue.Helpers;
 
-public class PhysicalSerialPort : SerialPort, ISerialPort
+public class PhysicalSerialPort : SerialPort, IODevice
 {
     public PhysicalSerialPort(
         string portName,

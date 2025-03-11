@@ -6,14 +6,14 @@ import { showErrorAlert } from "../helpers/AlertHelpers";
 import { Models } from "../types/models";
 
 interface NumericsSignalRConnectionIndicatorProps {
-    onNewNumericsDataAvailable: (data: Models.DataExport.NumericsData) => void;
+    onNewObservationsAvailable: (data: Models.DataExport.LogSessionObservations) => void;
     onPatientInfoAvailable: (patientInfo: Models.PatientInfo) => void;
     onLogStatusChanged: (logStatus: Models.LogStatus) => void;
 }
 
 export const NumericsSignalRConnectionIndicator = (props: NumericsSignalRConnectionIndicatorProps) => {
 
-    const { onNewNumericsDataAvailable, onPatientInfoAvailable, onLogStatusChanged } = props;
+    const { onNewObservationsAvailable: onNewNumericsDataAvailable, onPatientInfoAvailable, onLogStatusChanged } = props;
 
     const [ isConnecting, setIsConnecting ] = useState<boolean>(true);
     const [ isConnected, setIsConnected ] = useState<boolean>(false);
@@ -27,7 +27,7 @@ export const NumericsSignalRConnectionIndicator = (props: NumericsSignalRConnect
         const connectToHub = async () => {
             try {
                 await notificationsConnection.start();
-                notificationsConnection.on('ReceiveNumerics', onNewNumericsDataAvailable);
+                notificationsConnection.on('ReceiveObservations', onNewNumericsDataAvailable);
                 notificationsConnection.on('ReceivePatientInfo', onPatientInfoAvailable);
                 notificationsConnection.on('ReceiveStatusChange', onLogStatusChanged);
                 setIsConnected(true);

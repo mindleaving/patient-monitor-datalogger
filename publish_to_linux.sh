@@ -1,5 +1,5 @@
 BASE_PATH=$PWD
-rm PatientMonitorDataLogger.*.zip
+rm BASE_PATH/deployment/PatientMonitorDataLogger.*.zip
 
 cd PatientMonitorDataLogger.API
 dotnet clean -c Release

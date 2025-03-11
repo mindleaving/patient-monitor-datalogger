@@ -9,11 +9,11 @@ namespace PatientMonitorDataLogger.API.Controllers;
 public class LogController : ApiController
 {
     private readonly LogSessions logSessions;
-    private readonly IOptions<MonitorDataWriterSettings> writerSettings;
+    private readonly IOptions<DataWriterSettings> writerSettings;
 
     public LogController(
         LogSessions logSessions,
-        IOptions<MonitorDataWriterSettings> writerSettings)
+        IOptions<DataWriterSettings> writerSettings)
     {
         this.logSessions = logSessions;
         this.writerSettings = writerSettings;
@@ -52,7 +52,7 @@ public class LogController : ApiController
     {
         if (!logSessions.TryGet(id, out var logSession))
             return NotFound();
-        return Ok(logSession!.LatestMeasurements);
+        return Ok(logSession!.LatestObservations);
     }
 
     [HttpPost]
@@ -104,7 +104,7 @@ public class LogController : ApiController
         if (logSessions.TryRemove(id, out var logSession))
         {
             logSession!.Stop();
-            await logSession.DisposeAsync();
+            logSession.Dispose();
         }
         return Ok();
     }

@@ -10,11 +10,11 @@ namespace PatientMonitorDataLogger.API.Controllers;
 public class DataExportController : ApiController
 {
     private readonly IUsbDriveManager usbDriveManager;
-    private readonly IOptions<MonitorDataWriterSettings> writerSettings;
+    private readonly IOptions<DataWriterSettings> writerSettings;
 
     public DataExportController(
         IUsbDriveManager usbDriveManager,
-        IOptions<MonitorDataWriterSettings> writerSettings)
+        IOptions<DataWriterSettings> writerSettings)
     {
         this.usbDriveManager = usbDriveManager;
         this.writerSettings = writerSettings;

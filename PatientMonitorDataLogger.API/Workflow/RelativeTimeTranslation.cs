@@ -6,19 +6,31 @@ internal class RelativeTimeTranslation
 {
     public RelativeTimeTranslation(
         DateTime absoluteTime,
-        uint relativeTimeTicks)
+        ulong relativeTimeTicks,
+        ulong microsecondsPerTick)
     {
         AbsoluteTime = absoluteTime;
         RelativeTimeTicks = relativeTimeTicks;
+        MicrosecondsPerTick = microsecondsPerTick;
     }
 
+    public static RelativeTimeTranslation PhilipsIntellivue(
+        DateTime absoluteTime,
+        ulong relativeTimeTicks)
+        => new(absoluteTime, relativeTimeTicks, 125);
+    public static RelativeTimeTranslation BBraunBccProtocol(
+        DateTime absoluteTime,
+        ulong relativeTimeTicks)
+        => new(absoluteTime, relativeTimeTicks, 1_000_000);
+
     public DateTime AbsoluteTime { get; }
-    public uint RelativeTimeTicks { get; }
+    public ulong RelativeTimeTicks { get; }
+    public ulong MicrosecondsPerTick { get; }
 
     public DateTime GetAbsoluteTime(
-        uint ticks)
+        ulong ticks)
     {
-        var microSecondsSinceReference = (ticks - RelativeTimeTicks) * 125;
+        var microSecondsSinceReference = (ticks - RelativeTimeTicks) * MicrosecondsPerTick;
         return AbsoluteTime.AddMicroseconds(microSecondsSinceReference);
     }
     public DateTime GetAbsoluteTime(

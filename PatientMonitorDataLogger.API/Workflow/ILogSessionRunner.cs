@@ -3,14 +3,14 @@ using PatientMonitorDataLogger.API.Models.DataExport;
 
 namespace PatientMonitorDataLogger.API.Workflow;
 
-public interface ILogSessionRunner : IDisposable, IAsyncDisposable
+public interface ILogSessionRunner : IDisposable
 {
     Guid LogSessionId { get; }
     bool IsInitialized { get; }
     bool IsRunning { get; }
     LogStatus Status { get; }
     event EventHandler<LogStatus>? StatusChanged;
-    event EventHandler<NumericsData>? NewNumericsData;
+    event EventHandler<LogSessionObservations>? NewObservations;
     event EventHandler<PatientInfo>? PatientInfoAvailable;
 
     void Initialize();
