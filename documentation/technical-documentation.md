@@ -40,25 +40,71 @@ Germany
 | Micro-SD Card 128 GB | SDSQUAB-128G-GN6MA | SanDisk | |
 | USB-to-RS232 Serial Adapter UC232A | Aten | RoHS |
 
+
 ## Risk Assessment and Mitigation
 ### Risks due to Use of Product
+- **Risk of electrical shock**: When operated with the intended power supply, no electrical shock is to be expected. The User Manual instructs the End User only to use the power supply shipped with the Product. Furthermore the User Manual specifies that the End User must not deassemble the Product, insert any items into the opening of the case, except appropriate cables into the exposed connectors. When connecting to medical devices, only the cables specified in the User Manual must be used, to ensure, no ground loops occur, especially when connecting to more than one medical device. When connecting to more than one medical device at a time, the End User must either use medical isolators between the Product and the medical devices or consult with a local electrician to ensure that no devices with different ground potentials are connected. The Product must be operated in a suitable environment, i.e. ambient room temperature at humidities between 30 and 85% humidity.
+- **Risk of burns**: The Product contains no components that are intended to heat up excessively. The hottest part is expected to the processor the the Raspberry Pi, which contains circuits for throttling the processor, when it becomes too hot, which is the case at 80°C, with further throttling at 85°C, making it very unlikely for the product to become warmer than 90°C at any  point in time. This End User is not able to get in contact with the processor or any component to which the heat is conducted. The heat is dissipated through air convection and radiated through the walls of the protective case. The effect of operating the Raspberry Pi under maximum CPU-load for long periods of time on case temperature was explored during [General Product Safety Testing](#general-product-safety).
+- **Risk of cuts and mechanical injuries**: Design of the Product has been evaluated with regards to any sharp edges, corners, protrusions or openings. No sharp edges, corners or protrusions where identified, that could injury the End User. The protective case has several openings at the bottom, none of which are large enough for the End User to get a finger lodged inside. All edges of these openings are smooth and pose no risk of cuts. In case the protective case gets damaged, it may have sharp edges. In that case the User Manual instructs the End User to stop using the product and either discuss repair with the Manufacturer or dispose the Product.
+- **Risk of tripping**: Cables in general may pose a tripping hazard. The User Manual instructs the End User to place the Product at a location, that is sufficiently far away from the patient and any medical gas outlets and run power and data cables such, that they do not interfere with treatment of the patient and do not pose a tripping hazard.
+- **Risk due to material wear**: Over time, or when improperly treated with chemicals, materials can wear, become brittle, get sticky or in other ways loose their intended properties. All materials used in the Product have been evaluated to that regard. Raspberry Pi, touch screen and micro-SD-card are unlikely to show wear over time. Data loss may occur, due to wear of the storage medium. This is discussed separately. The protective case may show mechanical wear in form of scratches. Cables may wear due to the insulations becoming brittle or mechanical stresses (kinks, pinching), exposing the conductors, potentially causing short circuits. The User Manual instructs the End User to check all cables for damages before each use and dispose any damaged cable immediately.
+- **Risk of data loss**: The Product is intended for recording data from medical devices for up to 3 days and has been tested for that time period. It is not intended to store the recorded data in the long term. Due to software errors or the micro-SD storage card becoming faulty, data may get lost. The User Manual instructs the End User to copy recorded data to a USB drive using the web interface, move the data to a different storage medium and check that all data has been secured. This should be done after every recording session.
+
 ### Risks due to Effects on Environment
+The following risks and their mitigation strategies have been identified:
+- **Risk of fire**: Similar to the evaluation for the "Risk of burns", the limited heating of the components, with an expected maximum temperature of 90°C, makes it unlikely that the Product will catch fire, melt or begin to smoke. The more likely scenario is a ground loop, when connecting the Product to another device with an electrical fault. This risk is mitigated by following the same strategies as oulined in "Risk of electrical shock", i.e. using medical isolators or consulting with a local electrician before connecting to more than one medical device.
+- **Risk of fire or explosion when operated near an oxygen-outlet**: The Product must not be operated within 1.5 m of any outlet of medical gases, especially oxygen or any environment with increased oxygen saturation. This is clearly stated in the User Manual and End Users verbally informed of this restriction upon delivery of the Product.
+- **Risk of electric interference with medical devices**: All radio equipment of the Product is turned off during production. The End User is informed to keep all radio equipment turned off. This is also stated in the User Manual. The User Manual also outlines strategies for identifying, whether the Product is the cause of the interference. If the Product is identified as the source of interference, it is to be shut down, disconnected and removed from the vicinity of the effected medical devices.
+
 ### Safety Critical Components
 ### Independent Conformity Assessment
 
 ## Testing procedures
 
-## Harmonized Standard Compliance Evaluation
+## Harmonized Standards Compliance Evaluation
 ### Relevant Standards, Regulations and Directives
+The following regulations and harmonized standards frameworks are considered:
 - General Product Safety Regulation (GPSR)
+  - EN 62368-1 (PSU, Raspberry Pi 4B)
+  - EN 60950-1:2006 (Raspberry Pi 4B)
+  - BS EN 62311: 2008 (Raspberry Pi 4B)
 - Electromagnetic Compatibility (EMC)
+  - EN 55011:2009
+  - EN 55011:2016
+  - EN 55022:2010 + AC:2011 (PSU)
+  - EN 55024:2010 (PSU)
+  - EN 55032:2015 (PSU)
+  - EN 55035:2017
+  - EN 61000-3-2:2014
+  - EN 61000-3-3:2013
+  - EN 61204-3:2000
+  - ETSI EN 301 489-1 V2.2.3: 2019 (Raspberry Pi 4B)
+  - ETSI EN 301 489-17 V3.1.1: 2017 (Raspberry Pi 4B)
 - Low Voltage Directive (LVD)
+  - EN 62368-1:2014+A11:2017 (PSU)
 - Radio Equipment Directive (RED)
+  - ETSI EN 300 328 V2.2.2: 2019 (Raspberry Pi 4B)
+  - ETSI EN 301 893 V2.1.1: 2017 (Raspberry Pi 4B)
 - Restriction of the use of certain hazardous substances (RoHS)
+  - IEC EN 63000: 2018 (PSU, Raspberry Pi 4B)
+
+All parts of the Product are subject to GPSR. 
+
+Due to the low operating voltage of 5V, the Raspberry Pi, touch screen and USB-to-RS232-Adpater are not subject ot the Low Voltage Directive, which covers devices with an input or output voltage of at least 50 V AC or 75 V DC. The power supply is subject to the LVD.
+
+Raspberry Pi Model 4B contains circuits for wireless communication over WiFi and Bluetooth and is therefore subject to RED. Both Raspberry Pi and touch screen are subject to EMC regulation. 
+
+Finally, all components are subject to RoHS regulation.
 
 ### General Product Safety
 #### Intended User
+End User of the Product is intended to be research staff at hospitals or medical research facilities.
+
 #### Design and Composition
+The Product is designed to be simple and easy to use, with only the most necessary interfaces for interaction, to reduce the risk of wrong usage. The DC connector of the power supply only fits into one of the connectors on the Raspberry Pi, which eliminates the risk of End Users connecting the power supply to any wrong connector.
+
+The protective case has no sharp edges or corners, making injuries unlikely, as long as the protective case is assembled and intact. Due to the protective case, it is also not possible for the End User to come into contact with any parts of the Raspberry Pi, that mustn't been touched during operation. The exposed connectors are safe to be touched by the End User during operation.
+
 #### Features
 #### Effect on other Products
 #### Information to End User
@@ -72,7 +118,8 @@ Germany
 ##### Recall Procedure
 
 ### Electrical Safety
-
+#### Interactions of Components
+- TODO: Argument why conformity with regulations, standards and directives is maintained after assembling Raspberry Pi, touch screen and protective case.
 
 ### Environmental Safety
 #### RoHS Conformity
