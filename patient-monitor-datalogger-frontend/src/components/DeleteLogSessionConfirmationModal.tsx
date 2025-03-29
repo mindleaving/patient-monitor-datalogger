@@ -1,6 +1,6 @@
-import { Alert, Button, FormCheck, FormGroup, Modal } from "react-bootstrap";
+import { Alert, Button, FormCheck, Modal } from "react-bootstrap";
 import { AsyncButton } from "./AsyncButton";
-import { use, useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { deleteObject } from "../communication/ApiRequests";
 
 interface DeleteLogSessionConfirmationModalProps {

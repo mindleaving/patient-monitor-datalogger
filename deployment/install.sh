@@ -3,6 +3,16 @@
 sudo apt update
 sudo apt upgrade -y
 
+sudo useradd -d /home/tech tech
+sudo passwd -d tech
+sudo adduser tech sudo
+sudo mkdir -p /home/tech/.ssh
+sudo cp ~/.ssh/authorized_keys /home/tech/.ssh/
+sudo cp ~/.bashrc /home/tech/
+sudo cp ~/.profile /home/tech/.ssh/
+sudo chown tech:tech -R /home/tech
+sudo chmod 700 -R /home/tech
+
 unzip -q config.zip -d config
 rm config.zip
 sudo cp -R config/* /
@@ -12,7 +22,6 @@ chmod +x deploy_patient-monitor-datalogger.sh
 sudo nmtui
 sudo apt install -y ufw nginx unzip rsyslog
 sudo ufw allow 22/tcp
-sudo ufw allow 80/tcp
 sudo ufw logging off
 sudo ufw enable
 
@@ -22,6 +31,7 @@ sudo rm default
 cd ~
 sudo usermod -a -G dialout datalogger
 sudo usermod -a -G plugdev datalogger
+gsettings set org.gnome.desktop.media-handling automount-open false
 
 sudo mkdir -p /data/patient-monitor-datalogger
 sudo chown datalogger:datalogger -R /data/patient-monitor-datalogger
@@ -38,4 +48,6 @@ sudo systemctl enable patient-monitor-datalogger-api.service
 sudo nginx -s reload
 
 cd ~
+sudo mv deploy_patient-monitor-datalogger.sh /home/tech/deploy_patient-monitor-datalogger.sh
 rm install.sh
+sudo deluser datalogger sudo
