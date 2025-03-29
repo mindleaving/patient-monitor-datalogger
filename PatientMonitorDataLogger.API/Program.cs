@@ -28,7 +28,6 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     TypescriptGeneratorRunner.Run();
-    app.UseDeveloperExceptionPage();
 }
 
 app.UseForwardedHeaders();

@@ -10,5 +10,5 @@ cd ..
 #scp F:\Projects\patient-monitor-datalogger\deployment\PatientMonitorDataLogger.*.zip datalogger-3bplus:~
 #ssh datalogger-3bplus "./deploy_patient-monitor-datalogger.sh"
 
-scp F:\Projects\patient-monitor-datalogger\deployment\PatientMonitorDataLogger.*.zip datalogger01:~
-ssh datalogger01 "./deploy_patient-monitor-datalogger.sh"
+#scp F:\Projects\patient-monitor-datalogger\deployment\PatientMonitorDataLogger.*.zip datalogger01:~
+#ssh datalogger01 "./deploy_patient-monitor-datalogger.sh"

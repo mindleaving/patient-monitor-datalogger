@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Accordion, Button, Col, Row } from "react-bootstrap";
 import { Models } from "../types/models";
 import { buildLoadObjectFunc } from "../communication/ApiRequests";
@@ -8,40 +8,12 @@ import { NoEntriesAlert } from "../components/NoEntriesAlert";
 import { useNavigate } from "react-router";
 import { NumericsSignalRConnectionIndicator } from "../components/NumericsSignalRConnectionIndicator";
 import { MedicalDeviceType } from "../types/enums";
+import { MenuModal } from "../components/MenuModal";
+import { compareLogSessions } from "../helpers/sortHelpers";
 
 interface HomePageProps {
     logSessions: Models.LogSession[];
     setLogSessions: (update: Update<Models.LogSession[]>) => void;
-}
-
-const compareDeviceTypes = (a: Models.IMedicalDeviceSettings, b: Models.IMedicalDeviceSettings) => {
-    const deviceTypeComparison = a.deviceType.localeCompare(b.deviceType);
-    if(deviceTypeComparison !== 0) {
-        return deviceTypeComparison;
-    }
-    switch(a.deviceType) {
-        case MedicalDeviceType.PatientMonitor:
-        {
-            const patientMonitorSettingsA = a as Models.PatientMonitorSettings;
-            const patientMonitorSettingsB = b as Models.PatientMonitorSettings;
-            return patientMonitorSettingsA.monitorType.localeCompare(patientMonitorSettingsB.monitorType);
-        }
-        case MedicalDeviceType.InfusionPumps:
-        {
-            const infusionPumpSettingsA = a as Models.InfusionPumpSettings;
-            const infusionPumpSettingsB = b as Models.InfusionPumpSettings;
-            return infusionPumpSettingsA.infusionPumpType.localeCompare(infusionPumpSettingsB.infusionPumpType);
-        }
-        default:
-            throw new Error(`Comparison of device type ${a.deviceType} not implemented`);
-    }
-}
-const compareLogSessions = (a: Models.LogSession, b: Models.LogSession) => {
-    const deviceTypeComparison = compareDeviceTypes(a.settings.deviceSettings, b.settings.deviceSettings);
-    if(deviceTypeComparison !== 0) {
-        return deviceTypeComparison;
-    }
-    return a.id.localeCompare(b.id);
 }
 export const HomePage = (props: HomePageProps) => {
     
@@ -50,6 +22,7 @@ export const HomePage = (props: HomePageProps) => {
     const sortedLogSessions = useMemo(() => [...logSessions].sort((a,b) => compareLogSessions(a, b)), [ logSessions]);
     const [ isLoadingLogSessions, setIsLoadingLogSessions ] = useState<boolean>(true);
     const [ observations, setObservations ] = useState<{ [logSessionId: string]: Models.DataExport.Observation[] }>({});
+    const [ showMenu, setShowMenu ] = useState<boolean>(false);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -90,6 +63,10 @@ export const HomePage = (props: HomePageProps) => {
         }));
     }
 
+    const closeMenu = useCallback(() => {
+        setShowMenu(false);
+    }, []);
+
     return (<>
         <Row className="align-items-center">
             <Col>
@@ -104,10 +81,9 @@ export const HomePage = (props: HomePageProps) => {
             </Col>
             <Col xs="auto">
                 <Button
-                    onClick={() => navigate('/create/session')}
-                    size="lg"
+                    onClick={() => setShowMenu(true)}
                 >
-                    + Create data log session
+                    Menu
                 </Button>
             </Col>
         </Row>
@@ -128,6 +104,11 @@ export const HomePage = (props: HomePageProps) => {
                 </Accordion>}
             </Col>
         </Row>
+        <MenuModal
+            show={showMenu}
+            onClose={closeMenu}
+            isAnyLogSessionRunning={logSessions.some(x => x.status.isRunning)}
+        />
     </>);
 
 }
