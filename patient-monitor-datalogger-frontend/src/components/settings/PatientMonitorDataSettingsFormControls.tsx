@@ -44,13 +44,14 @@ export const PatientMonitorDataSettingsFormControls = (props: PatientMonitorData
     } = value;
 
     const maxWaveCount = useMemo(() => {
-        const serialPortBaudRate = getSerialBaudRate(deviceSettings);
-        if(deviceSettings.monitorType === PatientMonitorType.PhilipsIntellivue 
-            && !!serialPortBaudRate 
-            && serialPortBaudRate <= 19200) { // Bandwidth supports no more than 3-4 waves
-            return 4;
-        }
-        return undefined;
+        return undefined; // Disabled, because it is currently unclear, if it would be better to allow prioritizing all ECG waves, in case the ECG settings change during logging
+        // const serialPortBaudRate = getSerialBaudRate(deviceSettings);
+        // if(deviceSettings.monitorType === PatientMonitorType.PhilipsIntellivue 
+        //     && !!serialPortBaudRate 
+        //     && serialPortBaudRate <= 19200) { // Bandwidth supports no more than 3-4 waves
+        //     return 4;
+        // }
+        // return undefined;
     }, [ deviceSettings ]);
 
     const updateProperty = useCallback((update: Update<Models.PatientMonitorDataSettings>) => {

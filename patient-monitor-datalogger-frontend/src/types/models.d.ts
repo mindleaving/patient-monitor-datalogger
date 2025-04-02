@@ -688,6 +688,11 @@ export namespace Models {
         }
     }
     export namespace DataExport {
+        interface Alert {
+            timestamp: Date;
+            parameterName: string;
+            text: string;
+        }
         interface IMonitorData {
             type: Enums.MonitorDataType;
         }

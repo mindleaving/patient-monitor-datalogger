@@ -318,7 +318,7 @@ public class PhilipsIntellivueClient : IDisposable
         alertPollTimer.Change(Timeout.Infinite, Timeout.Infinite);
         numericsPollTimer.Change(Timeout.Infinite, Timeout.Infinite);
         wavesPollTimer.Change(Timeout.Infinite, Timeout.Infinite);
-        Log("Stopped polling for alerts and numerics");
+        Log("Stopped polling for alerts, numerics and waves");
     }
 
     public void Disconnect()
