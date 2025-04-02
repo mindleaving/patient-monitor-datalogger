@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using PatientMonitorDataLogger.API.Models;
 using PatientMonitorDataLogger.API.Workflow;
+using PatientMonitorDataLogger.Shared.Models;
 
 namespace PatientMonitorDataLogger.API.Controllers;
 
@@ -110,4 +111,19 @@ public class LogController : ApiController
             logSession.DeletePermanently();
         return Ok();
     }
+
+    [HttpPost("{id}/events")]
+    public async Task<IActionResult> CreateEvent(
+        [FromRoute] Guid id,
+        [FromBody] LogSessionEvent body)
+    {
+        if (!logSessions.TryGet(id, out var logSession))
+            return NotFound();
+        if (!logSession.ShouldBeRunning)
+            return BadRequest("Log session isn't running");
+        body.Timestamp = DateTime.UtcNow;
+        logSession.LogCustomEvent(body);
+        return Ok();
+    }
+
 }

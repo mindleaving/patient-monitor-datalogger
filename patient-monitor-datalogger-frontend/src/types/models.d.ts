@@ -19,6 +19,10 @@ export namespace Models {
     interface ISerializable {
         
     }
+    interface LogSessionEvent {
+        timestamp?: Date | null;
+        message: string;
+    }
     interface PatientMonitorDataSettings extends Models.IMedicalDeviceDataSettings {
         includeAlerts: boolean;
         includeNumerics: boolean;

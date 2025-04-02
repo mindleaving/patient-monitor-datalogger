@@ -10,6 +10,7 @@ import { DeviceDataSettingsDescription } from "./DeviceDataSettingsDescription";
 import { formatDate } from "../helpers/Formatters";
 import { DeviceDescription } from "./DeviceDescription";
 import { DeleteLogSessionConfirmationModal } from "./DeleteLogSessionConfirmationModal";
+import { CustomEventModal } from "./CustomEventModal";
 
 interface LogSessionListItemProps {
     logSession: Models.LogSession;
@@ -28,6 +29,7 @@ export const LogSessionListItem = (props: LogSessionListItemProps) => {
     const [ isStartingStopping, setIsStartingStopping ] = useState<boolean>(false);
     const [ showDeleteModal, setShowDeleteModal ] = useState<boolean>(false);
     const [ showCopyToUsbModal, setShowCopyToUsbModal ] = useState<boolean>(false);
+    const [ showCustomEventModal, setShowCustomEventModal ] = useState<boolean>(false);
 
     const startLogging = async () => {
         setIsStartingStopping(true);
@@ -182,6 +184,14 @@ export const LogSessionListItem = (props: LogSessionListItemProps) => {
             <Col></Col>
             <Col xs="auto">
                 <Button
+                    onClick={() => setShowCustomEventModal(true)}
+                    size="lg"
+                >
+                    Create custom event
+                </Button>
+            </Col>
+            <Col xs="auto">
+                <Button
                     onClick={() => setShowCopyToUsbModal(true)}
                     size="lg"
                 >
@@ -189,6 +199,11 @@ export const LogSessionListItem = (props: LogSessionListItemProps) => {
                 </Button>
             </Col>
         </Row>
+        <CustomEventModal
+            show={showCustomEventModal}
+            onClose={() => setShowCustomEventModal(false)}
+            logSessionId={logSession.id}
+        />
         <CopyToUsbModal
             show={showCopyToUsbModal}
             onClose={() => setShowCopyToUsbModal(false)}
