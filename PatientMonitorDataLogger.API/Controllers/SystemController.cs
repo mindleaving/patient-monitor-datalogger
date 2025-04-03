@@ -31,7 +31,7 @@ public class SystemController : ApiController
     {
         if (logSessions.All.Any(x => x.Status.IsRunning))
             return BadRequest("One or more log sessions is still running. Stop them, before shutting down.");
-        var result = Process.Start("sudo poweroff");
+        var result = Process.Start("sudo", "/usr/sbin/poweroff");
         result.WaitForExit(TimeSpan.FromSeconds(3));
         if (!result.HasExited)
         {

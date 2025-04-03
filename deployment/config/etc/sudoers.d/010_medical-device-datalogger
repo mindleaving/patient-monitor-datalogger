@@ -1,0 +1,4 @@
+Cmnd_Alias POWER = /usr/sbin/shutdown, /usr/sbin/poweroff, /usr/sbin/reboot
+
+datalogger	ALL=NOPASSWD: POWER
+tech		ALL=(ALL:ALL) ALL

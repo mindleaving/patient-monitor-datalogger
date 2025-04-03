@@ -7,6 +7,7 @@ import { createRoot } from 'react-dom/client'
 import App from './App.tsx'
 import { initializeApp } from './setup.ts';
 import { BrowserRouter } from 'react-router';
+//import 'bootstrap/dist/js/bootstrap.min.js';
 
 initializeApp();
 
