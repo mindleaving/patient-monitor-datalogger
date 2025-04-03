@@ -1,15 +1,16 @@
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import { Row, Col, Button, Spinner, Badge } from "react-bootstrap";
 import { Models } from "../types/models";
 import { AccordionCard } from "./AccordionCard";
-import { deleteObject, sendPostRequest } from "../communication/ApiRequests";
-import { DeleteButton } from "./DeleteButon";
+import { sendPostRequest } from "../communication/ApiRequests";
 import { CopyToUsbModal } from "./CopyToUsbModal";
 import { confirmAlert } from "react-confirm-alert";
 import { DeviceSettingsDescription } from "./DeviceSettingsDescription";
 import { DeviceDataSettingsDescription } from "./DeviceDataSettingsDescription";
 import { formatDate } from "../helpers/Formatters";
 import { DeviceDescription } from "./DeviceDescription";
+import { DeleteLogSessionConfirmationModal } from "./DeleteLogSessionConfirmationModal";
+import { CustomEventModal } from "./CustomEventModal";
 
 interface LogSessionListItemProps {
     logSession: Models.LogSession;
@@ -26,8 +27,9 @@ export const LogSessionListItem = (props: LogSessionListItemProps) => {
     const deviceDataSettings = logSession.settings.dataSettings;
 
     const [ isStartingStopping, setIsStartingStopping ] = useState<boolean>(false);
-    const [ isDeleting, setIsDeleting ] = useState<boolean>(false);
+    const [ showDeleteModal, setShowDeleteModal ] = useState<boolean>(false);
     const [ showCopyToUsbModal, setShowCopyToUsbModal ] = useState<boolean>(false);
+    const [ showCustomEventModal, setShowCustomEventModal ] = useState<boolean>(false);
 
     const startLogging = async () => {
         setIsStartingStopping(true);
@@ -81,18 +83,6 @@ export const LogSessionListItem = (props: LogSessionListItemProps) => {
         );
     }
 
-    const deleteLogSession = useCallback(async () => {
-        setIsDeleting(true);
-        await deleteObject(
-            `api/log/${logSession.id}`, {},
-            "Successfully deleted log session",
-            "Could not delete log session",
-            onDeleted,
-            undefined,
-            () => setIsDeleting(false)
-        );
-    }, [ logSession.id, onDeleted ]);
-
     return (<AccordionCard
         eventKey={logSession.id}
         title={<Row className="align-items-center">
@@ -126,15 +116,13 @@ export const LogSessionListItem = (props: LogSessionListItemProps) => {
             </Col>
             <Col />
             <Col xs="auto">
-                <DeleteButton
-                    requireConfirm
-                    confirmDialogTitle="Delete log session?"
-                    confirmDialogMessage="Are you sure you want to delete this log session? Recorded data is preserved."
-                    isDeleting={isDeleting}
-                    onClick={deleteLogSession}
+                <Button
+                    onClick={() => setShowDeleteModal(true)}
+                    variant="danger"
                     size="sm"
-                    className="m-0"
-                />
+                >
+                    Delete
+                </Button>
             </Col>
         </Row>
         <Row>
@@ -196,6 +184,14 @@ export const LogSessionListItem = (props: LogSessionListItemProps) => {
             <Col></Col>
             <Col xs="auto">
                 <Button
+                    onClick={() => setShowCustomEventModal(true)}
+                    size="lg"
+                >
+                    Create custom event
+                </Button>
+            </Col>
+            <Col xs="auto">
+                <Button
                     onClick={() => setShowCopyToUsbModal(true)}
                     size="lg"
                 >
@@ -203,10 +199,21 @@ export const LogSessionListItem = (props: LogSessionListItemProps) => {
                 </Button>
             </Col>
         </Row>
+        <CustomEventModal
+            show={showCustomEventModal}
+            onClose={() => setShowCustomEventModal(false)}
+            logSessionId={logSession.id}
+        />
         <CopyToUsbModal
             show={showCopyToUsbModal}
             onClose={() => setShowCopyToUsbModal(false)}
             logSessionId={logSession.id}
+        />
+        <DeleteLogSessionConfirmationModal
+            show={showDeleteModal}
+            onClose={() => setShowDeleteModal(false)}
+            logSessionId={logSession.id}
+            onLogSessionDeleted={onDeleted}
         />
     </AccordionCard>);
 

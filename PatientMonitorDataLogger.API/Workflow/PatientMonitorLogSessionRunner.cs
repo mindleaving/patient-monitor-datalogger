@@ -6,6 +6,7 @@ namespace PatientMonitorDataLogger.API.Workflow;
 public abstract class PatientMonitorLogSessionRunner : LogSessionRunner
 {
     protected new readonly LogSessionSettings logSessionSettings;
+    protected readonly IAlertWriter alertWriter;
     protected readonly INumericsWriter numericsWriter;
     protected readonly Dictionary<string, IWaveWriter> waveWriters = new();
 
@@ -16,12 +17,15 @@ public abstract class PatientMonitorLogSessionRunner : LogSessionRunner
         : base(logSessionId, logSessionSettings, writerSettings)
     {
         this.logSessionSettings = logSessionSettings;
+        var alertsOutputFilePath = Path.Combine(logSessionOutputDirectory, $"alerts_{DateTime.UtcNow:yyyy-MM-dd_HHmmss}.csv");
+        alertWriter = new CsvAlertWriter(alertsOutputFilePath, logSessionSettings.CsvSeparator);
         var numericsOutputFilePath = Path.Combine(logSessionOutputDirectory, $"numerics_{DateTime.UtcNow:yyyy-MM-dd_HHmmss}.csv");
         numericsWriter = new CsvNumericsWriter(numericsOutputFilePath, logSessionSettings.CsvSeparator);
     }
 
     protected override void StartImpl()
     {
+        alertWriter.Start();
         numericsWriter.Start();
         foreach (var waveWriter in waveWriters.Values)
         {
@@ -31,6 +35,7 @@ public abstract class PatientMonitorLogSessionRunner : LogSessionRunner
 
     protected override void StopImpl()
     {
+        alertWriter.Stop();
         numericsWriter.Stop();
         foreach(var waveWriter in waveWriters.Values)
         {

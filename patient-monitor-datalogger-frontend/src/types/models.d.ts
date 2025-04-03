@@ -16,11 +16,12 @@ export namespace Models {
     interface IODevice extends System.IDisposable {
         
     }
-    interface IPatientMonitorSettings extends Models.IMedicalDeviceSettings {
-        monitorType: Enums.PatientMonitorType;
-    }
     interface ISerializable {
         
+    }
+    interface LogSessionEvent {
+        timestamp?: Date | null;
+        message: string;
     }
     interface PatientMonitorDataSettings extends Models.IMedicalDeviceDataSettings {
         includeAlerts: boolean;
@@ -30,8 +31,8 @@ export namespace Models {
         selectedNumericsTypes: string[];
         selectedWaveTypes: Enums.WaveType[];
     }
-    interface PatientMonitorSettings extends Models.IPatientMonitorSettings {
-        
+    interface PatientMonitorSettings extends Models.IMedicalDeviceSettings {
+        monitorType: Enums.PatientMonitorType;
     }
     interface AbsoluteTime extends Models.ISerializable {
         century: System.Byte;
@@ -687,6 +688,11 @@ export namespace Models {
         }
     }
     export namespace DataExport {
+        interface Alert {
+            timestamp: Date;
+            parameterName: string;
+            text: string;
+        }
         interface IMonitorData {
             type: Enums.MonitorDataType;
         }

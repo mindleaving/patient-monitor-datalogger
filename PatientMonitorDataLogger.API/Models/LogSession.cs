@@ -1,18 +1,22 @@
 ﻿using PatientMonitorDataLogger.API.Models.DataExport;
 using PatientMonitorDataLogger.API.Workflow;
+using PatientMonitorDataLogger.API.Workflow.DataExport;
 using PatientMonitorDataLogger.Shared.Models;
 
 namespace PatientMonitorDataLogger.API.Models;
 
 public class LogSession : IDisposable
 {
+    private readonly DataWriterSettings writerSettings;
     private readonly ILogSessionRunner sessionRunner;
+    private readonly CsvCustomEventWriter eventWriter;
 
     public LogSession(
         Guid id,
         LogSessionSettings settings,
         DataWriterSettings writerSettings)
     {
+        this.writerSettings = writerSettings;
         Id = id;
         Settings = settings;
         if (settings.DeviceSettings == null)
@@ -46,6 +50,8 @@ public class LogSession : IDisposable
         sessionRunner.PatientInfoAvailable += UpdatePatientInfo;
         sessionRunner.StatusChanged += SessionRunner_StatusChanged;
         sessionRunner.NewObservations += UpdateLatestMeasurements;
+        var eventsFilePath = Path.Combine(writerSettings.OutputDirectory, Id.ToString(), "events.csv");
+        eventWriter = new CsvCustomEventWriter(eventsFilePath);
     }
 
     public Guid Id { get; }
@@ -64,12 +70,16 @@ public class LogSession : IDisposable
         ShouldBeRunning = true;
         sessionRunner.Initialize();
         sessionRunner.Start();
+        eventWriter.Start();
+        LogCustomEvent(new("Started log session"));
     }
 
     public void Stop()
     {
+        LogCustomEvent(new("Stopped log session"));
         ShouldBeRunning = false;
         sessionRunner.Stop();
+        eventWriter.Stop();
     }
 
     public void Dispose()
@@ -79,6 +89,7 @@ public class LogSession : IDisposable
         sessionRunner.StatusChanged -= SessionRunner_StatusChanged;
         sessionRunner.NewObservations -= UpdateLatestMeasurements;
         sessionRunner.Dispose();
+        eventWriter.Dispose();
     }
 
     private void UpdatePatientInfo(
@@ -124,5 +135,16 @@ public class LogSession : IDisposable
             LatestObservations[observation.ParameterName] = observation;
         }
         NewObservations?.Invoke(this, observations);
+    }
+
+    public void DeletePermanently()
+    {
+        Directory.Delete(Path.Combine(writerSettings.OutputDirectory, Id.ToString()), recursive: true);
+    }
+
+    public void LogCustomEvent(
+        LogSessionEvent logSessionEvent)
+    {
+        eventWriter.Write(logSessionEvent);
     }
 }

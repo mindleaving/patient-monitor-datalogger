@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Diagnostics;
+using System.Text.RegularExpressions;
 using PatientMonitorDataLogger.API.Models.DataExport;
 
 namespace PatientMonitorDataLogger.API.Workflow.DataExport;
@@ -24,6 +25,16 @@ public class LinuxUsbDriveManager : IUsbDriveManager
         {
             var targetFilePath = Path.Combine(targetPath, Path.GetFileName(sourceFilePath));
             File.Copy(sourceFilePath, targetFilePath, overwrite: true);
+        }
+
+        try
+        {
+            var syncProcess = Process.Start("sync");
+            syncProcess.WaitForExit();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine($"Could not sync files to USB drive: {e.Message}");
         }
     }
 

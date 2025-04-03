@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Accordion, Button, Col, Row } from "react-bootstrap";
 import { Models } from "../types/models";
 import { buildLoadObjectFunc } from "../communication/ApiRequests";
@@ -7,18 +7,22 @@ import { LogSessionListItem } from "../components/LogSessionListItem";
 import { NoEntriesAlert } from "../components/NoEntriesAlert";
 import { useNavigate } from "react-router";
 import { NumericsSignalRConnectionIndicator } from "../components/NumericsSignalRConnectionIndicator";
+import { MedicalDeviceType } from "../types/enums";
+import { MenuModal } from "../components/MenuModal";
+import { compareLogSessions } from "../helpers/sortHelpers";
 
 interface HomePageProps {
     logSessions: Models.LogSession[];
     setLogSessions: (update: Update<Models.LogSession[]>) => void;
 }
-
 export const HomePage = (props: HomePageProps) => {
     
     const { logSessions, setLogSessions } = props;
 
+    const sortedLogSessions = useMemo(() => [...logSessions].sort((a,b) => compareLogSessions(a, b)), [ logSessions]);
     const [ isLoadingLogSessions, setIsLoadingLogSessions ] = useState<boolean>(true);
     const [ observations, setObservations ] = useState<{ [logSessionId: string]: Models.DataExport.Observation[] }>({});
+    const [ showMenu, setShowMenu ] = useState<boolean>(false);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -59,10 +63,14 @@ export const HomePage = (props: HomePageProps) => {
         }));
     }
 
+    const closeMenu = useCallback(() => {
+        setShowMenu(false);
+    }, []);
+
     return (<>
         <Row className="align-items-center">
             <Col>
-                <h1>Patient Monitor Data Logger</h1>
+                <h1>Medical Device Data Logger</h1>
             </Col>
             <Col xs="auto">
                 <NumericsSignalRConnectionIndicator 
@@ -73,19 +81,18 @@ export const HomePage = (props: HomePageProps) => {
             </Col>
             <Col xs="auto">
                 <Button
-                    onClick={() => navigate('/create/session')}
-                    size="lg"
+                    onClick={() => setShowMenu(true)}
                 >
-                    + Create data log session
+                    Menu
                 </Button>
             </Col>
         </Row>
         <Row className="my-2">
             <Col>
                 {isLoadingLogSessions ? <LoadingAlert />
-                : logSessions.length === 0 ? <NoEntriesAlert />
+                : sortedLogSessions.length === 0 ? <NoEntriesAlert />
                 : <Accordion>
-                    {logSessions.map(logSession => (
+                    {sortedLogSessions.map(logSession => (
                         <LogSessionListItem
                             key={logSession.id}
                             logSession={logSession}
@@ -97,6 +104,11 @@ export const HomePage = (props: HomePageProps) => {
                 </Accordion>}
             </Col>
         </Row>
+        <MenuModal
+            show={showMenu}
+            onClose={closeMenu}
+            isAnyLogSessionRunning={logSessions.some(x => x.status.isRunning)}
+        />
     </>);
 
 }

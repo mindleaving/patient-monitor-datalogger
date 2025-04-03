@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
 using Newtonsoft.Json;
 using PatientMonitorDataLogger.API.Models;
 using PatientMonitorDataLogger.API.Models.DataExport;
@@ -99,7 +100,7 @@ public class LogSessions : IHostedService
 
     public bool TryGet(
         Guid id,
-        out LogSession? logSession)
+        [NotNullWhen(true)] out LogSession? logSession)
     {
         return sessions.TryGetValue(id, out logSession);
     }
