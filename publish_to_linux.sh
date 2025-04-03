@@ -1,5 +1,8 @@
+#!/bin/bash
+set -e
+
 BASE_PATH=$PWD
-rm BASE_PATH/deployment/PatientMonitorDataLogger.*.zip
+rm -f BASE_PATH/deployment/PatientMonitorDataLogger.*.zip
 
 cd PatientMonitorDataLogger.API
 dotnet clean -c Release
@@ -15,5 +18,5 @@ cd $BASE_PATH
 #scp ~/git/patient-monitor-datalogger/deployment/PatientMonitorDataLogger.*.zip datalogger-3bplus:~
 #ssh datalogger-3bplus "./deploy_patient-monitor-datalogger.sh"
 
-scp ~/git/patient-monitor-datalogger/deployment/PatientMonitorDataLogger.*.zip datalogger-4b:~
-ssh datalogger-4b "./deploy_patient-monitor-datalogger.sh"
+#scp ~/git/patient-monitor-datalogger/deployment/PatientMonitorDataLogger.*.zip datalogger-4b:~
+#ssh datalogger-4b "./deploy_patient-monitor-datalogger.sh"

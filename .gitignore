@@ -32,3 +32,4 @@ _ReSharper*/
 #Nuget packages folder
 packages/
 *.zip
+deployment/deployment-pack-signature.sig

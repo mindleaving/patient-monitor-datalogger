@@ -1,0 +1,8 @@
+[Unit]
+Description=Update Medical Device Datalogger to latest release from USB drive
+
+[Service]
+ExecStart=/root/update.sh usb
+
+[Install]
+WantedBy=multi-user.target

@@ -14,7 +14,7 @@ See GitHub repository for code examples.</Description>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/mindleaving/patient-monitor-datalogger</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <Version>2025.03.29</Version>
+    <Version>2025.04.04</Version>
     <PackageId>mindleaving.PatientMonitorDataLogger</PackageId>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
@@ -42,10 +42,6 @@ See GitHub repository for code examples.</Description>
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Shared\Simulation\" />
   </ItemGroup>
 
 </Project>
