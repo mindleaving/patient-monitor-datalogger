@@ -1,4 +1,4 @@
 #!/bin/bash
 
-sudo /root/update.sh web
+sudo sh /root/update.sh web
 cd ~

@@ -2,7 +2,8 @@
 Description=Update Medical Device Datalogger to latest release from USB drive
 
 [Service]
-ExecStart=/root/update.sh usb
+ExecStart=bash /root/update.sh usb
+User=root
 
 [Install]
 WantedBy=multi-user.target
