@@ -2,33 +2,35 @@
 
 cd /root
 
-if [ $1 -eq "web" ]
+if [[ "$1" == "web" ]]
 then
 	
-	if wget -q https://github.com/mindleaving/patient-monitor-datalogger/releases/latest/download/patient-monitor-datalogger-deployment-pack.zip
+	wget -q https://github.com/mindleaving/patient-monitor-datalogger/releases/latest/download/patient-monitor-datalogger-deployment-pack.zip
+	if [ $? -ne 0 ]
 	then
 		echo "Could not download latest patient-monitor-datalogger-deployment-pack.zip"
 		exit 1
 	fi
-	if wget -q https://github.com/mindleaving/patient-monitor-datalogger/releases/latest/download/deployment-pack-signature.sig
+	wget -q https://github.com/mindleaving/patient-monitor-datalogger/releases/latest/download/deployment-pack-signature.sig
+	if [ $? -ne 0 ]
 	then
 		echo "Could not download latest deployment-pack-signature.sig"
 		exit 1
 	fi
-elif [ $1 -eq "usb" ]
+elif [[ "$1" == "usb" ]]
 then
-	if [ ! -f /dev/sdb1 ]
+	if [ ! -e /dev/sda1 ]
 	then
 		echo "No USB drive found. Skipping update."
 		exit 0
 	fi
-	mount /dev/sdb1 /mnt/usb
+	mount /dev/sda1 /mnt/usb
 	if [ $? -ne 0 ]
 	then
 		echo "Could not mount USB drive. Skipping update."
 		exit 0
 	fi
-	if [ ! -f /mnt/usb/patient-monitor-datalogger-deployment-pack.zip || ! -f /mnt/usb/deployment-pack-signature.sig ]
+	if [ ! -f /mnt/usb/patient-monitor-datalogger-deployment-pack.zip ] || [ ! -f /mnt/usb/deployment-pack-signature.sig ]
 	then
 		echo "USB drive doesn't contain patient-monitor-datalogger-deployment-pack.zip and deployment-pack-signature.sig. Skipping update."
 		umount /mnt/usb
@@ -42,7 +44,8 @@ else
 	exit 1;
 fi
 
-if openssl dgst -sha256 -verify update-public-key.pem -signature deployment-pack-signature.sig patient-monitor-datalogger-deployment-pack.zip
+openssl dgst -sha256 -verify update-public-key.pem -signature deployment-pack-signature.sig patient-monitor-datalogger-deployment-pack.zip
+if [ $? -ne 0 ]
 then
 	echo "Medical Device Datalogger update: Invalid signature for patient-monitor-datalogger-deployment-pack.zip"
 	rm patient-monitor-datalogger-deployment-pack.zip
@@ -70,3 +73,6 @@ rm -rf config
 # Clean up
 rm patient-monitor-datalogger-deployment-pack.zip
 rm deployment-pack-signature.sig
+
+echo "Successfully updates Medical Device Data Logger"
+

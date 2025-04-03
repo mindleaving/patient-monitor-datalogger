@@ -20,6 +20,8 @@ rm -rf config
 sudo chmod +x deploy_patient-monitor-datalogger.sh
 sudo chown tech:tech -R /home/tech
 sudo chmod 700 -R /home/tech
+sudo chmod +x /root/update.sh
+sudo chmod +x /root/deploy_patient-monitor-datalogger.sh
 
 sudo nmtui
 sudo apt install -y ufw nginx unzip rsyslog
