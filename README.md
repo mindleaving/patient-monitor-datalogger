@@ -146,7 +146,7 @@ Log into your Raspberry Pi using SSH:
 ssh -i ~/.ssh/datalogger01 datalogger@datalogger01
 ```
 
-Download the latest relase of Patient Monitor Data Logger
+Download the latest relase of Medical Device Data Logger
 
 ```
 wget https://github.com/mindleaving/patient-monitor-datalogger/releases/latest/patient-monitor-datalogger-deployment-pack.zip
@@ -191,3 +191,14 @@ Close Chromium and use the Desktop Shortcut to start the web interface again. Cl
 - Click on "Eject" in the systems taskbar at the top of the screen. 
 - Make sure there the recorded data is on the USB drive.
 
+## Update
+
+Since version v2025.04.04, updating the data logger software can be done by inserting a USB drive with the latest release and rebooting. Do the following:
+
+- Download the following files from the [latest relase](https://github.com/mindleaving/patient-monitor-datalogger/releases/latest) of Medical Device Data Logger
+  - patient-monitor-datalogger-deployment-pack.zip
+  - deployment-pack-signature.sig
+- Copy these files to the root of a USB drive. IMPORTANT: The files must be on the **first** partition of the USB drive.
+- Remove any other USB drive from the data logger
+- Insert the USB drive into the data logger
+- Reboot the data logger
