@@ -13,7 +13,7 @@ public class BBraunBccCommunicator : IDisposable
     private readonly BBraunBccMessageCreator messageCreator;
     private readonly AwaitableTimeCappedCollection<BBraunBccFrame> messageCollection;
     private readonly object startStopLock = new();
-    private BlockingCollection<byte[]>? outgoingMessages = new();
+    private BlockingCollection<byte[]> outgoingMessages = new();
     private Task? sendTask;
     private readonly string logName;
 
@@ -115,7 +115,7 @@ public class BBraunBccCommunicator : IDisposable
             if (IsSending)
             {
                 IsSending = false;
-                outgoingMessages?.CompleteAdding();
+                outgoingMessages.CompleteAdding();
                 try
                 {
                     sendTask?.Wait();
@@ -143,8 +143,6 @@ public class BBraunBccCommunicator : IDisposable
     public void Enqueue(
         byte[] message)
     {
-        if(outgoingMessages == null)
-            return;
         if(outgoingMessages.IsAddingCompleted)
             return;
         outgoingMessages.Add(message);

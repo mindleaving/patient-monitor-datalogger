@@ -5,7 +5,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <Title>Patient Monitor Data Logger</Title>
+    <Title>Medical Device Data Logger</Title>
     <Authors>Jan Scholtyssek</Authors>
     <Description>Clients for connecting to patient monitors and other medical devices.
 Currently supported: Philips IntelliVue and B. Braun Space Infusion System
@@ -14,7 +14,7 @@ See GitHub repository for code examples.</Description>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/mindleaving/patient-monitor-datalogger</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <Version>2025.04.04.2</Version>
+    <Version>2025.04.13</Version>
     <PackageId>mindleaving.PatientMonitorDataLogger</PackageId>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
