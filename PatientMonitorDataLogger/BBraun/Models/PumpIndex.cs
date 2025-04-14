@@ -27,11 +27,25 @@ public class PumpIndex : ISerializable, IEquatable<PumpIndex>, IComparable<PumpI
     public static PumpIndex Parse(
         string str)
     {
-        if (!Regex.IsMatch(str, "^501[0-3][0-9A-O]$"))
-            throw new FormatException("Invalid pump index");
-        var pillar = int.Parse(str.Substring(3, 1));
-        var slot = GetSlotIndexFromSlotCharacter(str[4]);
-        return new(pillar, slot);
+        if (str.Length == 5)
+        {
+            if (!Regex.IsMatch(str, "^501[0-3][0-9A-O]$"))
+                throw new FormatException($"Invalid pump index {str}");
+            var pillar = int.Parse(str.Substring(3, 1));
+            var slot = GetSlotIndexFromSlotCharacter(str[4]);
+            return new(pillar, slot);
+        }
+
+        if (str.Length == 6) // Observed with BCC 3.30: Sometimes slots are encoded with 2-digit-integers, e.g. 501110 instead of 5011A.
+        {
+            if (!Regex.IsMatch(str, "^501[0-3][0-9]+$"))
+                throw new FormatException($"Invalid pump index {str}");
+            var pillar = int.Parse(str.Substring(3, 1));
+            var slot = int.Parse(str[4..]);
+            return new(pillar, slot);
+        }
+
+        throw new FormatException($"Invalid pump index {str}");
     }
 
     public byte[] Serialize()

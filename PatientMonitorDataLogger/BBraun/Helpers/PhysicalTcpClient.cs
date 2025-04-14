@@ -26,12 +26,18 @@ public class PhysicalTcpClient : TcpClient, IODevice
         int offset,
         int count)
     {
-        return GetStream().Read(buffer, offset, count);
+        var stream = GetStream();
+        if (!stream.DataAvailable)
+            return 0;
+        return stream.Read(buffer, offset, count);
     }
 
     public int Read(
         byte[] buffer)
     {
+        var stream = GetStream();
+        if (!stream.DataAvailable)
+            return 0;
         return GetStream().Read(buffer);
     }
 
