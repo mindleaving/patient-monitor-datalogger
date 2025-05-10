@@ -3,10 +3,12 @@ using PatientMonitorDataLogger.Shared.Models;
 
 namespace PatientMonitorDataLogger.BBraun.Helpers;
 
-public class PhysicalTcpClient : TcpClient, IODevice
+public class PhysicalTcpClient : IODevice
 {
     private readonly string targetHostname;
     private readonly ushort targetPort;
+    private TcpClient? tcpClient;
+    private readonly object startStopLock = new();
 
     public PhysicalTcpClient(
         string targetHostname,
@@ -16,9 +18,24 @@ public class PhysicalTcpClient : TcpClient, IODevice
         this.targetPort = targetPort;
     }
 
+    public bool IsConnected => tcpClient != null && tcpClient.Connected;
+
     public void Open()
     {
-        Connect(targetHostname, targetPort);
+        if(IsConnected)
+            return;
+        lock (startStopLock)
+        {
+            if(IsConnected)
+                return;
+
+            // Dispose existing TCP client
+            tcpClient?.Dispose();
+
+            // Create new TCP client
+            tcpClient = new TcpClient();
+            tcpClient.Connect(targetHostname, targetPort);
+        }
     }
 
     public int Read(
@@ -26,7 +43,9 @@ public class PhysicalTcpClient : TcpClient, IODevice
         int offset,
         int count)
     {
-        var stream = GetStream();
+        if (!IsConnected)
+            throw new InvalidOperationException("TCP client not connected");
+        var stream = tcpClient!.GetStream();
         if (!stream.DataAvailable)
             return 0;
         return stream.Read(buffer, offset, count);
@@ -35,10 +54,7 @@ public class PhysicalTcpClient : TcpClient, IODevice
     public int Read(
         byte[] buffer)
     {
-        var stream = GetStream();
-        if (!stream.DataAvailable)
-            return 0;
-        return GetStream().Read(buffer);
+        return Read(buffer, 0, buffer.Length);
     }
 
     public void Write(
@@ -46,12 +62,27 @@ public class PhysicalTcpClient : TcpClient, IODevice
         int offset,
         int count)
     {
-        GetStream().Write(buffer, offset, count);
+        if (!IsConnected)
+            throw new InvalidOperationException("TCP client not connected");
+        tcpClient!.GetStream().Write(buffer, offset, count);
     }
 
     public void Write(
         byte[] buffer)
     {
-        GetStream().Write(buffer);
+        Write(buffer, 0, buffer.Length);
+    }
+
+    public void Close()
+    {
+        lock (startStopLock)
+        {
+            tcpClient?.Close();
+        }
+    }
+
+    public void Dispose()
+    {
+        tcpClient?.Dispose();
     }
 }
