@@ -3,6 +3,7 @@ This library provides clients for connecting to some medical devices.
 
 Currently supported:
 - Philips IntelliVue patient monitors
+- B. Braun Space Infusion Pump System
 
 ## NuGet package
 
@@ -50,6 +51,7 @@ var settings = PhilipsIntellivueClientSettings.CreateForSimulatedSerialPort(simu
 simulatedMonitor = new SimulatedPhilipsIntellivueMonitor(simulatedCable.End2);
 simulatedMonitor.Start();
 
+var philipsIntellivueCommunicator = new PhilipsIntellivueClient(settings);
 philipsIntellivueCommunicator.NewMessage += (sender, message) => { /* Do something with the message, e.g. serialize to JSON and write to file */ };
 philipsIntellivueCommunicator.Connect(
     TimeSpan.FromSeconds(1), 
