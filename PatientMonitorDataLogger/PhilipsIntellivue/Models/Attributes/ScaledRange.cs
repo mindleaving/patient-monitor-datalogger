@@ -5,6 +5,8 @@ namespace PatientMonitorDataLogger.PhilipsIntellivue.Models.Attributes;
 
 public class ScaledRange : ISerializable
 {
+    public ScaledRange() { }
+
     public ScaledRange(
         ushort lowerScaledValue,
         ushort upperScaledValue)
@@ -13,8 +15,8 @@ public class ScaledRange : ISerializable
         UpperScaledValue = upperScaledValue;
     }
 
-    public ushort LowerScaledValue { get; }
-    public ushort UpperScaledValue { get; }
+    public ushort LowerScaledValue { get; set; }
+    public ushort UpperScaledValue { get; set; }
 
     public static ScaledRange Read(
         BigEndianBinaryReader binaryReader)

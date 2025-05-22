@@ -4,6 +4,8 @@ namespace PatientMonitorDataLogger.PhilipsIntellivue.Models;
 
 public class RemoteOperationInvoke : IRemoteOperation
 {
+    public RemoteOperationInvoke() { }
+
     public RemoteOperationInvoke(
         ushort invokeId,
         DataExportCommandType commandType,
@@ -16,10 +18,10 @@ public class RemoteOperationInvoke : IRemoteOperation
         Data = data;
     }
 
-    public ushort InvokeId { get; }
-    public DataExportCommandType CommandType { get; }
-    public ushort Length { get; }
-    public IRemoteOperationInvokeData Data { get; }
+    public ushort InvokeId { get; set; }
+    public DataExportCommandType CommandType { get; set; }
+    public ushort Length { get; set; }
+    public IRemoteOperationInvokeData Data { get; set; }
 
     public byte[] Serialize()
     {

@@ -1,4 +1,6 @@
-﻿namespace PatientMonitorDataLogger.API.Models;
+﻿using PatientMonitorDataLogger.Shared.Models;
+
+namespace PatientMonitorDataLogger.API.Models;
 
 public class LogStatus : ILogSessionData
 {

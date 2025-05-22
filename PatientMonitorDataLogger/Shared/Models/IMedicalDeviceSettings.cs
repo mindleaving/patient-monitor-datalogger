@@ -1,5 +1,5 @@
 ﻿using Newtonsoft.Json;
-using PatientMonitorDataLogger.Shared.Models.Converters;
+using PatientMonitorDataLogger.Shared.Converters;
 
 namespace PatientMonitorDataLogger.Shared.Models;
 

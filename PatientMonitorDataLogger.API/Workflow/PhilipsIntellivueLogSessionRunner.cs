@@ -2,6 +2,7 @@
 using PatientMonitorDataLogger.API.Models;
 using PatientMonitorDataLogger.API.Models.DataExport;
 using PatientMonitorDataLogger.PhilipsIntellivue;
+using PatientMonitorDataLogger.PhilipsIntellivue.DataProcessing;
 using PatientMonitorDataLogger.PhilipsIntellivue.Models;
 using PatientMonitorDataLogger.Shared.Models;
 
@@ -159,7 +160,7 @@ public class PhilipsIntellivueLogSessionRunner : PatientMonitorLogSessionRunner
         WriteRawMessage(message);
         if (patientInfoExtractor.TryExtract(LogSessionId, message, out var patientInfo))
             OnPatientInfoAvailable(this, patientInfo!);
-        foreach (var monitorData in numericsAndWavesExtractor.Extract(message))
+        foreach (var monitorData in numericsAndWavesExtractor.Extract(message, [ MeasurementState.INVALID, MeasurementState.UNAVAILABLE ]))
         {
             switch (monitorData)
             {

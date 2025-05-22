@@ -5,8 +5,9 @@ namespace PatientMonitorDataLogger.PhilipsIntellivue.Models.Attributes;
 
 public class EnumAttributeValue<T> : ISerializable where T: struct
 {
-    private readonly byte[] serializedValue;
+    private readonly byte[] serializedValue = [];
 
+    public EnumAttributeValue() { }
     public EnumAttributeValue(
         T value,
         byte[] serializedValue)
@@ -15,7 +16,7 @@ public class EnumAttributeValue<T> : ISerializable where T: struct
         Value = value;
     }
 
-    public T Value { get; }
+    public T Value { get; set; }
 
     public byte[] Serialize()
     {

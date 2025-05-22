@@ -5,6 +5,8 @@ namespace PatientMonitorDataLogger.PhilipsIntellivue.Models;
 
 public class RelativeTime : ISerializable
 {
+    public RelativeTime() { }
+
     public RelativeTime(
         uint ticks)
     {
@@ -16,7 +18,7 @@ public class RelativeTime : ISerializable
         Ticks = (uint)(time.TotalMilliseconds * 8);
     }
 
-    public uint Ticks { get; } // 1 tick = 125 us
+    public uint Ticks { get; set; } // 1 tick = 125 us
 
     public double TotalSeconds => Ticks / 8000d;
 

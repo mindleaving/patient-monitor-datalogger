@@ -5,6 +5,8 @@ namespace PatientMonitorDataLogger.PhilipsIntellivue.Models.Attributes;
 
 public class EnumValue : ISerializable
 {
+    public EnumValue() { }
+
     public EnumValue(
         EnumUnionChoice choice,
         ushort length,
@@ -17,10 +19,10 @@ public class EnumValue : ISerializable
         EnumObjectIdValue = enumObjectIdValue;
     }
 
-    public EnumUnionChoice Choice { get; }
-    public ushort Length { get; }
-    public OIDType? EnumObjectId { get; }
-    public EnumObjectIdValue? EnumObjectIdValue { get; }
+    public EnumUnionChoice Choice { get; set; }
+    public ushort Length { get; set; }
+    public OIDType? EnumObjectId { get; set; }
+    public EnumObjectIdValue? EnumObjectIdValue { get; set; }
 
     public static EnumValue Read(
         BigEndianBinaryReader binaryReader)

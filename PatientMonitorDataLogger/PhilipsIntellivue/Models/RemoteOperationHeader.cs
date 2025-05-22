@@ -5,6 +5,8 @@ namespace PatientMonitorDataLogger.PhilipsIntellivue.Models;
 
 public class RemoteOperationHeader : ISerializable
 {
+    public RemoteOperationHeader() { }
+
     public RemoteOperationHeader(
         RemoteOperationType type,
         ushort length)
@@ -13,8 +15,8 @@ public class RemoteOperationHeader : ISerializable
         Length = length;
     }
 
-    public RemoteOperationType Type { get; }
-    public ushort Length { get; }
+    public RemoteOperationType Type { get; set; }
+    public ushort Length { get; set; }
 
     public byte[] Serialize()
     {

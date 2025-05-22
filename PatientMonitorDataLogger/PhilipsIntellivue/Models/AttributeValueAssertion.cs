@@ -1,9 +1,12 @@
-﻿using PatientMonitorDataLogger.PhilipsIntellivue.Helpers;
+﻿using Newtonsoft.Json;
+using PatientMonitorDataLogger.PhilipsIntellivue.Converters;
+using PatientMonitorDataLogger.PhilipsIntellivue.Helpers;
 using PatientMonitorDataLogger.PhilipsIntellivue.Models.Attributes;
 using PatientMonitorDataLogger.Shared.Models;
 
 namespace PatientMonitorDataLogger.PhilipsIntellivue.Models;
 
+[JsonConverter(typeof(AttributeValueAssertionJsonConverter))]
 public class AttributeValueAssertion : ISerializable
 {
     public AttributeValueAssertion(

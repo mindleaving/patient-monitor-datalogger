@@ -5,6 +5,8 @@ namespace PatientMonitorDataLogger.PhilipsIntellivue.Models.Attributes;
 
 public class SampleArraySpecifications : ISerializable
 {
+    public SampleArraySpecifications() { }
+
     public SampleArraySpecifications(
         ushort arraySize,
         SampleType sampleType,
@@ -15,9 +17,9 @@ public class SampleArraySpecifications : ISerializable
         Flags = flags;
     }
 
-    public ushort ArraySize { get; }
-    public SampleType SampleType { get; }
-    public SampleArrayFlags Flags { get; }
+    public ushort ArraySize { get; set; }
+    public SampleType SampleType { get; set; }
+    public SampleArrayFlags Flags { get; set; }
 
     public static SampleArraySpecifications Read(
         BigEndianBinaryReader binaryReader)

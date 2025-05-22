@@ -6,13 +6,15 @@ namespace PatientMonitorDataLogger.PhilipsIntellivue.Models;
 
 public class IntellivueFloat : ISerializable
 {
+    public IntellivueFloat() { }
+
     public IntellivueFloat(
         float value)
     {
         Value = value;
     }
 
-    public float Value { get; }
+    public float Value { get; set; }
 
     public static implicit operator float(IntellivueFloat x) => x.Value;
     public static implicit operator IntellivueFloat(float x) => new(x);

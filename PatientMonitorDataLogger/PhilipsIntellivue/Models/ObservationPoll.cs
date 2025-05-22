@@ -5,6 +5,8 @@ namespace PatientMonitorDataLogger.PhilipsIntellivue.Models;
 
 public class ObservationPoll : ISerializable
 {
+    public ObservationPoll() { }
+
     public ObservationPoll(
         ushort handle,
         List<AttributeValueAssertion> attributes)
@@ -13,8 +15,8 @@ public class ObservationPoll : ISerializable
         Attributes = attributes;
     }
 
-    public ushort Handle { get; }
-    public List<AttributeValueAssertion> Attributes { get; }
+    public ushort Handle { get; set; }
+    public List<AttributeValueAssertion> Attributes { get; set; }
 
     public byte[] Serialize()
     {

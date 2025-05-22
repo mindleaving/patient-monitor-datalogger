@@ -5,6 +5,8 @@ namespace PatientMonitorDataLogger.PhilipsIntellivue.Models.Attributes;
 
 public class DeviceAlarmEntry : ISerializable
 {
+    public DeviceAlarmEntry() { }
+
     public DeviceAlarmEntry(
         OIDType source,
         OIDType code,
@@ -25,14 +27,14 @@ public class DeviceAlarmEntry : ISerializable
         AdditionalInfo = additionalInfo;
     }
 
-    public OIDType Source { get; }
-    public OIDType Code { get; }
-    public AlertType Type { get; }
-    public AlertState State { get; }
-    public ManagedObjectId Object { get; }
-    public AlertInfoType AdditionalInfoType { get; }
-    public ushort Length { get; }
-    public AlarmMonitorGeneralInfo AdditionalInfo { get; }
+    public OIDType Source { get; set; }
+    public OIDType Code { get; set; }
+    public AlertType Type { get; set; }
+    public AlertState State { get; set; }
+    public ManagedObjectId Object { get; set; }
+    public AlertInfoType AdditionalInfoType { get; set; }
+    public ushort Length { get; set; }
+    public AlarmMonitorGeneralInfo AdditionalInfo { get; set; }
 
     public static DeviceAlarmEntry Read(
         BigEndianBinaryReader binaryReader)

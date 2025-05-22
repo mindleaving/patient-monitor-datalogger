@@ -5,6 +5,8 @@ namespace PatientMonitorDataLogger.PhilipsIntellivue.Models.Attributes;
 
 public class SampleArrayObservedValue : ISerializable
 {
+    public SampleArrayObservedValue() { }
+
     public SampleArrayObservedValue(
         SCADAType physioId,
         MeasurementState state,
@@ -15,9 +17,9 @@ public class SampleArrayObservedValue : ISerializable
         Values = values;
     }
 
-    public SCADAType PhysioId { get; }
-    public MeasurementState State { get; }
-    public ObservedValueArray Values { get; }
+    public SCADAType PhysioId { get; set; }
+    public MeasurementState State { get; set; }
+    public ObservedValueArray Values { get; set; }
 
     public static SampleArrayObservedValue Read(
         BigEndianBinaryReader binaryReader)

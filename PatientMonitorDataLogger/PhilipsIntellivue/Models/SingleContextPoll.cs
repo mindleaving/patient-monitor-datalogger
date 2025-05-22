@@ -5,6 +5,8 @@ namespace PatientMonitorDataLogger.PhilipsIntellivue.Models;
 
 public class SingleContextPoll : ISerializable
 {
+    public SingleContextPoll() { }
+
     public SingleContextPoll(
         ushort contextId,
         List<ObservationPoll> observations)
@@ -13,8 +15,8 @@ public class SingleContextPoll : ISerializable
         Observations = observations;
     }
 
-    public ushort ContextId { get; }
-    public List<ObservationPoll> Observations { get; }
+    public ushort ContextId { get; set; }
+    public List<ObservationPoll> Observations { get; set; }
 
     public byte[] Serialize()
     {

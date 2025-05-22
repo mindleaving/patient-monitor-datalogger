@@ -5,6 +5,10 @@ namespace PatientMonitorDataLogger.PhilipsIntellivue.Models.Attributes;
 
 public class NumericObservedValue : ISerializable
 {
+    public NumericObservedValue()
+    {
+    }
+
     public NumericObservedValue(
         SCADAType physioId,
         MeasurementState state,
@@ -17,10 +21,10 @@ public class NumericObservedValue : ISerializable
         Value = value;
     }
 
-    public SCADAType PhysioId { get; }
-    public MeasurementState State { get; }
-    public UnitCodes UnitCode { get; }
-    public IntellivueFloat Value { get; }
+    public SCADAType PhysioId { get; set; }
+    public MeasurementState State { get; set; }
+    public UnitCodes UnitCode { get; set; }
+    public IntellivueFloat Value { get; set; }
 
     public static NumericObservedValue Read(
         BigEndianBinaryReader binaryReader)

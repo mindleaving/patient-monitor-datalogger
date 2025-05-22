@@ -4,6 +4,7 @@ namespace PatientMonitorDataLogger.PhilipsIntellivue.Models;
 
 public class RemoteOperationError : IRemoteOperationResult
 {
+    public RemoteOperationError() { }
     public RemoteOperationError(
         ushort invokeId,
         RemoteOperationErrorType errorValue,
@@ -16,10 +17,10 @@ public class RemoteOperationError : IRemoteOperationResult
         Data = data;
     }
 
-    public ushort InvokeId { get; }
-    public RemoteOperationErrorType ErrorValue { get; }
-    public ushort Length { get; }
-    public IRemoteOperationErrorData? Data { get; }
+    public ushort InvokeId { get; set; }
+    public RemoteOperationErrorType ErrorValue { get; set; }
+    public ushort Length { get; set; }
+    public IRemoteOperationErrorData? Data { get; set; }
 
     public byte[] Serialize()
     {

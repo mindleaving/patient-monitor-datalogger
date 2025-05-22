@@ -5,6 +5,8 @@ namespace PatientMonitorDataLogger.PhilipsIntellivue.Models.Attributes;
 
 public class MetricSpecification : ISerializable
 {
+    public MetricSpecification() { }
+
     public MetricSpecification(
         RelativeTime updatePeriod,
         MetricCategory category,
@@ -19,11 +21,11 @@ public class MetricSpecification : ISerializable
         Relevance = relevance;
     }
 
-    public RelativeTime UpdatePeriod { get; }
-    public MetricCategory Category { get; }
-    public MetricAccess Access { get; }
-    public MetricStructure Structure { get; }
-    public MetricRelevance Relevance { get; }
+    public RelativeTime UpdatePeriod { get; set; }
+    public MetricCategory Category { get; set; }
+    public MetricAccess Access { get; set; }
+    public MetricStructure Structure { get; set; }
+    public MetricRelevance Relevance { get; set; }
 
     public static MetricSpecification Read(
         BigEndianBinaryReader binaryReader)

@@ -9,6 +9,8 @@ public class AbsoluteTime : ISerializable
 {
     public static AbsoluteTime Invalid = new(0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff);
 
+    public AbsoluteTime() { }
+
     public AbsoluteTime(
         byte century,
         byte year,
@@ -29,14 +31,14 @@ public class AbsoluteTime : ISerializable
         Milliseconds = milliseconds;
     }
 
-    public byte Century { get; }
-    public byte Year { get; }
-    public byte Month { get; }
-    public byte Day { get; }
-    public byte Hour { get; }
-    public byte Minute { get; }
-    public byte Second { get; }
-    public byte Milliseconds { get; } // Not used
+    public byte Century { get; set; }
+    public byte Year { get; set; }
+    public byte Month { get; set; }
+    public byte Day { get; set; }
+    public byte Hour { get; set; }
+    public byte Minute { get; set; }
+    public byte Second { get; set; }
+    public byte Milliseconds { get; set; } // Not used
 
     public DateTime ToDateTime()
     {

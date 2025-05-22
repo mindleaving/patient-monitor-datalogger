@@ -4,6 +4,8 @@ namespace PatientMonitorDataLogger.PhilipsIntellivue.Models;
 
 public class PollMdiDataReply : IActionResultData
 {
+    public PollMdiDataReply() { }
+
     public PollMdiDataReply(
         ushort pollNumber,
         RelativeTime relativeTimeStamp,
@@ -20,12 +22,12 @@ public class PollMdiDataReply : IActionResultData
         PollContexts = pollContexts;
     }
 
-    public ushort PollNumber { get; }
-    public RelativeTime RelativeTimeStamp { get; }
-    public AbsoluteTime AbsoluteTimeStamp { get; }
-    public NomenclatureReference ObjectType { get; }
-    public OIDType AttributeGroup { get; }
-    public List<SingleContextPoll> PollContexts { get; }
+    public ushort PollNumber { get; set; }
+    public RelativeTime RelativeTimeStamp { get; set; }
+    public AbsoluteTime AbsoluteTimeStamp { get; set; }
+    public NomenclatureReference ObjectType { get; set; }
+    public OIDType AttributeGroup { get; set; }
+    public List<SingleContextPoll> PollContexts { get; set; }
 
     public virtual byte[] Serialize()
     {

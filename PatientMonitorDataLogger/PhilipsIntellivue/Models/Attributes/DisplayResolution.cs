@@ -5,6 +5,8 @@ namespace PatientMonitorDataLogger.PhilipsIntellivue.Models.Attributes;
 
 public class DisplayResolution : ISerializable
 {
+    public DisplayResolution() { }
+
     public DisplayResolution(
         byte digitsBeforeDecimalPoint,
         byte digitsAfterDecimalPoint)
@@ -13,8 +15,8 @@ public class DisplayResolution : ISerializable
         DigitsAfterDecimalPoint = digitsAfterDecimalPoint;
     }
 
-    public byte DigitsBeforeDecimalPoint { get; }
-    public byte DigitsAfterDecimalPoint { get; }
+    public byte DigitsBeforeDecimalPoint { get; set; }
+    public byte DigitsAfterDecimalPoint { get; set; }
 
     public static DisplayResolution Read(
         BigEndianBinaryReader binaryReader)
