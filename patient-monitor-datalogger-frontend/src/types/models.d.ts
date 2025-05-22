@@ -1,20 +1,49 @@
 import * as Enums from './enums';
 
 export namespace Models {
+    interface Alert {
+        timestamp: Date;
+        parameterName: string;
+        text: string;
+    }
+    interface IInfusionPumpInfo extends Models.IMedicalDeviceInfo {
+        infusionPumpType: Enums.InfusionPumpType;
+    }
+    interface ILogSessionData {
+        logSessionId: string;
+    }
     interface IMedicalDeviceDataSettings {
+        deviceType: Enums.MedicalDeviceType;
+    }
+    interface IMedicalDeviceInfo {
         deviceType: Enums.MedicalDeviceType;
     }
     interface IMedicalDeviceSettings {
         deviceType: Enums.MedicalDeviceType;
     }
+    interface IMonitorData {
+        type: Enums.MonitorDataType;
+    }
     interface InfusionPumpDataSettings extends Models.IMedicalDeviceDataSettings {
         
+    }
+    interface InfusionPumpParameter {
+        name: string;
+        value: string;
     }
     interface InfusionPumpSettings extends Models.IMedicalDeviceSettings {
         infusionPumpType: Enums.InfusionPumpType;
     }
+    interface InfusionPumpState {
+        timestamp: Date;
+        pumpIndex: Models.PumpIndex;
+        parameters: Models.InfusionPumpParameter[];
+    }
     interface IODevice extends System.IDisposable {
         
+    }
+    interface IPatientMonitorInfo extends Models.IMedicalDeviceInfo {
+        monitorType: Enums.PatientMonitorType;
     }
     interface ISerializable {
         
@@ -22,6 +51,25 @@ export namespace Models {
     interface LogSessionEvent {
         timestamp?: Date | null;
         message: string;
+    }
+    interface NumericsData extends Models.IMonitorData {
+        timestamp: Date;
+        values: { [key: string]: Models.NumericsValue };
+    }
+    interface NumericsValue {
+        timestamp: Date;
+        value: number;
+        unit: string;
+        state: Enums.MeasurementState;
+    }
+    interface PatientInfo extends Models.ILogSessionData {
+        patientId: string;
+        encounterId: string;
+        firstName: string;
+        lastName: string;
+        sex?: Enums.Sex | null;
+        dateOfBirth?: Date | null;
+        comment: string;
     }
     interface PatientMonitorDataSettings extends Models.IMedicalDeviceDataSettings {
         includeAlerts: boolean;
@@ -33,6 +81,12 @@ export namespace Models {
     }
     interface PatientMonitorSettings extends Models.IMedicalDeviceSettings {
         monitorType: Enums.PatientMonitorType;
+    }
+    interface WaveData extends Models.IMonitorData {
+        measurementType: string;
+        timestampFirstDataPoint: Date;
+        sampleRate: number;
+        values: System.Single[];
     }
     interface AbsoluteTime extends Models.ISerializable {
         century: System.Byte;
@@ -202,6 +256,9 @@ export namespace Models {
     interface LengthIndicator {
         length: number;
     }
+    interface LinkedCommandMessageBundle {
+        messages: Models.ICommandMessage[];
+    }
     interface List<T> extends Models.ISerializable {
         count: number;
         length: number;
@@ -251,6 +308,9 @@ export namespace Models {
         protocolId: Enums.ProtocolId;
         messageType: Enums.MessageType;
         userDataLength: number;
+    }
+    interface PhilipsIntellivuePatientMonitorInfo extends Models.IPatientMonitorInfo {
+        name: string;
     }
     interface PhilipsIntellivueSettings extends Models.PatientMonitorSettings {
         serialPortName: string;
@@ -395,9 +455,15 @@ export namespace Models {
     interface PatientDemographics {
         
     }
+    interface GEDashPatientMonitorInfo extends Models.IPatientMonitorInfo {
+        name: string;
+    }
     interface GEDashSettings extends Models.PatientMonitorSettings {
         serialPortName: string;
         serialPortBaudRate: number;
+    }
+    interface BBraunInfusionPumpInfo extends Models.IInfusionPumpInfo {
+        bedId: string;
     }
     interface BBraunInfusionPumpSettings extends Models.InfusionPumpSettings {
         hostname: string;
@@ -474,24 +540,6 @@ export namespace Models {
     interface DataWriterSettings {
         outputDirectory: string;
     }
-    interface GEDashPatientMonitorInfo extends Models.IPatientMonitorInfo {
-        name: string;
-    }
-    interface IInfusionPumpInfo extends Models.IMedicalDeviceInfo {
-        infusionPumpType: Enums.InfusionPumpType;
-    }
-    interface BBraunInfusionPumpInfo extends Models.IInfusionPumpInfo {
-        bedId: string;
-    }
-    interface ILogSessionData {
-        logSessionId: string;
-    }
-    interface IMedicalDeviceInfo {
-        deviceType: Enums.MedicalDeviceType;
-    }
-    interface IPatientMonitorInfo extends Models.IMedicalDeviceInfo {
-        monitorType: Enums.PatientMonitorType;
-    }
     interface LogSession extends System.IDisposable {
         id: string;
         settings: Models.LogSessionSettings;
@@ -511,18 +559,6 @@ export namespace Models {
         deviceInfo: Models.IMedicalDeviceInfo;
         startTime?: Date | null;
         recordedParameters: string[];
-    }
-    interface PatientInfo extends Models.ILogSessionData {
-        patientId: string;
-        encounterId: string;
-        firstName: string;
-        lastName: string;
-        sex?: Enums.Sex | null;
-        dateOfBirth?: Date | null;
-        comment: string;
-    }
-    interface PhilipsIntellivuePatientMonitorInfo extends Models.IPatientMonitorInfo {
-        name: string;
     }
     export namespace Attributes {
         interface AlarmMonitorGeneralInfo extends Models.ISerializable {
@@ -688,36 +724,9 @@ export namespace Models {
         }
     }
     export namespace DataExport {
-        interface Alert {
-            timestamp: Date;
-            parameterName: string;
-            text: string;
-        }
-        interface IMonitorData {
-            type: Enums.MonitorDataType;
-        }
-        interface InfusionPumpParameter {
-            name: string;
-            value: string;
-        }
-        interface InfusionPumpState {
-            timestamp: Date;
-            pumpIndex: Models.PumpIndex;
-            parameters: Models.DataExport.InfusionPumpParameter[];
-        }
         interface LogSessionObservations extends Models.ILogSessionData {
             timestamp: Date;
             observations: Models.DataExport.Observation[];
-        }
-        interface NumericsData extends Models.DataExport.IMonitorData {
-            timestamp: Date;
-            values: { [key: string]: Models.DataExport.NumericsValue };
-        }
-        interface NumericsValue {
-            timestamp: Date;
-            value: number;
-            unit: string;
-            state: Enums.MeasurementState;
         }
         interface Observation {
             timestamp: Date;
@@ -729,16 +738,13 @@ export namespace Models {
             path: string;
             name: string;
         }
-        interface WaveData extends Models.DataExport.IMonitorData {
-            measurementType: string;
-            timestampFirstDataPoint: Date;
-            sampleRate: number;
-            values: System.Single[];
-        }
     }
 }
 export namespace System {
     interface IDisposable {
+        
+    }
+    interface Single extends System.ValueType, System.IConvertible, System.IBinaryFloatParseAndFormatInfo<System.Single> {
         
     }
     interface Byte extends System.ValueType, System.IConvertible, System.Numerics.IUnsignedNumber<System.Byte>, System.IUtfChar<System.Byte>, System.IBinaryIntegerParseAndFormatInfo<System.Byte> {
@@ -754,9 +760,6 @@ export namespace System {
         hResult: number;
         stackTrace: string;
     }
-    interface Single extends System.ValueType, System.IConvertible, System.IBinaryFloatParseAndFormatInfo<System.Single> {
-        
-    }
     interface IEquatable<T> {
         
     }
@@ -768,16 +771,6 @@ export namespace System {
     }
     interface IConvertible {
         
-    }
-    interface IUtfChar<TSelf> extends System.Numerics.IBinaryInteger<TSelf> {
-        
-    }
-    interface IBinaryIntegerParseAndFormatInfo<TSelf> extends System.Numerics.IBinaryInteger<TSelf>, System.Numerics.IMinMaxValue<TSelf> {
-        isSigned: boolean;
-        maxDigitCount: number;
-        maxHexDigitCount: number;
-        maxValueDiv10: TSelf;
-        overflowMessage: string;
     }
     interface IBinaryFloatParseAndFormatInfo<TSelf> extends System.Numerics.IBinaryFloatingPointIeee754<TSelf>, System.Numerics.IMinMaxValue<TSelf> {
         numberBufferLength: number;
@@ -801,6 +794,16 @@ export namespace System {
         maxExponentRoundToEven: number;
         maxExponentFastPath: number;
         maxMantissaFastPath: number;
+    }
+    interface IUtfChar<TSelf> extends System.Numerics.IBinaryInteger<TSelf> {
+        
+    }
+    interface IBinaryIntegerParseAndFormatInfo<TSelf> extends System.Numerics.IBinaryInteger<TSelf>, System.Numerics.IMinMaxValue<TSelf> {
+        isSigned: boolean;
+        maxDigitCount: number;
+        maxHexDigitCount: number;
+        maxValueDiv10: TSelf;
+        overflowMessage: string;
     }
     interface RuntimeMethodHandle extends System.ValueType, System.IEquatable<System.RuntimeMethodHandle>, System.Runtime.Serialization.ISerializable {
         value: System.IntPtr;
@@ -912,6 +915,13 @@ export namespace System {
         interface IUnsignedNumber<TSelf> extends System.Numerics.INumberBase<TSelf> {
             
         }
+        interface IBinaryFloatingPointIeee754<TSelf> extends System.Numerics.IBinaryNumber<TSelf>, System.Numerics.IFloatingPointIeee754<TSelf> {
+            
+        }
+        interface IMinMaxValue<TSelf> {
+            minValue: TSelf;
+            maxValue: TSelf;
+        }
         interface INumberBase<TSelf> extends System.Numerics.IAdditionOperators<TSelf,TSelf,TSelf>, System.Numerics.IAdditiveIdentity<TSelf,TSelf>, System.Numerics.IDecrementOperators<TSelf>, System.Numerics.IDivisionOperators<TSelf,TSelf,TSelf>, System.IEquatable<TSelf>, System.Numerics.IEqualityOperators<TSelf,TSelf,boolean>, System.Numerics.IIncrementOperators<TSelf>, System.Numerics.IMultiplicativeIdentity<TSelf,TSelf>, System.Numerics.IMultiplyOperators<TSelf,TSelf,TSelf>, System.ISpanFormattable, System.ISpanParsable<TSelf>, System.Numerics.ISubtractionOperators<TSelf,TSelf,TSelf>, System.Numerics.IUnaryPlusOperators<TSelf,TSelf>, System.Numerics.IUnaryNegationOperators<TSelf,TSelf>, System.IUtf8SpanFormattable, System.IUtf8SpanParsable<TSelf> {
             one: TSelf;
             radix: number;
@@ -920,12 +930,15 @@ export namespace System {
         interface IBinaryInteger<TSelf> extends System.Numerics.IBinaryNumber<TSelf>, System.Numerics.IShiftOperators<TSelf,number,TSelf> {
             
         }
-        interface IMinMaxValue<TSelf> {
-            minValue: TSelf;
-            maxValue: TSelf;
+        interface IBinaryNumber<TSelf> extends System.Numerics.IBitwiseOperators<TSelf,TSelf,TSelf>, System.Numerics.INumber<TSelf> {
+            allBitsSet: TSelf;
         }
-        interface IBinaryFloatingPointIeee754<TSelf> extends System.Numerics.IBinaryNumber<TSelf>, System.Numerics.IFloatingPointIeee754<TSelf> {
-            
+        interface IFloatingPointIeee754<TSelf> extends System.Numerics.IExponentialFunctions<TSelf>, System.Numerics.IFloatingPoint<TSelf>, System.Numerics.IHyperbolicFunctions<TSelf>, System.Numerics.ILogarithmicFunctions<TSelf>, System.Numerics.IPowerFunctions<TSelf>, System.Numerics.IRootFunctions<TSelf>, System.Numerics.ITrigonometricFunctions<TSelf> {
+            epsilon: TSelf;
+            naN: TSelf;
+            negativeInfinity: TSelf;
+            negativeZero: TSelf;
+            positiveInfinity: TSelf;
         }
         interface IAdditionOperators<TSelf,TOther,TResult> {
             
@@ -960,27 +973,14 @@ export namespace System {
         interface IUnaryNegationOperators<TSelf,TResult> {
             
         }
-        interface IBinaryNumber<TSelf> extends System.Numerics.IBitwiseOperators<TSelf,TSelf,TSelf>, System.Numerics.INumber<TSelf> {
-            allBitsSet: TSelf;
-        }
         interface IShiftOperators<TSelf,TOther,TResult> {
             
-        }
-        interface IFloatingPointIeee754<TSelf> extends System.Numerics.IExponentialFunctions<TSelf>, System.Numerics.IFloatingPoint<TSelf>, System.Numerics.IHyperbolicFunctions<TSelf>, System.Numerics.ILogarithmicFunctions<TSelf>, System.Numerics.IPowerFunctions<TSelf>, System.Numerics.IRootFunctions<TSelf>, System.Numerics.ITrigonometricFunctions<TSelf> {
-            epsilon: TSelf;
-            naN: TSelf;
-            negativeInfinity: TSelf;
-            negativeZero: TSelf;
-            positiveInfinity: TSelf;
         }
         interface IBitwiseOperators<TSelf,TOther,TResult> {
             
         }
         interface INumber<TSelf> extends System.IComparable, System.IComparable<TSelf>, System.Numerics.IComparisonOperators<TSelf,TSelf,boolean>, System.Numerics.IModulusOperators<TSelf,TSelf,TSelf>, System.Numerics.INumberBase<TSelf> {
             
-        }
-        interface ISignedNumber<TSelf> extends System.Numerics.INumberBase<TSelf> {
-            negativeOne: TSelf;
         }
         interface IExponentialFunctions<TSelf> extends System.Numerics.IFloatingPointConstants<TSelf> {
             
@@ -1002,6 +1002,9 @@ export namespace System {
         }
         interface ITrigonometricFunctions<TSelf> extends System.Numerics.IFloatingPointConstants<TSelf> {
             
+        }
+        interface ISignedNumber<TSelf> extends System.Numerics.INumberBase<TSelf> {
+            negativeOne: TSelf;
         }
         interface IComparisonOperators<TSelf,TOther,TResult> extends System.Numerics.IEqualityOperators<TSelf,TOther,TResult> {
             

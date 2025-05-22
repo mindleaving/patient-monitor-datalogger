@@ -20,6 +20,7 @@ internal class MessagesJsonDataExtractionTool
             return;
         }
         Console.WriteLine("Extracting data from messages file...");
+        var linkedResultAggregator = new PhilipsIntellivueLinkedResultAggregator();
         var dataExtractor = new PhilipsIntellivueNumericsAndWavesExtractor();
         var numericsWriter = new CsvNumericsWriter(numericsOutputFilePath, measurementTypes: [
             SCADAType.NOM_ECG_CARD_BEAT_RATE,
@@ -45,7 +46,12 @@ internal class MessagesJsonDataExtractionTool
         using var streamReader = new StreamReader(messagesFilePath);
         try
         {
-            ReadMessagesAndWriteNumericsToCsv(streamReader, dataExtractor, numericsWriter, RelativeTimeTranslationFactory);
+            ReadMessagesAndWriteNumericsToCsv(
+                streamReader, 
+                linkedResultAggregator,
+                dataExtractor, 
+                numericsWriter, 
+                RelativeTimeTranslationFactory);
             Console.WriteLine("DONE");
         }
         finally
@@ -56,12 +62,12 @@ internal class MessagesJsonDataExtractionTool
 
     private static void ReadMessagesAndWriteNumericsToCsv(
         StreamReader streamReader,
+        PhilipsIntellivueLinkedResultAggregator linkedResultAggregator,
         PhilipsIntellivueNumericsAndWavesExtractor dataExtractor,
         CsvNumericsWriter numericsWriter,
-        Func<uint,RelativeTimeTranslation> relativeTimeTranslation)
+        Func<uint, RelativeTimeTranslation> relativeTimeTranslation)
     {
         var messageCount = 0;
-        NumericsData? linkedResultNumericsData = null;
         string? line;
         while ((line = streamReader.ReadLine()) != null)
         {
@@ -69,54 +75,40 @@ internal class MessagesJsonDataExtractionTool
             if(messageCount % 10_000 == 0)
                 Console.WriteLine($"Messages processed: {messageCount}");
             var commandMessage = JsonConvert.DeserializeObject<ICommandMessage>(line);
-            if(commandMessage is not DataExportCommandMessage dataCommandMessage)
+            if(commandMessage == null)
                 continue;
-
-            var isLinkedResult = dataCommandMessage.RemoteOperationHeader.Type == RemoteOperationType.LinkedResult;
-            var isLastLinkedResult = dataCommandMessage.RemoteOperationData is RemoteOperationLinkedResult linkedResult
-                                     && linkedResult.LinkedId.State == RemoteOperationLinkedResultState.Last;
-            if (!isLastLinkedResult && linkedResultNumericsData != null)
+            foreach (var messageBundle in linkedResultAggregator.TestMessageAndAggregateOrRelease(commandMessage))
             {
-                numericsWriter.Write(linkedResultNumericsData);
-                linkedResultNumericsData = null;
+                ProcessMessageBundle(messageBundle, dataExtractor, numericsWriter, relativeTimeTranslation);
             }
-            var dataObjects = dataExtractor.Extract(
-                dataCommandMessage, 
-                excludedMeasurementStates: [ MeasurementState.INVALID, MeasurementState.UNAVAILABLE ],
-                relativeTimeTranslation).ToList();
-            foreach (var monitorData in dataObjects)
-            {
-                switch (monitorData)
-                {
-                    case NumericsData numericsData:
-                        if (isLinkedResult)
-                        {
-                            linkedResultNumericsData ??= new NumericsData(numericsData.Timestamp, new());
-                            foreach (var (measurementType,value) in numericsData.Values)
-                            {
-                                linkedResultNumericsData.Values[measurementType] = value;
-                            }
-                        }
-                        else
-                        {
-                            numericsWriter.Write(numericsData);
-                        }
-                        break;
-                    case WaveData waveData:
-                        //Console.WriteLine($"Message {messageCount}: Extracted wave {waveData.MeasurementType}");
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException(nameof(monitorData));
-                }
-            }
+        }
+        if(linkedResultAggregator.IsRetainingMessages)
+            ProcessMessageBundle(linkedResultAggregator.ReleaseRetainedLinkedMessages(), dataExtractor, numericsWriter, relativeTimeTranslation);
+    }
 
-            if (isLinkedResult && isLastLinkedResult && linkedResultNumericsData != null)
+    private static void ProcessMessageBundle(
+        LinkedCommandMessageBundle messageBundle,
+        PhilipsIntellivueNumericsAndWavesExtractor dataExtractor,
+        CsvNumericsWriter numericsWriter,
+        Func<uint, RelativeTimeTranslation> relativeTimeTranslation)
+    {
+        var dataObjects = dataExtractor.Extract(
+            messageBundle, 
+            excludedMeasurementStates: [ MeasurementState.INVALID, MeasurementState.UNAVAILABLE ],
+            relativeTimeTranslation).ToList();
+        foreach (var monitorData in dataObjects)
+        {
+            switch (monitorData)
             {
-                numericsWriter.Write(linkedResultNumericsData);
-                linkedResultNumericsData = null;
+                case NumericsData numericsData:
+                    numericsWriter.Write(numericsData);
+                    break;
+                case WaveData waveData:
+                    //Console.WriteLine($"Message {messageCount}: Extracted wave {waveData.MeasurementType}");
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(monitorData));
             }
         }
     }
-    
-    
 }

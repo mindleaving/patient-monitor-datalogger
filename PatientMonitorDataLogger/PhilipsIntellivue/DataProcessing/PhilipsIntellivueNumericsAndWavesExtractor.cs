@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.Collections;
+using System.Diagnostics.CodeAnalysis;
 using PatientMonitorDataLogger.PhilipsIntellivue.Models;
 using PatientMonitorDataLogger.PhilipsIntellivue.Models.Attributes;
 using PatientMonitorDataLogger.Shared.Helpers;
@@ -11,85 +12,99 @@ public class PhilipsIntellivueNumericsAndWavesExtractor
     private RelativeTimeTranslation? defaultRelativeTimeTranslation;
 
     public IEnumerable<IMonitorData> Extract(
-        ICommandMessage message,
+        LinkedCommandMessageBundle messageBundle,
         IList<MeasurementState> excludedMeasurementStates,
         Func<uint,RelativeTimeTranslation>? relativeTimeTranslationFactory = null)
     {
-        if(message is not DataExportCommandMessage dataExportMessage)
-            yield break;
-        if(dataExportMessage.RemoteOperationData is not RemoteOperationResult remoteOperationResult)
-            yield break;
-        if(remoteOperationResult.CommandType != DataExportCommandType.ConfirmedAction)
-            yield break;
-        if(remoteOperationResult.Data is not ActionResultCommand actionResult)
-            yield break;
-        if(actionResult.Data is not PollMdiDataReply pollResult)
-            yield break;
-        var timestamp = GetAbsoluteTime(pollResult.RelativeTimeStamp, relativeTimeTranslationFactory);
-        var numericsData = new NumericsData(timestamp, new Dictionary<string, NumericsValue>());
-        foreach (var singleContextPoll in pollResult.PollContexts.Values)
+        var numericsValues = new Dictionary<string, NumericsValue>();
+        DateTime? timestamp = null;
+        foreach (var pollResult in GetPollResults(messageBundle))
         {
-            var contextId = singleContextPoll.ContextId;
-            foreach (var observation in singleContextPoll.Observations.Values)
+            timestamp ??= GetAbsoluteTime(pollResult.RelativeTimeStamp, relativeTimeTranslationFactory);
+            foreach (var observation in ExtractObservations(pollResult))
             {
-                var handle = observation.Handle;
-                foreach (var observationAttribute in observation.Attributes.Values)
+                switch (observation)
                 {
-                    switch (observationAttribute.AttributeValue)
+                    case SampleArrayObservedValue sampleArray:
                     {
-                        case SampleArrayObservedValue sampleArray:
+                        if(!IsSampleArrayValid(sampleArray, pollResult.ObjectType, excludedMeasurementStates, out var measurementType))
+                            continue;
+                        var waveData = CreateWaveData(sampleArray, measurementType, timestamp.Value);
+                        yield return waveData;
+                        break;
+                    }
+                    case PhilipsIntellivue.Models.List<SampleArrayObservedValue> listOfSampleArrays:
+                    {
+                        foreach (var sampleArray in listOfSampleArrays.Values)
                         {
                             if(!IsSampleArrayValid(sampleArray, pollResult.ObjectType, excludedMeasurementStates, out var measurementType))
                                 continue;
-                            var waveData = CreateWaveData(sampleArray, measurementType, timestamp);
+                            var waveData = CreateWaveData(sampleArray, measurementType, timestamp.Value);
                             yield return waveData;
-                            break;
                         }
-                        case PhilipsIntellivue.Models.List<SampleArrayObservedValue> listOfSampleArrays:
-                        {
-                            foreach (var sampleArray in listOfSampleArrays.Values)
-                            {
-                                if(!IsSampleArrayValid(sampleArray, pollResult.ObjectType, excludedMeasurementStates, out var measurementType))
-                                    continue;
-                                var waveData = CreateWaveData(sampleArray, measurementType, timestamp);
-                                yield return waveData;
-                            }
-                            break;
-                        }
-                        case NumericObservedValue numericsObservation:
+                        break;
+                    }
+                    case NumericObservedValue numericsObservation:
+                    {
+                        if(!IsNumericsObservationValid(numericsObservation, pollResult.ObjectType, excludedMeasurementStates, out var measurementType))
+                            continue;
+                        numericsValues[measurementType] = CreateNumericsDataValue(timestamp.Value, numericsObservation);
+                        break;
+                    }
+                    case PhilipsIntellivue.Models.List<NumericObservedValue> listOfNumericsObservations:
+                    {
+                        foreach (var numericsObservation in listOfNumericsObservations.Values)
                         {
                             if(!IsNumericsObservationValid(numericsObservation, pollResult.ObjectType, excludedMeasurementStates, out var measurementType))
                                 continue;
-                            numericsData.Values[measurementType] = CreateNumericsDataValue(timestamp, numericsObservation);
-                            break;
+                            numericsValues[measurementType] = CreateNumericsDataValue(timestamp.Value, numericsObservation);
                         }
-                        case PhilipsIntellivue.Models.List<NumericObservedValue> listOfNumericsObservations:
-                        {
-                            foreach (var numericsObservation in listOfNumericsObservations.Values)
-                            {
-                                if(!IsNumericsObservationValid(numericsObservation, pollResult.ObjectType, excludedMeasurementStates, out var measurementType))
-                                    continue;
-                                numericsData.Values[measurementType] = CreateNumericsDataValue(timestamp, numericsObservation);
-                            }
-                            break;
-                        }
-                        //case AbsoluteTime:
-                        //case DeviceAlertCondition:
-                        //case UnknownAttributeValue:
-                        //case PhilipsIntellivue.Models.List<DeviceAlarmEntry>:
-                        //    break;
-                        //default:
-                        //{
-                        //    Console.WriteLine($"Unsupported data type {observationAttribute.AttributeValue.GetType()}");
-                        //    break;
-                        //}
+                        break;
                     }
+                    //case AbsoluteTime:
+                    //case DeviceAlertCondition:
+                    //case UnknownAttributeValue:
+                    //case PhilipsIntellivue.Models.List<DeviceAlarmEntry>:
+                    //    break;
+                    //default:
+                    //{
+                    //    Console.WriteLine($"Unsupported data type {observationAttribute.AttributeValue.GetType()}");
+                    //    break;
+                    //}
                 }
             }
         }
 
-        if (numericsData.Values.Count > 0)
-            yield return numericsData;
+        if (timestamp.HasValue && numericsValues.Count > 0)
+            yield return new NumericsData(timestamp.Value, numericsValues);
+    }
+
+    private static IEnumerable<ISerializable> ExtractObservations(
+        PollMdiDataReply pollResult)
+    {
+        return from singleContextPoll in pollResult.PollContexts.Values 
+            from observation in singleContextPoll.Observations.Values 
+            from observationAttribute in observation.Attributes.Values 
+            select observationAttribute.AttributeValue;
+    }
+
+    private IEnumerable<PollMdiDataReply> GetPollResults(
+        LinkedCommandMessageBundle messageBundle)
+    {
+        foreach (var message in messageBundle.Messages)
+        {
+            if(message is not DataExportCommandMessage dataExportMessage)
+                continue;
+            if(dataExportMessage.RemoteOperationData is not RemoteOperationResult remoteOperationResult)
+                continue;
+            if(remoteOperationResult.CommandType != DataExportCommandType.ConfirmedAction)
+                continue;
+            if(remoteOperationResult.Data is not ActionResultCommand actionResult)
+                continue;
+            if(actionResult.Data is not PollMdiDataReply pollResult)
+                continue;
+            yield return pollResult;
+        }
     }
 
     private bool IsSampleArrayValid(
