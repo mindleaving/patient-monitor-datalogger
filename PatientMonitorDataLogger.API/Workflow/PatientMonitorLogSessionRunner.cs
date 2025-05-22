@@ -1,5 +1,6 @@
 ﻿using PatientMonitorDataLogger.API.Models;
 using PatientMonitorDataLogger.API.Workflow.DataExport;
+using PatientMonitorDataLogger.Shared.DataExport;
 
 namespace PatientMonitorDataLogger.API.Workflow;
 

@@ -5,13 +5,15 @@ namespace PatientMonitorDataLogger.PhilipsIntellivue.Models;
 
 public class TextId : ISerializable
 {
+    public TextId() { }
+
     public TextId(
         Labels label)
     {
         Label = label;
     }
 
-    public Labels Label { get; }
+    public Labels Label { get; set; }
 
     public static TextId Read(
         BigEndianBinaryReader binaryReader)

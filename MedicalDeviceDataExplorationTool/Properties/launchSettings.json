@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "MedicalDeviceDataExplorationTool": {
+      "commandName": "Project",
+      "commandLineArgs": "extract \"2025-04-13 08:17:38\" \"F:\\data\\medical-device-datalogger\\e7638e63-fd3f-4416-bf6f-63e6f309eeda\\messages-sample.json\" \"F:\\data\\medical-device-datalogger\\e7638e63-fd3f-4416-bf6f-63e6f309eeda\\numerics-reconstructed-sample.csv\""
+    }
+  }
+}

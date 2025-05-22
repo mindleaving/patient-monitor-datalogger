@@ -2,6 +2,8 @@
 
 public class AssociationCommandMessage : ICommandMessage
 {
+    public AssociationCommandMessage() { }
+
     public AssociationCommandMessage(
         SessionHeader sessionHeader,
         SessionData sessionData,
@@ -18,11 +20,11 @@ public class AssociationCommandMessage : ICommandMessage
 
     public CommandMessageType MessageType => CommandMessageType.Association;
 
-    public SessionHeader SessionHeader { get; }
-    public SessionData SessionData { get; }
-    public PresentationHeader PresentationHeader { get; }
-    public IAssociationCommandUserData? UserData { get; }
-    public PresentationTrailer PresentationTrailer { get; }
+    public SessionHeader SessionHeader { get; set; }
+    public SessionData SessionData { get; set; }
+    public PresentationHeader PresentationHeader { get; set; }
+    public IAssociationCommandUserData? UserData { get; set; }
+    public PresentationTrailer PresentationTrailer { get; set; }
 
     public byte[] Serialize()
     {

@@ -5,6 +5,7 @@ namespace PatientMonitorDataLogger.PhilipsIntellivue.Models;
 
 public class NomenclatureReference : ISerializable, IEquatable<NomenclatureReference>
 {
+    public NomenclatureReference() { }
     public NomenclatureReference(
         NomenclaturePartition partition,
         ushort code)
@@ -13,8 +14,8 @@ public class NomenclatureReference : ISerializable, IEquatable<NomenclatureRefer
         Code = code;
     }
 
-    public NomenclaturePartition Partition { get; }
-    public ushort Code { get; }
+    public NomenclaturePartition Partition { get; set; }
+    public ushort Code { get; set; }
 
     public byte[] Serialize()
     {

@@ -5,6 +5,8 @@ namespace PatientMonitorDataLogger.PhilipsIntellivue.Models.Attributes;
 
 public class DeviceAlertCondition : ISerializable
 {
+    public DeviceAlertCondition() { }
+
     public DeviceAlertCondition(
         AlertState deviceAlertState,
         ushort changeCounter,
@@ -19,11 +21,11 @@ public class DeviceAlertCondition : ISerializable
         MaximumAuditoryAlarm = maximumAuditoryAlarm;
     }
 
-    public AlertState DeviceAlertState { get; }
-    public ushort ChangeCounter { get; }
-    public AlertType MaximumPhysiologicalAlarm { get; }
-    public AlertType MaximumTechnicalAlarm { get; }
-    public AlertType MaximumAuditoryAlarm { get; }
+    public AlertState DeviceAlertState { get; set; }
+    public ushort ChangeCounter { get; set; }
+    public AlertType MaximumPhysiologicalAlarm { get; set; }
+    public AlertType MaximumTechnicalAlarm { get; set; }
+    public AlertType MaximumAuditoryAlarm { get; set; }
 
     public static DeviceAlertCondition Read(
         BigEndianBinaryReader binaryReader)

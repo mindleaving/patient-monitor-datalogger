@@ -6,13 +6,14 @@ namespace PatientMonitorDataLogger.PhilipsIntellivue.Models;
 
 public class IntellivueString : ISerializable
 {
+    public IntellivueString() { }
     public IntellivueString(
         string value)
     {
         Value = value;
     }
 
-    public string Value { get; }
+    public string Value { get; set; }
 
     public static IntellivueString Read(
         BigEndianBinaryReader binaryReader)

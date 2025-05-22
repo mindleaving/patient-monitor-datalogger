@@ -4,6 +4,7 @@ namespace PatientMonitorDataLogger.PhilipsIntellivue.Models;
 
 public class EventReportResultCommand : IRemoteOperationResultData
 {
+    public EventReportResultCommand() { }
     public EventReportResultCommand(
         ManagedObjectId managedObject,
         RelativeTime currentTime,
@@ -18,10 +19,10 @@ public class EventReportResultCommand : IRemoteOperationResultData
         Data = data;
     }
 
-    public ManagedObjectId ManagedObject { get; }
-    public RelativeTime CurrentTime { get; }
-    public OIDType EventType { get; }
-    public ushort Length { get; }
+    public ManagedObjectId ManagedObject { get; set; }
+    public RelativeTime CurrentTime { get; set; }
+    public OIDType EventType { get; set; }
+    public ushort Length { get; set; }
     public IEventReportResultData? Data { get; set; }
 
     public byte[] Serialize()

@@ -2,7 +2,9 @@
 using PatientMonitorDataLogger.API.Models;
 using PatientMonitorDataLogger.API.Models.DataExport;
 using PatientMonitorDataLogger.PhilipsIntellivue;
+using PatientMonitorDataLogger.PhilipsIntellivue.DataProcessing;
 using PatientMonitorDataLogger.PhilipsIntellivue.Models;
+using PatientMonitorDataLogger.Shared.Helpers;
 using PatientMonitorDataLogger.Shared.Models;
 
 namespace PatientMonitorDataLogger.API.Workflow;
@@ -13,6 +15,7 @@ public class PhilipsIntellivueLogSessionRunner : PatientMonitorLogSessionRunner
     protected readonly PatientMonitorDataSettings dataSettings;
     protected PhilipsIntellivueClient? monitorClient;
     private readonly IPatientMonitorInfo monitorInfo = new PhilipsIntellivuePatientMonitorInfo();
+    private readonly PhilipsIntellivueLinkedResultAggregator linkedResultAggregator = new();
     private readonly PhilipsIntellivueNumericsAndWavesExtractor numericsAndWavesExtractor = new();
     private readonly PhilipsIntellivuePatientInfoExtractor patientInfoExtractor = new();
     private readonly System.Collections.Generic.List<string> numericsTypes = new();
@@ -156,10 +159,26 @@ public class PhilipsIntellivueLogSessionRunner : PatientMonitorLogSessionRunner
         object? sender,
         ICommandMessage message)
     {
-        WriteRawMessage(message);
-        if (patientInfoExtractor.TryExtract(LogSessionId, message, out var patientInfo))
+        try
+        {
+            WriteRawMessage(message);
+            foreach (var messageBundle in linkedResultAggregator.TestMessageAndAggregateOrRelease(message))
+            {
+                ProcessMessageBundle(messageBundle);
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine($"Failed to process Philips Intellivue message: {e.InnermostException().Message}");
+        }
+    }
+
+    private void ProcessMessageBundle(
+        LinkedCommandMessageBundle messageBundle)
+    {
+        if (patientInfoExtractor.TryExtract(LogSessionId, messageBundle, out var patientInfo))
             OnPatientInfoAvailable(this, patientInfo!);
-        foreach (var monitorData in numericsAndWavesExtractor.Extract(message))
+        foreach (var monitorData in numericsAndWavesExtractor.Extract(messageBundle, [ MeasurementState.INVALID, MeasurementState.UNAVAILABLE ]))
         {
             switch (monitorData)
             {
@@ -202,6 +221,16 @@ public class PhilipsIntellivueLogSessionRunner : PatientMonitorLogSessionRunner
         {
             monitorClient?.StopPolling();
             monitorClient?.Disconnect();
+        }
+        catch
+        {
+            // Ignore
+        }
+
+        try
+        {
+            if(linkedResultAggregator.IsRetainingMessages)
+                ProcessMessageBundle(linkedResultAggregator.ReleaseRetainedLinkedMessages());
         }
         catch
         {

@@ -4,6 +4,7 @@ namespace PatientMonitorDataLogger.PhilipsIntellivue.Models;
 
 public class GetResultCommand : IRemoteOperationResultData
 {
+    public GetResultCommand() { }
     public GetResultCommand(
         ManagedObjectId managedObject,
         List<AttributeValueAssertion> attributeList)
@@ -12,8 +13,8 @@ public class GetResultCommand : IRemoteOperationResultData
         AttributeList = attributeList;
     }
 
-    public ManagedObjectId ManagedObject { get; }
-    public List<AttributeValueAssertion> AttributeList { get; }
+    public ManagedObjectId ManagedObject { get; set; }
+    public List<AttributeValueAssertion> AttributeList { get; set; }
 
     public byte[] Serialize()
     {

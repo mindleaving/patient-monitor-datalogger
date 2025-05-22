@@ -5,12 +5,14 @@ namespace PatientMonitorDataLogger.PhilipsIntellivue.Models.Attributes;
 
 public class ObservedValueArray : ISerializable
 {
+    public ObservedValueArray() { }
+
     public ObservedValueArray(
         ushort[] values)
     {
         Values = values;
     }
-    public ushort[] Values { get; }
+    public ushort[] Values { get; set; }
 
     public static ObservedValueArray Read(
         BigEndianBinaryReader binaryReader)

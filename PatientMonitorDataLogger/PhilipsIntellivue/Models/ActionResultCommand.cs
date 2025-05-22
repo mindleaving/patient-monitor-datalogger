@@ -4,6 +4,7 @@ namespace PatientMonitorDataLogger.PhilipsIntellivue.Models;
 
 public class ActionResultCommand : IRemoteOperationResultData, IRemoteOperationErrorData
 {
+    public ActionResultCommand() { }
     public ActionResultCommand(
         ManagedObjectId managedObject,
         OIDType actionType,
@@ -16,10 +17,10 @@ public class ActionResultCommand : IRemoteOperationResultData, IRemoteOperationE
         Data = data;
     }
 
-    public ManagedObjectId ManagedObject { get; }
-    public OIDType ActionType { get; }
-    public ushort Length { get; }
-    public IActionResultData Data { get; }
+    public ManagedObjectId ManagedObject { get; set; }
+    public OIDType ActionType { get; set; }
+    public ushort Length { get; set; }
+    public IActionResultData Data { get; set; }
 
     public byte[] Serialize()
     {

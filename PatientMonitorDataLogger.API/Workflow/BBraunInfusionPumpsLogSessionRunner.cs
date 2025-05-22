@@ -4,6 +4,9 @@ using PatientMonitorDataLogger.API.Workflow.DataExport;
 using PatientMonitorDataLogger.BBraun;
 using PatientMonitorDataLogger.BBraun.Helpers;
 using PatientMonitorDataLogger.BBraun.Models;
+using PatientMonitorDataLogger.Shared.DataExport;
+using PatientMonitorDataLogger.Shared.Helpers;
+using PatientMonitorDataLogger.Shared.Models;
 
 namespace PatientMonitorDataLogger.API.Workflow;
 

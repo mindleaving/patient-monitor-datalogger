@@ -5,6 +5,8 @@ namespace PatientMonitorDataLogger.PhilipsIntellivue.Models.Attributes;
 
 public class ScaleAndRangeSpecification : ISerializable
 {
+    public ScaleAndRangeSpecification() { }
+
     public ScaleAndRangeSpecification(
         IntellivueFloat lowerAbsoluteValue,
         IntellivueFloat upperAbsoluteValue,
@@ -17,10 +19,10 @@ public class ScaleAndRangeSpecification : ISerializable
         UpperScaledValue = upperScaledValue;
     }
 
-    public IntellivueFloat LowerAbsoluteValue { get; }
-    public IntellivueFloat UpperAbsoluteValue { get; }
-    public ushort LowerScaledValue { get; }
-    public ushort UpperScaledValue { get; }
+    public IntellivueFloat LowerAbsoluteValue { get; set; }
+    public IntellivueFloat UpperAbsoluteValue { get; set; }
+    public ushort LowerScaledValue { get; set; }
+    public ushort UpperScaledValue { get; set; }
 
     public static ScaleAndRangeSpecification Read(
         BigEndianBinaryReader binaryReader)

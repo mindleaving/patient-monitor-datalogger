@@ -33,3 +33,4 @@ _ReSharper*/
 packages/
 *.zip
 deployment/deployment-pack-signature.sig
+**/appsettings.Development.json

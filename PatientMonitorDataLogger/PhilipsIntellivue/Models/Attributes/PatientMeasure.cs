@@ -5,6 +5,8 @@ namespace PatientMonitorDataLogger.PhilipsIntellivue.Models.Attributes;
 
 public class PatientMeasure : ISerializable
 {
+    public PatientMeasure() { }
+
     public PatientMeasure(
         IntellivueFloat value,
         UnitCodes unit)
@@ -13,8 +15,8 @@ public class PatientMeasure : ISerializable
         Unit = unit;
     }
 
-    public IntellivueFloat Value { get; }
-    public UnitCodes Unit { get; }
+    public IntellivueFloat Value { get; set; }
+    public UnitCodes Unit { get; set; }
 
     public static PatientMeasure Read(
         BigEndianBinaryReader binaryReader)

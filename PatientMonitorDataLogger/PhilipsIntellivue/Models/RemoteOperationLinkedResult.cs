@@ -4,6 +4,7 @@ namespace PatientMonitorDataLogger.PhilipsIntellivue.Models;
 
 public class RemoteOperationLinkedResult : RemoteOperationResult
 {
+    public RemoteOperationLinkedResult() { }
     public RemoteOperationLinkedResult(
         RemoteOperationLinkedResultId linkedId,
         ushort invokeId,
@@ -15,7 +16,7 @@ public class RemoteOperationLinkedResult : RemoteOperationResult
         LinkedId = linkedId;
     }
 
-    public RemoteOperationLinkedResultId LinkedId { get; }
+    public RemoteOperationLinkedResultId LinkedId { get; set; }
 
     public override byte[] Serialize()
     {

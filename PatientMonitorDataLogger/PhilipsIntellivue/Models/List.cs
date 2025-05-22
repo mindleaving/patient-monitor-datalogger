@@ -5,6 +5,8 @@ namespace PatientMonitorDataLogger.PhilipsIntellivue.Models;
 
 public class List<T> : ISerializable where T: ISerializable
 {
+    public List() { }
+
     public List(
         System.Collections.Generic.List<T> values)
     {
@@ -13,7 +15,7 @@ public class List<T> : ISerializable where T: ISerializable
 
     public ushort Count => (ushort)Values.Count;
     public ushort Length => (ushort)Values.Sum(x => x.Serialize().Length);
-    public System.Collections.Generic.List<T> Values { get; }
+    public System.Collections.Generic.List<T> Values { get; set; }
 
     public byte[] Serialize()
     {

@@ -5,6 +5,8 @@ namespace PatientMonitorDataLogger.PhilipsIntellivue.Models.Attributes;
 
 public class EnumObservationValue : ISerializable
 {
+    public EnumObservationValue() { }
+
     public EnumObservationValue(
         SCADAType physioId,
         MeasurementState state,
@@ -15,9 +17,9 @@ public class EnumObservationValue : ISerializable
         Value = value;
     }
 
-    public SCADAType PhysioId { get; }
-    public MeasurementState State { get; }
-    public EnumValue Value { get; }
+    public SCADAType PhysioId { get; set; }
+    public MeasurementState State { get; set; }
+    public EnumValue Value { get; set; }
 
     public static EnumObservationValue Read(
         BigEndianBinaryReader binaryReader)

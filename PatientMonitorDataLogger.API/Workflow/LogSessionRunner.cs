@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using PatientMonitorDataLogger.API.Models;
 using PatientMonitorDataLogger.API.Models.DataExport;
 using PatientMonitorDataLogger.PhilipsIntellivue;
+using PatientMonitorDataLogger.Shared.Models;
 
 namespace PatientMonitorDataLogger.API.Workflow;
 

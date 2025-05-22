@@ -4,6 +4,8 @@ namespace PatientMonitorDataLogger.PhilipsIntellivue.Models;
 
 public class ExtendedPollMdiDataReply : PollMdiDataReply
 {
+    public ExtendedPollMdiDataReply() { }
+
     public ExtendedPollMdiDataReply(
         ushort pollNumber,
         ushort sequenceNumber,
@@ -17,7 +19,7 @@ public class ExtendedPollMdiDataReply : PollMdiDataReply
         SequenceNumber = sequenceNumber;
     }
 
-    public ushort SequenceNumber { get; }
+    public ushort SequenceNumber { get; set; }
 
     public override byte[] Serialize()
     {

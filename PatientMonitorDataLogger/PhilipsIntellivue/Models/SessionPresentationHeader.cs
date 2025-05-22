@@ -5,6 +5,7 @@ namespace PatientMonitorDataLogger.PhilipsIntellivue.Models;
 
 public class SessionPresentationHeader : ISerializable
 {
+    public SessionPresentationHeader() { }
     public SessionPresentationHeader(
         ushort presentationContextId)
     {
@@ -12,7 +13,7 @@ public class SessionPresentationHeader : ISerializable
     }
 
     public ushort SessionId { get; } = 0xE100;
-    public ushort PresentationContextId { get; }
+    public ushort PresentationContextId { get; set; }
 
     public byte[] Serialize()
     {

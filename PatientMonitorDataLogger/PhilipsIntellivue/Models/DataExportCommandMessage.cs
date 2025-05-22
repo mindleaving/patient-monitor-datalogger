@@ -2,6 +2,7 @@
 
 public class DataExportCommandMessage : ICommandMessage
 {
+    public DataExportCommandMessage() { }
     public DataExportCommandMessage(
         SessionPresentationHeader sessionPresentationHeader,
         RemoteOperationHeader remoteOperationHeader,
@@ -12,9 +13,9 @@ public class DataExportCommandMessage : ICommandMessage
         RemoteOperationData = remoteOperationData;
     }
 
-    public SessionPresentationHeader SessionPresentationHeader { get; }
-    public RemoteOperationHeader RemoteOperationHeader { get; }
-    public IRemoteOperationResult RemoteOperationData { get; }
+    public SessionPresentationHeader SessionPresentationHeader { get; set; }
+    public RemoteOperationHeader RemoteOperationHeader { get; set; }
+    public IRemoteOperationResult RemoteOperationData { get; set; }
 
     public CommandMessageType MessageType => CommandMessageType.DataExport;
 

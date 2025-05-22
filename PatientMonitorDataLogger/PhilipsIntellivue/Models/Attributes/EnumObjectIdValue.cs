@@ -5,6 +5,8 @@ namespace PatientMonitorDataLogger.PhilipsIntellivue.Models.Attributes;
 
 public class EnumObjectIdValue : ISerializable
 {
+    public EnumObjectIdValue() { }
+
     public EnumObjectIdValue(
         OIDType objectId,
         IntellivueFloat numericValue,
@@ -15,9 +17,9 @@ public class EnumObjectIdValue : ISerializable
         UnitCode = unitCode;
     }
 
-    public OIDType ObjectId { get; }
-    public IntellivueFloat NumericValue { get; }
-    public OIDType UnitCode { get; }
+    public OIDType ObjectId { get; set; }
+    public IntellivueFloat NumericValue { get; set; }
+    public OIDType UnitCode { get; set; }
 
     public static EnumObjectIdValue Read(
         BigEndianBinaryReader binaryReader)

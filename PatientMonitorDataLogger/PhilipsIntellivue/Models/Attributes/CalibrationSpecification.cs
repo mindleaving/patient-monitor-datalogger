@@ -5,6 +5,8 @@ namespace PatientMonitorDataLogger.PhilipsIntellivue.Models.Attributes;
 
 public class CalibrationSpecification : ISerializable
 {
+    public CalibrationSpecification() { }
+
     public CalibrationSpecification(
         IntellivueFloat lowerAbsoluteValue,
         IntellivueFloat upperAbsoluteValue,
@@ -21,12 +23,12 @@ public class CalibrationSpecification : ISerializable
         CalibrationType = calibrationType;
     }
 
-    public IntellivueFloat LowerAbsoluteValue { get; }
-    public IntellivueFloat UpperAbsoluteValue { get; }
-    public ushort LowerScaledValue { get; }
-    public ushort UpperScaledValue { get; }
-    public ushort Increment { get; }
-    public CalibrationType CalibrationType { get; }
+    public IntellivueFloat LowerAbsoluteValue { get; set; }
+    public IntellivueFloat UpperAbsoluteValue { get; set; }
+    public ushort LowerScaledValue { get; set; }
+    public ushort UpperScaledValue { get; set; }
+    public ushort Increment { get; set; }
+    public CalibrationType CalibrationType { get; set; }
 
     public static CalibrationSpecification Read(
         BigEndianBinaryReader binaryReader)

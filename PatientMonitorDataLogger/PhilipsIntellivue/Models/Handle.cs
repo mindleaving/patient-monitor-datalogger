@@ -5,13 +5,15 @@ namespace PatientMonitorDataLogger.PhilipsIntellivue.Models;
 
 public class Handle : ISerializable
 {
+    public Handle() { }
+
     public Handle(
         ushort id)
     {
         Id = id;
     }
 
-    public ushort Id { get; }
+    public ushort Id { get; set; }
 
     public static Handle Read(
         BigEndianBinaryReader binaryReader)
