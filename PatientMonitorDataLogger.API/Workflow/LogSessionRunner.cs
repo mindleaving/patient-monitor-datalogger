@@ -15,6 +15,7 @@ public abstract class LogSessionRunner : ILogSessionRunner
     protected readonly string logSessionOutputDirectory;
     private readonly object startStopLock = new();
     protected DateTime? startTime;
+    protected DateTime? lastReceivedObservationTime;
     private readonly string logSessionActiveIndicatorFilePath;
 
     protected LogSessionRunner(
@@ -141,6 +142,7 @@ public abstract class LogSessionRunner : ILogSessionRunner
         object? sender,
         LogSessionObservations observations)
     {
+        lastReceivedObservationTime = DateTime.UtcNow;
         NewObservations?.Invoke(sender, observations);
     }
 

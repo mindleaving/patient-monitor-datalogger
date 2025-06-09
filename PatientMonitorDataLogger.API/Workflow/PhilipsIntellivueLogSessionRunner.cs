@@ -20,7 +20,8 @@ public class PhilipsIntellivueLogSessionRunner : PatientMonitorLogSessionRunner
     private readonly PhilipsIntellivuePatientInfoExtractor patientInfoExtractor = new();
     private readonly System.Collections.Generic.List<string> numericsTypes = new();
     private readonly System.Collections.Generic.List<string> waveTypes = new();
-    
+    private DateTime? lastReceivedMessageTime;
+
     public PhilipsIntellivueLogSessionRunner(
         Guid logSessionId,
         LogSessionSettings logSessionSettings,
@@ -57,7 +58,7 @@ public class PhilipsIntellivueLogSessionRunner : PatientMonitorLogSessionRunner
     public override LogStatus Status
         => new(
             LogSessionId,
-            monitorClient != null && monitorClient.IsConnected && monitorClient.IsListening,
+            IsRunning && monitorClient != null && monitorClient.IsConnected && monitorClient.IsListening && lastReceivedObservationTime.HasValue && DateTime.UtcNow - lastReceivedObservationTime < TimeSpan.FromSeconds(60),
             monitorInfo,
             startTime,
             numericsTypes.Concat(waveTypes).ToList());
@@ -159,6 +160,7 @@ public class PhilipsIntellivueLogSessionRunner : PatientMonitorLogSessionRunner
         object? sender,
         ICommandMessage message)
     {
+        lastReceivedMessageTime = DateTime.UtcNow;
         try
         {
             WriteRawMessage(message);
@@ -211,7 +213,7 @@ public class PhilipsIntellivueLogSessionRunner : PatientMonitorLogSessionRunner
     private void WriteRawMessage(ICommandMessage message)
     {
         File.AppendAllText(
-            Path.Combine(logSessionOutputDirectory, "messages.json"),
+            Path.Combine(logSessionOutputDirectory, startTime.HasValue ? $"messages_{startTime:yyyy-MM-dd_HHmmss}.json" : "messages.json"),
             JsonConvert.SerializeObject(message, Constants.JsonSerializerSettings) + Environment.NewLine);
     }
 
