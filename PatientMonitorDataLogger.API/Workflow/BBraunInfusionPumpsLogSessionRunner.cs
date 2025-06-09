@@ -1,6 +1,5 @@
 ﻿using PatientMonitorDataLogger.API.Models;
 using PatientMonitorDataLogger.API.Models.DataExport;
-using PatientMonitorDataLogger.API.Workflow.DataExport;
 using PatientMonitorDataLogger.BBraun;
 using PatientMonitorDataLogger.BBraun.Helpers;
 using PatientMonitorDataLogger.BBraun.Models;
@@ -16,6 +15,7 @@ public class BBraunInfusionPumpsLogSessionRunner : LogSessionRunner
     private readonly List<string> recordedParameters = new();
     private readonly IInfusionPumpStateWriter infusionPumpStateWriter;
     private RelativeTimeTranslation? relativeTimeTranslation;
+    private DateTime? lastReceivedMessageTime;
 
     public BBraunInfusionPumpsLogSessionRunner(
         Guid logSessionId,
@@ -53,7 +53,7 @@ public class BBraunInfusionPumpsLogSessionRunner : LogSessionRunner
     public override LogStatus Status
         => new(
             LogSessionId,
-            IsRunning,
+            IsRunning && bccClient != null && bccClient.IsConnected && lastReceivedObservationTime.HasValue && DateTime.UtcNow - lastReceivedObservationTime < TimeSpan.FromSeconds(60),
             new BBraunInfusionPumpInfo(bccClient?.BedId ?? "1"),
             startTime,
             recordedParameters);
@@ -95,6 +95,7 @@ public class BBraunInfusionPumpsLogSessionRunner : LogSessionRunner
             return;
         if(response.Quadruples.Count == 0)
             return;
+        lastReceivedMessageTime = DateTime.UtcNow;
         var relativeTime = response.Quadruples[0].RelativeTimeInSeconds;
         relativeTimeTranslation ??= RelativeTimeTranslation.BBraunBccProtocol(DateTime.UtcNow, relativeTime);
 

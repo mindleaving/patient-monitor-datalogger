@@ -15,7 +15,9 @@ public abstract class LogSessionRunner : ILogSessionRunner
     protected readonly string logSessionOutputDirectory;
     private readonly object startStopLock = new();
     protected DateTime? startTime;
+    protected DateTime? lastReceivedObservationTime;
     private readonly string logSessionActiveIndicatorFilePath;
+    private readonly Timer statusPublishTimer;
 
     protected LogSessionRunner(
         Guid logSessionId,
@@ -27,6 +29,7 @@ public abstract class LogSessionRunner : ILogSessionRunner
         LogSessionId = logSessionId;
         logSessionOutputDirectory = Path.Combine(writerSettings.OutputDirectory, logSessionId.ToString());
         logSessionActiveIndicatorFilePath = GetLogSessionActiveIndicatorFilePath(logSessionId, writerSettings);
+        statusPublishTimer = new(PublishLogSessionStatus, null, Timeout.Infinite, Timeout.Infinite);
     }
 
     protected abstract void InitializeImpl();
@@ -63,11 +66,13 @@ public abstract class LogSessionRunner : ILogSessionRunner
         {
             if(IsRunning)
                 return;
+            lastReceivedObservationTime = null;
             StartImpl();
             startTime = DateTime.UtcNow;
             IsRunning = true;
             WriteLogSessionActiveIndicatorFile();
             WriteVersionFile();
+            statusPublishTimer.Change(TimeSpan.FromSeconds(3), TimeSpan.FromSeconds(30));
         }
     }
 
@@ -119,6 +124,7 @@ public abstract class LogSessionRunner : ILogSessionRunner
             }
             startTime = null;
             StopImpl();
+            statusPublishTimer.Change(0, Timeout.Infinite);
         }
     }
     protected abstract void StopImpl();
@@ -141,7 +147,17 @@ public abstract class LogSessionRunner : ILogSessionRunner
         object? sender,
         LogSessionObservations observations)
     {
+        var isFirstObservation = !lastReceivedObservationTime.HasValue;
+        lastReceivedObservationTime = DateTime.UtcNow;
+        if(isFirstObservation)
+            PublishLogSessionStatus(null);
         NewObservations?.Invoke(sender, observations);
+    }
+
+    public void PublishLogSessionStatus(
+        object? state)
+    {
+        StatusChanged?.Invoke(this, Status);
     }
 
     public void WritePatientInfo(

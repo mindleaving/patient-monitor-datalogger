@@ -4,6 +4,7 @@ if (args.Length == 0)
 {
     Console.WriteLine($"Usage: {nameof(MedicalDeviceDataExplorationTool)}.exe extract <date-time of start of recording>  <messages.json file path> [numerics.csv output file path]");
     Console.WriteLine($"Usage: {nameof(MedicalDeviceDataExplorationTool)}.exe split <numerics.csv file path>");
+    Console.WriteLine($"Usage: {nameof(MedicalDeviceDataExplorationTool)}.exe gedash <numerics or wave CSV file path> <output directory>");
     return;
 }
 
@@ -34,6 +35,23 @@ switch (mode.ToLower())
         }
         var numericsFilePath = args[1];
         new NumericsSplittingTool().Split(numericsFilePath);
+        return;
+    }
+    case "gedash":
+    {
+        if (args.Length < 3)
+        {
+            Console.WriteLine($"Usage: {nameof(MedicalDeviceDataExplorationTool)}.exe gedash <numerics or wave CSV file path> <output directory>");
+            return;
+        }
+
+        var numericsOrWaveFilePath = args[1];
+        var outputDirectory = args[2];
+        var isNumerics = Path.GetFileNameWithoutExtension(numericsOrWaveFilePath).StartsWith("numerics");
+        if(isNumerics)
+            new GeDashNumericsConversionTool().ConvertNumerics(numericsOrWaveFilePath, outputDirectory);
+        else
+            new GeDashWaveConversionTool().ConvertWaveFile(numericsOrWaveFilePath, outputDirectory);
         return;
     }
     default:
