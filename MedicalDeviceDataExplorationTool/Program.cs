@@ -1,4 +1,5 @@
-﻿using MedicalDeviceDataExplorationTool.PhilipsIntellivue;
+﻿using System.Text.RegularExpressions;
+using MedicalDeviceDataExplorationTool.PhilipsIntellivue;
 
 if (args.Length == 0)
 {
@@ -33,8 +34,15 @@ switch (mode.ToLower())
             Console.WriteLine($"Usage: {nameof(MedicalDeviceDataExplorationTool)}.exe split <numerics.csv file path>");
             return;
         }
-        var numericsFilePath = args[1];
-        new NumericsSplittingTool().Split(numericsFilePath);
+        var filePath = args[1];
+        if (Path.GetFileNameWithoutExtension(filePath).ToLower().StartsWith("messages"))
+        {
+            new MessagesJsonSplittingTool().Split(filePath);
+        }
+        else
+        {
+            new NumericsSplittingTool().Split(filePath);
+        }
         return;
     }
     case "gedash":
@@ -57,19 +65,41 @@ switch (mode.ToLower())
     default:
     {
         // Try to guess, what you want to do, if you dropped a file on this program.
-        if (Path.GetFileName(args[0]) == "messages.json")
+        if (Regex.IsMatch(args[0].ToLower(), @"messages.*\.json"))
         {
-            Console.Write("Start date-time (yyyy-MM-dd HH:mm:ss): ");
-            var startDatreTime = Console.ReadLine();
-            if (startDatreTime == null)
+            do
             {
-                Console.WriteLine("Aborted.");
-                return;
-            }
+                Console.WriteLine("What do you want to do?");
+                Console.WriteLine("1: Extract numerics");
+                Console.WriteLine("2: Split");
+                mode = Console.ReadLine();
+                if (mode == "q")
+                    return;
+            } while (mode != "1" && mode != "2");
 
             var messagesFilePath = args[0];
-            var numericsOutputFilePath = Path.Combine(Path.GetDirectoryName(messagesFilePath) ?? Environment.CurrentDirectory, "numerics-reconstructed.csv");
-            new MessagesJsonDataExtractionTool().ExtractNumerics(messagesFilePath, numericsOutputFilePath, startDatreTime);
+            switch (mode)
+            {
+                case "1":
+                {
+                    Console.Write("Start date-time (yyyy-MM-dd HH:mm:ss): ");
+                    var startDatreTime = Console.ReadLine();
+                    if (startDatreTime == null)
+                    {
+                        Console.WriteLine("Aborted.");
+                        return;
+                    }
+
+                    var numericsOutputFilePath = Path.Combine(Path.GetDirectoryName(messagesFilePath) ?? Environment.CurrentDirectory, "numerics-reconstructed.csv");
+                    new MessagesJsonDataExtractionTool().ExtractNumerics(messagesFilePath, numericsOutputFilePath, startDatreTime);
+                    break;
+                }
+                case "2":
+                {
+                    new MessagesJsonSplittingTool().Split(messagesFilePath);
+                    break;
+                }
+            }
         }
         else if (Path.GetFileNameWithoutExtension(args[0]).StartsWith("numerics") && Path.GetExtension(args[0]).ToLower() == ".csv")
         {

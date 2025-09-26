@@ -2,7 +2,7 @@
   "profiles": {
     "MedicalDeviceDataExplorationTool": {
       "commandName": "Project",
-      "commandLineArgs": "gedash \"F:\\data\\medical-device-datalogger\\e7638e63-fd3f-4416-bf6f-63e6f309eeda\\NOM_PRESS_BLD_ART_ABP.csv\" \"C:\\Users\\Jan\\Desktop\\GE Dash 4000 Central Monitor v2025-05-22\\Data\\FIPS_1\""
+      "commandLineArgs": "\"F:\\data\\medical-device-datalogger\\messages_2025-04-22_193309.json\""
     }
   }
 }
