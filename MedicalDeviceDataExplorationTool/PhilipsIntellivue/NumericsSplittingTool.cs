@@ -40,7 +40,7 @@ public class NumericsSplittingTool
     {
         var currentPartFilePath = Path.Combine(
             Path.GetDirectoryName(numericsFilePath),
-            $"{Path.GetFileNameWithoutExtension(numericsFilePath)}-part{partCount}.csv");
+            $"{Path.GetFileNameWithoutExtension(numericsFilePath)}-part{partCount:00}.csv");
         return currentPartFilePath;
     }
 }
