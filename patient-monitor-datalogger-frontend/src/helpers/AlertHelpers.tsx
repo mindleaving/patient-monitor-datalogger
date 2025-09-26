@@ -1,5 +1,6 @@
 import { confirmAlert } from "react-confirm-alert";
 import { toast } from "react-toastify";
+import { ToastContent } from "../components/ToastContent";
 
 export const openConfirmDeleteAlert = (
     nameOfObjectToBeDeleted: string, 
@@ -42,19 +43,4 @@ export const showInfoAlert = (title: string, message?: string, durationInMs?: nu
     toast.info(<ToastContent title={title} message={message} />, {
         autoClose: durationInMs
     });
-}
-
-export interface ToastContentProps {
-    title: string;
-    message?: string;
-}
-export const ToastContent = (props: ToastContentProps) => {
-    return (
-    <>
-        <strong>{props.title}</strong>
-        {props.message 
-        ? <div>
-            {props.message}
-        </div> : null}
-    </>);
 }

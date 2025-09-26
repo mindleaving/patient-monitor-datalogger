@@ -22,6 +22,7 @@ public static class TypescriptGeneratorRunner
             .IncludeAllInNamespace(Assembly.GetAssembly(typeof(LogSession)), "PatientMonitorDataLogger.API.Models")
             .ExcludeAllInNamespace(Assembly.GetAssembly(typeof(PatientMonitorDataSettings)), "PatientMonitorDataLogger.Shared.Models.Converters")
             .ExcludeAllInNamespace(Assembly.GetAssembly(typeof(LogSession)), "PatientMonitorDataLogger.API.Models.Converters")
+            .Exclude<FrameAbortException>()
             .ReactDefaults()
             .SetDefaultFilenameForEnums("enums.ts")
             .ConfigureNamespace("PatientMonitorDataLogger.Shared.Models", options => options.Translation = "Models")
@@ -34,6 +35,8 @@ public static class TypescriptGeneratorRunner
             .CustomizeType(x => x == typeof(DateOnly), _ => "Date")
             .CustomizeType(x => x == typeof(TimeOnly), _ => "string")
             .CustomizeType(x => x == typeof(char), _ => "string")
+            .CustomizeType(x => x == typeof(byte), _ => "number")
+            .CustomizeType(x => x == typeof(Single), _ => "number")
             //.CustomizeType(x => x == typeof(Dictionary<string,NumericsValue>), _ => "{ [measurementType: string]: Models.DataExport.NumericsValue }")
             .SetOutputDirectory(Path.Combine(repositoryPath, "patient-monitor-datalogger-frontend", "src", "types"))
             .Generate();
