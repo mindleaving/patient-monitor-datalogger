@@ -7,7 +7,7 @@ rm -f BASE_PATH/deployment/PatientMonitorDataLogger.*.zip
 cd PatientMonitorDataLogger.API
 dotnet clean -c Release
 dotnet publish -c Release -r linux-arm64 --no-self-contained
-cd bin/Release/net8.0/linux-arm64
+cd bin/Release/net10.0/linux-arm64
 zip -q -r $BASE_PATH/deployment/PatientMonitorDataLogger.API.zip publish
 
 cd $BASE_PATH/patient-monitor-datalogger-frontend

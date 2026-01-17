@@ -52,7 +52,9 @@ Use the short golden spacers and screws to attach your Raspberry Pi to the back 
 
 **Step 2 - Write Image to micro-SD card**
 
-Follow instructions from Raspberry Pi to use their Raspberry Pi Imager to your micro-SD card: https://www.raspberrypi.com/software/
+Follow instructions from Raspberry Pi to use their Raspberry Pi Imager to install RaspberryOS (use Debian 12 (bookworm)) on your micro-SD card: https://www.raspberrypi.com/software/
+
+**NOTE**: The installation process has only been tested for **Debian 12 (bookworm)**. If you use any other version, the installation script will very likely not work.
 
 Edit configuration as follows:
 - Set hostname (e.g. "datalogger01")
@@ -64,7 +66,7 @@ Edit configuration as follows:
 **Step 3 - Custom setup**
 
 As described in the installation instructions for the touch display in step 1, we need to modify the config.txt file on the micro-SD card's *bootfs* parition.
-Add the following to the end of the config.txt file:
+Add the following to the end of the config.txt file (NOTE: Other users have reported issues with this configuration, you may need use other values. Please refer to Waveshares Wiki):
 
 ```
 dtoverlay=vc4-kms-v3d
@@ -149,7 +151,7 @@ ssh -i ~/.ssh/datalogger01 datalogger@datalogger01
 Download the latest relase of Medical Device Data Logger
 
 ```
-wget https://github.com/mindleaving/patient-monitor-datalogger/releases/latest/patient-monitor-datalogger-deployment-pack.zip
+wget https://github.com/mindleaving/patient-monitor-datalogger/releases/download/v2026.01.17/patient-monitor-datalogger-deployment-pack.zip
 ```
 
 and unpack it
