@@ -30,7 +30,7 @@ sudo rm default
 
 # Fix permissions
 cd ~
-sudo chmod 440 /etc/sudoers.d/*
+sudo chmod 440 /etc/sudoers.d/010_medical-device-datalogger
 sudo chmod +x deploy_patient-monitor-datalogger.sh
 sudo chown datalogger:datalogger -R /home/datalogger
 sudo chmod 700 -R /home/datalogger
