@@ -52,19 +52,22 @@ Use the short golden spacers and screws to attach your Raspberry Pi to the back 
 
 **Step 2 - Write Image to micro-SD card**
 
-Follow instructions from Raspberry Pi to use their Raspberry Pi Imager to your micro-SD card: https://www.raspberrypi.com/software/
+Follow instructions from Raspberry Pi to use their Raspberry Pi Imager to install RaspberryOS on your micro-SD card: https://www.raspberrypi.com/software/
+
+**NOTE**: I am using the latest version of the Imager (currently version 2.0.4).
+**NOTE**: Tested with Debian 12 (bookworm) and Debian 13 (trixie)
 
 Edit configuration as follows:
 - Set hostname (e.g. "datalogger01")
 - Set username "datalogger" (must be spelled exactly this way. All further instructions are based on this username)
 - Enable SSH using public key
 - - Generate a public-private-key pair using ```ssh-keygen```. Recommended location and file name (asked when running the command): ```~/.ssh/<hostname>``` e.g. ```~/.ssh/datalogger01```. Further instructions: https://medium.com/@mbohlip/generating-ssh-key-pairs-on-a-windows-mac-linux-0e9993bf2985
-- - Copy the content of the newly generate *public* key (.pub-file) to the Raspberry Pi Imager
+- - Copy the content of the newly generate *public* key (.pub-file) to the Raspberry Pi Imager (or use "Browse" to locate the public key file)
 
-**Step 3 - Custom setup**
+**Step 3 (Debian 12 bookworm only) - Custom setup**
 
 As described in the installation instructions for the touch display in step 1, we need to modify the config.txt file on the micro-SD card's *bootfs* parition.
-Add the following to the end of the config.txt file:
+Add the following to the end of the config.txt file (NOTE: Other users have reported issues with this configuration, you may need use other values. Please refer to Waveshares Wiki):
 
 ```
 dtoverlay=vc4-kms-v3d
@@ -74,11 +77,9 @@ dtoverlay=vc4-kms-dsi-7inch
 #dtoverlay=vc4-kms-dsi-7inch,dsi0
 ```
 
-Safely eject the micro-SD card.
-
 **Step 4 - Insert micro-SD card**
 
-Insert the micro-SD card into the Raspberry Pi.
+Safely eject the micro-SD card from you card reader and insert it into the Raspberry Pi.
 
 **Step 5 - Assemble the protective case**
 
@@ -149,7 +150,7 @@ ssh -i ~/.ssh/datalogger01 datalogger@datalogger01
 Download the latest relase of Medical Device Data Logger
 
 ```
-wget https://github.com/mindleaving/patient-monitor-datalogger/releases/latest/patient-monitor-datalogger-deployment-pack.zip
+wget https://github.com/mindleaving/patient-monitor-datalogger/releases/download/v2026.01.17/patient-monitor-datalogger-deployment-pack.zip
 ```
 
 and unpack it
