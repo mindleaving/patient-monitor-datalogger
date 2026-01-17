@@ -18,7 +18,7 @@ public class BBraunBccResponse : IBBraunBccMessage
     public static BBraunBccResponse Read(
         byte[] bytes)
     {
-        var records = bytes.Split((byte)RecordSeparator);
+        var records = bytes.AsEnumerable().Split((byte)RecordSeparator);
         var quadruples = records.Select(Quadruple.Read).ToList();
         return new(quadruples);
     }
