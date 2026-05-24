@@ -171,7 +171,7 @@ public abstract class LogSessionRunner : ILogSessionRunner
     private void WriteSettings()
     {
         File.WriteAllText(
-            Path.Combine(logSessionOutputDirectory, "settings.json"), 
+            Path.Combine(logSessionOutputDirectory, Constants.SettingsFileName), 
             JsonConvert.SerializeObject(logSessionSettings, Formatting.Indented, Constants.JsonSerializerSettings));
     }
 

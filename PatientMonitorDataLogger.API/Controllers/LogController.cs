@@ -60,6 +60,7 @@ public class LogController : ApiController
     public async Task<IActionResult> CreateNewLogSession(
         [FromBody] LogSessionSettings body)
     {
+        body.Hostname = Environment.MachineName;
         var logSession = await logSessions.CreateNew(body, writerSettings.Value);
         return Ok(logSession);
     }

@@ -6,6 +6,7 @@ namespace PatientMonitorDataLogger.API.Models;
 public class LogSessionSettings
 {
     public string Name { get; set; }
+    public string Hostname { get; set; }
     public IMedicalDeviceSettings DeviceSettings { get; set; }
     public IMedicalDeviceDataSettings DataSettings { get; set; }
     [Required]
