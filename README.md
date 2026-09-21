@@ -150,7 +150,7 @@ ssh -i ~/.ssh/datalogger01 datalogger@datalogger01
 Download the latest relase of Medical Device Data Logger
 
 ```
-wget https://github.com/mindleaving/patient-monitor-datalogger/releases/download/v2026.01.17/patient-monitor-datalogger-deployment-pack.zip
+wget https://github.com/mindleaving/patient-monitor-datalogger/releases/download/v2026.09.21/patient-monitor-datalogger-deployment-pack.zip
 ```
 
 and unpack it
