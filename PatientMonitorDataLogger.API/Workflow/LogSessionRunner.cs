@@ -72,6 +72,7 @@ public abstract class LogSessionRunner : ILogSessionRunner
             IsRunning = true;
             WriteLogSessionActiveIndicatorFile();
             WriteVersionFile();
+            WriteHostname();
             statusPublishTimer.Change(TimeSpan.FromSeconds(3), TimeSpan.FromSeconds(30));
         }
     }
@@ -95,6 +96,20 @@ public abstract class LogSessionRunner : ILogSessionRunner
             File.WriteAllText(
                 Path.Combine(logSessionOutputDirectory, $"version_{DateTime.UtcNow:yyyy-MM-dd_HHmmss}.txt"), 
                 Assembly.GetAssembly(typeof(PhilipsIntellivueClient))!.GetName().Version!.ToString());
+        }
+        catch
+        {
+            // Ignore
+        }
+    }
+    
+    private void WriteHostname()
+    {
+        try
+        {
+            File.WriteAllText(
+                Path.Combine(logSessionOutputDirectory, $"hostname_{DateTime.UtcNow:yyyy-MM-dd_HHmmss}.txt"), 
+                Environment.MachineName);
         }
         catch
         {
