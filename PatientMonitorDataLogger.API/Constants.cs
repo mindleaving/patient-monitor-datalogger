@@ -15,8 +15,8 @@ public static class Constants
     public static readonly Dictionary<string, string> RepositoryPaths = new()
     {
         {"stationary-win8", @"F:\Projects\patient-monitor-datalogger"},
-        {"ubuntu-stationary", @"/mnt/data/Projects/patient-monitor-datalogger"},
-        {"jan-laptop", @"/home/jan/git/patient-monitor-datalogger"},
+        {"jan-laptop", "/home/jan/git/patient-monitor-datalogger"},
+        {"nebulacube", "/home/jan/git/patient-monitor-datalogger"},
     };
     public static string GetRepositoryPath()
     {

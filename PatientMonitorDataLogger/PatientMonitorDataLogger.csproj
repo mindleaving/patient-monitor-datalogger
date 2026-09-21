@@ -14,7 +14,7 @@ See GitHub repository for code examples.</Description>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/mindleaving/patient-monitor-datalogger</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <Version>2026.01.17.0</Version>
+    <Version>2026.09.21.0</Version>
     <PackageId>mindleaving.PatientMonitorDataLogger</PackageId>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
@@ -29,7 +29,7 @@ See GitHub repository for code examples.</Description>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.IO.Ports" Version="10.0.2" />
+    <PackageReference Include="System.IO.Ports" Version="10.0.12" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
   </ItemGroup>
 
